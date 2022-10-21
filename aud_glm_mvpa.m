@@ -13,7 +13,7 @@ S = dir(D);
 mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 
-a = 48; b = 48;
+a = 1; b = 48;
 
 nb_repeat       = 8;
 ncondition1     = 8;
@@ -22,7 +22,7 @@ ncondition      = ncondition1 + ncondition2;
 redo = 0;
 
 % for k = a:b
-%     new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa');
+%     new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa10mm');
 %     
 %     if exist(new_spm_1) == 0
 %         mkdir(new_spm_1)
@@ -31,12 +31,6 @@ redo = 0;
 %     dinfo = dir(new_spm_1);
 %     dinfo([dinfo.isdir]) = [];   %skip directories
 %     filenames = fullfile(new_spm_1, {dinfo.name});
-%     if ~exist('redo','var')
-%         redo = 0;
-%     end
-%     if redo & ~isempty (filenames)
-%         delete( filenames{:} );
-%     end
 %     
 %     %% modele specification:
 %     if exist ('i', 'var')==0
@@ -100,7 +94,7 @@ redo = 0;
 clear matlabbatch
 i = 1;
 for k = a : b
-    new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa');
+    new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa10mm');
     filename = fullfile(D,S(k).name,'Aud/loc/param');
     cd (filename);
     json=dir('*.json');
@@ -121,88 +115,88 @@ for k = a : b
         delete( filenames{:} );
     end
     
-    matlabbatch{i}.spm.stats.fmri_spec.dir = {new_spm_1};
-    matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
-    matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
-    matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
-    matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
+%     matlabbatch{i}.spm.stats.fmri_spec.dir = {new_spm_1};
+%     matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
+%     matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
+%     matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
+%     matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
+%     
+%     clear scans;
+%     scans={};
+%     cd(fullfile(D, S(k).name,'Aud/loc/wf'))
+%     vol_name = dir('wts_OC.nii');
+%     vol_name=fullfile(D, S(k).name,'Aud/loc/wf', vol_name(1).name);
+%     nb_vol = size(spm_vol(vol_name),1);
+%     
+%     for v=1:nb_vol
+%         volume=sprintf('%s,%d',vol_name,v);
+%         scans=[scans;volume];
+%     end
+%     
+%     matlabbatch{i}.spm.stats.fmri_spec.sess.scans       = scans;
+%     matlabbatch{i}.spm.stats.fmri_spec.sess.cond        = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
+%     multi_name=fullfile(D,S(k).name,'Aud/loc/mvpa/mvpa_Timedata_');
+%     multi_name = sprintf('%s%s%s',multi_name,S(k).name,'_Aud.mat');
+%     matlabbatch{i}.spm.stats.fmri_spec.sess.multi       = {multi_name};
+%     matlabbatch{i}.spm.stats.fmri_spec.sess.regress     = struct('name', {}, 'val', {});
+%     multi_reg = fullfile(D,S(k).name,'Aud/loc/param');
+%     cd (multi_reg);
+%     mr = 'multiple_regressors.txt';
+%     multi_reg = fullfile(multi_reg,mr);
+%     matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg   = {multi_reg};
+%     matlabbatch{i}.spm.stats.fmri_spec.sess.hpf         = 128;
+%     
+%     matlabbatch{i}.spm.stats.fmri_spec.fact             = struct('name', {}, 'levels', {});
+%     matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
+%     matlabbatch{i}.spm.stats.fmri_spec.volt             = 1;
+%     matlabbatch{i}.spm.stats.fmri_spec.global           = 'None';
+%     matlabbatch{i}.spm.stats.fmri_spec.mthresh          = 0;
+%     anat = fullfile(D,S(k).name,'anat');
+%     mask = fullfile(anat,'brain_extraction_mask.nii');
+%     matlabbatch{i}.spm.stats.fmri_spec.mask             = {mask};
+%     matlabbatch{i}.spm.stats.fmri_spec.cvi              = 'AR(1)';
+%     i=i+1;
     
-    clear scans;
-    scans={};
-    cd(fullfile(D, S(k).name,'Aud/loc/wf'))
-    vol_name = dir('wts_OC.nii');
-    vol_name=fullfile(D, S(k).name,'Aud/loc/wf', vol_name(1).name);
-    nb_vol = size(spm_vol(vol_name),1);
-    
-    for v=1:nb_vol
-        volume=sprintf('%s,%d',vol_name,v);
-        scans=[scans;volume];
-    end
-    
-    matlabbatch{i}.spm.stats.fmri_spec.sess.scans       = scans;
-    matlabbatch{i}.spm.stats.fmri_spec.sess.cond        = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-    multi_name=fullfile(D,S(k).name,'Aud/loc/mvpa/mvpa_Timedata_');
-    multi_name = sprintf('%s%s%s',multi_name,S(k).name,'_Aud.mat');
-    matlabbatch{i}.spm.stats.fmri_spec.sess.multi       = {multi_name};
-    matlabbatch{i}.spm.stats.fmri_spec.sess.regress     = struct('name', {}, 'val', {});
-    multi_reg = fullfile(D,S(k).name,'Aud/loc/param');
-    cd (multi_reg);
-    mr = 'multiple_regressors.txt';
-    multi_reg = fullfile(multi_reg,mr);
-    matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg   = {multi_reg};
-    matlabbatch{i}.spm.stats.fmri_spec.sess.hpf         = 128;
-    
-    matlabbatch{i}.spm.stats.fmri_spec.fact             = struct('name', {}, 'levels', {});
-    matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
-    matlabbatch{i}.spm.stats.fmri_spec.volt             = 1;
-    matlabbatch{i}.spm.stats.fmri_spec.global           = 'None';
-    matlabbatch{i}.spm.stats.fmri_spec.mthresh          = 0;
-    anat = fullfile(D,S(k).name,'anat');
-    mask = fullfile(anat,'brain_extraction_mask.nii');
-    matlabbatch{i}.spm.stats.fmri_spec.mask             = {mask};
-    matlabbatch{i}.spm.stats.fmri_spec.cvi              = 'AR(1)';
-    i=i+1;
-    
-%     filename = fullfile(new_spm_1,'SPM.mat');
+    filename = fullfile(new_spm_1,'SPM.mat');
 %     matlabbatch{i}.spm.stats.fmri_est.spmmat            = {filename};
 %     matlabbatch{i}.spm.stats.fmri_est.write_residuals   = 0;
 %     matlabbatch{i}.spm.stats.fmri_est.method.Classical  = 1;
 %     i=i+1;
 % 
-%     matlabbatch{i}.spm.stats.con.spmmat = {filename};
-%     words           = [repmat([1 0 0 0 0 0 0 0],1,nb_repeat)];
-%     pseudowords     = [repmat([0 1 0 0 0 0 0 0],1,nb_repeat)];
-%     numbers         = [repmat([0 0 1 0 0 0 0 0],1,nb_repeat)];
-%     normal_speech   = [repmat([0 0 0 1 0 0 0 0],1,nb_repeat)];
-%     scramble_speech = [repmat([0 0 0 0 1 0 0 0],1,nb_repeat)];
-%     odds            = [repmat([0 0 0 0 0 1 0 0],1,nb_repeat)];
-%     motor           = [repmat([0 0 0 0 0 0 1 0],1,nb_repeat)];
-%     resting         = [repmat([0 0 0 0 0 0 0 1],1,nb_repeat)];
-% 
-%     
-%     alphabetic      =    words + pseudowords;
-%     lexicality      =    words - pseudowords;
-%     phonology       =    normal_speech - scramble_speech;
-%     
-%     values = {...
-%         words - resting, pseudowords - resting, alphabetic, lexicality, -lexicality, numbers - resting, ...
-%         normal_speech - resting, scramble_speech - resting,...
-%         phonology
-%         };
-%     
-%     names = {...
-%         'words', 'pseudowords', 'alphabetic', 'lexicality', '-lexicality', 'numbers', 'normal_speech', 'scramble_speech',...
-%         'phonology', ...
-%         };
-%     
-%     for j=1:length(values)
-%         matlabbatch{i}.spm.stats.con.consess{j}.tcon.name = names{j};
-%         matlabbatch{i}.spm.stats.con.consess{j}.tcon.weights = values{j};
-%         matlabbatch{i}.spm.stats.con.consess{j}.tcon.sessrep = 'none';
-%     end
-%     
-%     matlabbatch{i}.spm.stats.con.delete = 1;
-%     i=i+1;
+    matlabbatch{i}.spm.stats.con.spmmat = {filename};
+    words           = [repmat([1 0 0 0 0 0 0 0],1,nb_repeat)];
+    pseudowords     = [repmat([0 1 0 0 0 0 0 0],1,nb_repeat)];
+    numbers         = [repmat([0 0 1 0 0 0 0 0],1,nb_repeat)];
+    normal_speech   = [repmat([0 0 0 1 0 0 0 0],1,nb_repeat)];
+    scramble_speech = [repmat([0 0 0 0 1 0 0 0],1,nb_repeat)];
+    odds            = [repmat([0 0 0 0 0 1 0 0],1,nb_repeat)];
+    motor           = [repmat([0 0 0 0 0 0 1 0],1,nb_repeat)];
+    resting         = [repmat([0 0 0 0 0 0 0 1],1,nb_repeat)];
+
+    
+    alphabetic      =    words + pseudowords;
+    lexicality      =    words - pseudowords;
+    phonology       =    normal_speech - scramble_speech;
+    
+    values = {...
+        words - resting, pseudowords - resting, alphabetic, lexicality, -lexicality, numbers - resting, ...
+        normal_speech - resting, scramble_speech - resting,...
+        phonology
+        };
+    
+    names = {...
+        'words', 'pseudowords', 'alphabetic', 'lexicality', '-lexicality', 'numbers', 'normal_speech', 'scramble_speech',...
+        'phonology', ...
+        };
+    
+    for j=1:length(values)
+        matlabbatch{i}.spm.stats.con.consess{j}.tcon.name = names{j};
+        matlabbatch{i}.spm.stats.con.consess{j}.tcon.weights = values{j};
+        matlabbatch{i}.spm.stats.con.consess{j}.tcon.sessrep = 'none';
+    end
+    
+    matlabbatch{i}.spm.stats.con.delete = 1;
+    i=i+1;
 end
 
 cd '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts'

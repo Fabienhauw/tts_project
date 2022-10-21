@@ -3,14 +3,12 @@ clear;clc;
 
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/matvol'))
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB'))
-addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/conn18.b'))
+addpath(genpath('/network/lustre/isbackps02/home/fabien.hauw/Documents/MATLAB/conn18.b'))
 
 
 cwd = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs';
-% proj_name = 'syn_group_rs_s5_modified_hz_filter.mat';
-% proj_name = 'syn_group_rs_s5.mat';
-proj_name = 'syn_group_rs_rh_s5.mat';
-
+only_right = 0;
+roi_incl = 3; %1, 2, or 3 for brainnetome atlas, networks, or personnalized ROIs.
 
 %% definition of all subjects:
 subjs={};
@@ -37,17 +35,32 @@ S = [Syn;Con];
 % matched controls: Control02|Control04|Control05|Control07|Control17 
 
 %%
+if only_right
+    proj_name = 'syn_group_rs_rh_s5';
+    gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
+    mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
+else
+    proj_name = 'syn_group_rs_s5';
+    gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
+    mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
+end
 
-% gaucher_appar = {'Control02|Control04|Control05|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
-gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
+if roi_incl == 1
+    proj_name = (sprintf('%s_brainnetome.mat', proj_name));
+elseif roi_incl == 2
+    proj_name = (sprintf('%s_networks.mat', proj_name));
+elseif roi_incl == 3
+    proj_name = (sprintf('%s_pers_rois.mat', proj_name));
+end
+
+% proj_name = 'syn_group_rs_s5_modified_hz_filter.mat';
+
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
-S_con_app = S;
-S_con_app(mask_gauch_con) = [];
+S_con = S;
+S_con(mask_gauch_con) = [];
 
-% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
-mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
-S_droit = S;
-S_droit(mask_gauch) = [];
+S_syn = S;
+S_syn(mask_gauch) = [];
 
 vector_age = [
     25.1013699; 70.8219178; 23.6821918; 24.3342466; 21.109589; 31.7260274; 18.8438356; ...
@@ -64,7 +77,7 @@ vector_hand = [
     zeros(21,1); 1; 1; 1; 1; 1; ... % end of controls
     ]; %0 = right, 1 = left;
 
-S_final = [S_droit ; S_con_app];
+S_final = [S_syn ; S_con];
 
 for j = 1 : size(S,1)
     if ~isempty(find(~cellfun(@isempty,(regexp({S_final.name},S(j).name)))))
@@ -210,14 +223,16 @@ end
 
 %% second lvl cov
 
-% effects = {vector_cov1, vector_cov2};
-% batch.Setup.subjects.effect_names    = {'age', 'handedness'};
-% batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls', 'lh_syn', 'lh_con'};
 
-effects = {vector_cov1};
-batch.Setup.subjects.effect_names    = {'age'};
-batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls'};
-
+if only_right
+    effects = {vector_cov1};
+    batch.Setup.subjects.effect_names    = {'age'};
+    batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls'};
+else 
+    effects = {vector_cov1, vector_cov2};
+    batch.Setup.subjects.effect_names    = {'age', 'handedness'};
+    batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls', 'lh_syn', 'lh_con'};
+end
 % effects = {vector_cov2};
 % batch.Setup.subjects.effect_names    = {'handedness'};
 % batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls', 'lh_syn', 'lh_con'};
@@ -244,28 +259,62 @@ for nsub = 1:NSUBJECTS
 end
 
 %% roi part;
-batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','atlas_brainnet', 'atlas_reoriented', 'networks', 'SMG', 'VWFA', 'IFG_from_brainnetome', 'SMG_from_brainnetome', 'VWFA_from_brainnetome'};
-batch.Setup.rois.multiplelabels     = [0,0,0,1,1,1,0,0,0,0,0];
-batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0,0,0];
-
-for nses = 1 : nsessions
-    for nsub = 1 : NSUBJECTS
-        batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
-        batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
-        batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
-    end
-    batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/atlas/brainnetome/BN_Atlas_246_1mm_reoriented.nii';
-    batch.Setup.rois.files{5,nses}           = '/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/conn18.b/rois/atlas_reoriented.nii';
-    batch.Setup.rois.files{6,nses}           = '/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/conn18.b/rois/networks.nii';
-    batch.Setup.rois.files{7,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/sphere_15--48_-43_32.nii';
-    batch.Setup.rois.files{8,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/sphere_8--44_-50_-14.nii';
-    batch.Setup.rois.files{9,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/masks/ifg_mask_from_brainnetome_and_flc_activations.nii';
-    batch.Setup.rois.files{10,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/masks/smg_mask_from_brainnetome_and_flc_activations.nii';
-    batch.Setup.rois.files{11,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/masks/vwfa_mask_from_brainnetome_and_flc_activations.nii';
+if roi_incl == 1
     
-    batch.Setup.rois.dimensions{1} = 1;
-    batch.Setup.rois.dimensions{2} = 16;
-    batch.Setup.rois.dimensions{3} = 16;
+    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','atlas_brainnet'};
+    batch.Setup.rois.multiplelabels     = [0,0,0,1];
+    batch.Setup.rois.regresscovariates  = [0,1,1,0];
+    for nses = 1 : nsessions
+        for nsub = 1 : NSUBJECTS
+            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+        end
+        batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/atlas/brainnetome/BN_Atlas_246_1mm_reoriented.nii';
+        batch.Setup.rois.dimensions{1,nses} = 1;
+        batch.Setup.rois.dimensions{2,nses} = 16;
+        batch.Setup.rois.dimensions{3,nses} = 16;
+    end
+    
+elseif roi_incl == 2
+    
+    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','networks'};
+    batch.Setup.rois.multiplelabels     = [0,0,0,1];
+    batch.Setup.rois.regresscovariates  = [0,1,1,0];
+    for nses = 1 : nsessions
+        for nsub = 1 : NSUBJECTS
+            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+        end
+        batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/conn18.b/rois/networks.nii';
+        batch.Setup.rois.dimensions{1,nses} = 1;
+        batch.Setup.rois.dimensions{2,nses} = 16;
+        batch.Setup.rois.dimensions{3,nses} = 16;
+    end
+    
+elseif roi_incl == 3
+    
+    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF', 'IFG', 'SMG','VWFA', 'IFG_rh', 'SMG_rh','VWFA_rh'};
+    batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
+    batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
+    for nses = 1 : nsessions
+        for nsub = 1 : NSUBJECTS
+            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+        end
+        batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/ifg_aud_norm_scr_sph_10_-50_-8_46.nii';
+        batch.Setup.rois.files{5,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/smg_aud_norm_scr_sph_10_-58_-44_23.nii';
+        batch.Setup.rois.files{6,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/vwfa_aud_norm_scr_sph_10_-40_-24_-22.nii';
+        batch.Setup.rois.files{7,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/ifg_rh_aud_norm_scr_sph_10_-45_22_23.nii';
+        batch.Setup.rois.files{8,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/smg_rh_aud_norm_scr_sph_10_-58_-44_23.nii';
+        batch.Setup.rois.files{9,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/vwfa_rh_aud_norm_scr_sph_10_-52_-51_-20.nii';
+        batch.Setup.rois.dimensions{1,nses} = 1;
+        batch.Setup.rois.dimensions{2,nses} = 16;
+        batch.Setup.rois.dimensions{3,nses} = 16;
+    end
+    
 end
 
 batch.Setup.rois.add = 0;

@@ -17,18 +17,22 @@ i=1;
 
 label1 = 'ScrSpeech';
 label2 =  'NormalSpeech';
+% 
+% label1 = 'PW';
+% label2 =  'Words';
 
 % a = 1; b = numel(S);
-a = 48; b = 48;
+a = 1; b = 48;
 
 for k = a:b
     % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
+%     matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {fullfile(D, S(k).name, 'Aud/loc/mvpa10mm')};
     matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {fullfile(D, S(k).name, 'Aud/loc/mvpa')};
     matlabbatch{i}.spm.tools.tdt.decod.subj.conds.cond1 = label1;
     matlabbatch{i}.spm.tools.tdt.decod.subj.conds.cond2 = label2;
     matlabbatch{i}.spm.tools.tdt.decod.options.nrun = 8;
     matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.unit = 'mm';
-    matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.rad = 12;
+    matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.rad = 10;
     matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.mask = {fullfile(D, S(k).name, 'Aud/loc/mvpa/mask.nii')};    matlabbatch{i}.spm.tools.tdt.decod.options.meth = 'kernel';
     matlabbatch{i}.spm.tools.tdt.decod.options.analysis = 'accuracy';
     matlabbatch{i}.spm.tools.tdt.decod.options.display = 'no';
@@ -65,8 +69,9 @@ results_fold_inv = sprintf('results_%s_vs_%s', label2, label1);
 
 % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
 
-for k = a:b
+for k = 48 %a:b
     mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+%     mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa10mm');
     cd(mvpa_res_dir)
     files = dir;
     dirFlags = [files.isdir];
@@ -89,7 +94,7 @@ end
 % spm_jobman('interactive', matlabbatch)
 
 %% ....................................
-cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/tmp2')
 
 par.run = 0;
 par.sge = 1;
@@ -119,13 +124,15 @@ for k = a:b
     subDirs = files(dirFlags);
     for dirname = 1 : length(subDirs)
         if ~isempty(regexp(subDirs(dirname).name,results_fold_inv))
-            results_folder=results_fold_inv;
+            tmp_results_folder = results_fold_inv;
             fprintf('This analysis already exists, with %s labelled Condition1 and inversely (same decoding). Overwriting in the corresponding folder \n', label2)
+        else
+            tmp_results_folder = results_folder;
         end
     end
     
-    matlabbatch{i}.spm.tools.tdt.ttest.dcdg_dir(1) = {fullfile(mvpa_res_dir, results_folder)};
-    matlabbatch{i}.spm.tools.tdt.ttest.perm_dir(1) = {fullfile(mvpa_res_dir, results_folder, 'perm')};
+    matlabbatch{i}.spm.tools.tdt.ttest.dcdg_dir(1) = {fullfile(mvpa_res_dir, tmp_results_folder)};
+    matlabbatch{i}.spm.tools.tdt.ttest.perm_dir(1) = {fullfile(mvpa_res_dir, tmp_results_folder, 'perm')};
     matlabbatch{i}.spm.tools.tdt.ttest.options = 'right';
     
     i = i + 1;
@@ -135,17 +142,18 @@ end
 
 %% ....................................
 cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+spm_jobman('run', matlabbatch)
 
-par.run = 0;
-par.sge = 1;
-par.sge_queu = 'normal,bigmem';
-par.pct = 1;
-par.walltime = '24:00:00'; % probably 24h is enough
-par.jobname  = 'mvpa_ttest';
-%%%%%%%% this line below to comment to avoid re estimating
-%%%%%%%% models
-
-job_ending_rountines(matlabbatch, [], par);
+% par.run = 0;
+% par.sge = 1;
+% par.sge_queu = 'normal,bigmem';
+% par.pct = 1;
+% par.walltime = '24:00:00'; % probably 24h is enough
+% par.jobname  = 'mvpa_ttest';
+% %%%%%%%% this line below to comment to avoid re estimating
+% %%%%%%%% models
+% 
+% job_ending_rountines(matlabbatch, [], par);
 
 %% NIFTI Writing
 clear matlabbatch
@@ -164,15 +172,17 @@ for k = a:b
     subDirs = files(dirFlags);
     for dirname = 1 : length(subDirs)
         if ~isempty(regexp(subDirs(dirname).name,results_fold_inv))
-            results_folder=results_fold_inv;
+            tmp_results_folder = results_fold_inv;
             fprintf('This analysis already exists, with %s labelled Condition1 and inversely (same decoding). Overwriting in the corresponding folder. \n', label2)
+        else
+            tmp_results_folder = results_folder;
         end
     end
     
-    matlabbatch{i}.spm.tools.tdt.nft.dir(1) = {fullfile(mvpa_res_dir, results_folder)};
-    matlabbatch{i}.spm.tools.tdt.nft.pmat(1) = {
-        fullfile(mvpa_res_dir, results_folder, 'perm/p_value.mat')
-        fullfile(mvpa_res_dir, results_folder, 'perm/1-p_value.mat')
+    matlabbatch{i}.spm.tools.tdt.nft.dir(1) = {fullfile(mvpa_res_dir, tmp_results_folder)};
+    matlabbatch{i}.spm.tools.tdt.nft.pmat(1:2,1) = {
+        fullfile(mvpa_res_dir, tmp_results_folder, 'perm/p_value.mat')
+        fullfile(mvpa_res_dir, tmp_results_folder, 'perm/1-p_value.mat')
         };
     
     i = i + 1;
@@ -184,13 +194,15 @@ end
 %% ....................................
 cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
 
-par.run = 0;
-par.sge = 1;
-par.sge_queu = 'normal,bigmem';
-par.pct = 1;
-par.walltime = '24:00:00'; % probably 24h is enough
-par.jobname  = 'mvpa_perm';
-%%%%%%%% this line below to comment to avoid re estimating
-%%%%%%%% models
+spm_jobman('run', matlabbatch)
 
-job_ending_rountines(matlabbatch, [], par);
+% par.run = 0;
+% par.sge = 1;
+% par.sge_queu = 'normal,bigmem';
+% par.pct = 1;
+% par.walltime = '24:00:00'; % probably 24h is enough
+% par.jobname  = 'mvpa_perm';
+% %%%%%%%% this line below to comment to avoid re estimating
+% %%%%%%%% models
+% 
+% job_ending_rountines(matlabbatch, [], par);

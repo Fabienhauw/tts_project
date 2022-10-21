@@ -4,8 +4,8 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 
-% res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Vis/loc/syn_vs_con_rh_s5';
-res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Vis/loc/syn_vs_con_s5';
+res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Vis/loc/syn_vs_con_rh_s5';
+% res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Vis/loc/syn_vs_con_s5';
 
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
 cd (D);
@@ -20,14 +20,14 @@ S = [Syn;Con];
 % left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
 % matched controls: Control02|Control04|Control05|Control07|Control17 
 
-% gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
-gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
+gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
+% gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
 S_con_app = S;
 S_con_app(mask_gauch_con) = [];
 
-% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
-mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
+mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
+% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
 S_droit = S;
 S_droit(mask_gauch) = [];
 
@@ -76,13 +76,13 @@ i=1;
 
 cd(fullfile(D, S(1).name,'Vis/loc/stats_s5'))
 all_contrast = dir('con*');
-all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, 'con_\d+.nii'))));
+all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, '^con_\d+\.nii'))));
 
 names = {...
             'faces', 'houses', 'tools', 'numbers', 'words', 'odds', 'motor', 'images', ...
             'words - (faces+houses)', 'faces-(houses+words)', 'houses-(faces+words)', ...
             'words - (faces+houses+tools)', 'faces-(houses+words+tools)', 'houses-(faces+words+tools)', 'tools -(faces+houses+words)', ...
-            'numbers-(faces+houses+words)', 'numbers-words', 'words - numbers', 'numbers-(faces+houses)', ...
+            'numbers-(faces+houses+tools)', 'numbers-(faces+houses+words)', 'numbers-words', 'words - numbers', 'numbers-(faces+houses)', ...
             'EOI',...
             };
 

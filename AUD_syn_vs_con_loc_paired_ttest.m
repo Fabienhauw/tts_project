@@ -101,7 +101,7 @@ names = {...
 
 cd(fullfile(D, S(1).name,'Aud/loc/stats_s5'))
 all_contrast = dir(sprintf('con*.nii'));
-all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, 'con_\d+.nii'))));
+all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, '^con_\d+\.nii'))));
 
 for tmp_con = 1 : length(names)
     res_dir = fullfile(res_dir_base,names{tmp_con});

@@ -1,0 +1,268 @@
+started on lmb033
+ven. oct. 21 12:10:42 CEST 2022
+
+                                                                              < M A T L A B (R) >
+                                                                    Copyright 1984-2020 The MathWorks, Inc.
+                                                                R2020b Update 2 (9.9.0.1524771) 64-bit (glnxa64)
+                                                                                November 3, 2020
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Function iscolumn has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j15_mvpa_perm (line 1)
+In run (line 91)] 
+[Warning: Function ismatrix has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j15_mvpa_perm (line 1)
+In run (line 91)] 
+[Warning: Function isrow has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j15_mvpa_perm (line 1)
+In run (line 91)] 
+[Warning: Function narginchk has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j15_mvpa_perm (line 1)
+In run (line 91)] 
+[Warning: Function isequaln has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j15_mvpa_perm (line 1)
+In run (line 91)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_ozqls] 
+[> In path (line 34)
+In mfonc_j15_mvpa_perm (line 1)
+In run (line 91)] 
+Initialising batch system... done.
+
+
+------------------------------------------------------------------------
+21-Oct-2022 12:11:26 - Running job #1
+------------------------------------------------------------------------
+21-Oct-2022 12:11:26 - Running 'Permutations'
+[tdt_run_permutations]: Final output = res_cfg_perm.mat 
+
+[Warning: This function is still in beta modus. Execute with necessary care!] 
+[> In warningv (line 68)
+In make_design_permutation (line 189)
+In tdt_run_permutations (line 33)
+In tdt_cfg_matlabbatch>prog_perm (line 510)
+In cfg_run_cm (line 29)
+In cfg_util>local_runcj (line 1717)
+In cfg_util (line 972)
+In spm_jobman>fill_run_job (line 469)
+In spm_jobman (line 247)
+In mfonc_j15_mvpa_perm (line 11)
+In run (line 91)] 
+
+Removing symmetric permutations (this may take a while depending on the number of iterations...)
+Design for CV decoding for 16 files x 8 steps created
+
+Future displays at same level switched off. Number of displays stored in cfg.
+Combining designs. Please make sure cfg.results.setwise = 1 and remains that way before running the permutation design.
+done.
+[Warning: This function is still in beta modus. Execute with necessary care!] 
+[> In warningv (line 63)
+In make_design_permutation (line 189)
+In tdt_run_permutations (line 34)
+In tdt_cfg_matlabbatch>prog_perm (line 510)
+In cfg_run_cm (line 29)
+In cfg_util>local_runcj (line 1717)
+In cfg_util (line 972)
+In spm_jobman>fill_run_job (line 469)
+In spm_jobman (line 247)
+In mfonc_j15_mvpa_perm (line 11)
+In run (line 91)] 
+Future warnings at same level switched off. Number of warnings stored in cfg. dbstack stored in global reports, reports.warnstc
+Removing symmetric permutations (this may take a while depending on the number of iterations...)
+Combining designs. Please make sure cfg.results.setwise = 1 and remains that way before running the permutation design.
+done.
+The Decoding Toolbox (by Martin Hebart & Kai Goergen), v2019/04/29 3.997
+Preparing analysis: 'searchlight'
+Image access with: SPM12
+Results are saved as .mat-file to /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/Control15/Aud/loc/mvpa10mm/results_PW_vs_Words/perm
+Using a "_kernel" decoding method.
+Performing 1024 decoding steps for 16 files
+Writing input filenames for each decoding iteration to /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/Control15/Aud/loc/mvpa10mm/results_PW_vs_Words/perm/res_filedetails.txt
+Loading mask(s):
+/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/Control15/Aud/loc/mvpa/mask.nii
+Loading data from files
+Starting decoding...
+All samples in final estimate (e.g. accuracy) weighted equally (see README.txt)...
+
+Starting time: 21-Oct-2022 12:11:39
+
+searchlight: 1/120202, time to go: 01 09:57:48, time running: 00:00:01, finish: 2022/10/22 22:09:29
+
+
+searchlight: 2/120202, time to go: 01 04:58:51, time running: 00:00:01, finish: 2022/10/22 17:10:32
+
+
+searchlight: 5/120202, time to go: 21:36:09, time running: 00:00:03, finish: 2022/10/22 09:47:52
+
+
+searchlight: 10/120202, time to go: 16:31:36, time running: 00:00:04, finish: 2022/10/22 04:43:21
+
+
+searchlight: 15/120202, time to go: 13:54:16, time running: 00:00:06, finish: 2022/10/22 02:06:02
+
+
+searchlight: 20/120202, time to go: 12:37:31, time running: 00:00:07, finish: 2022/10/22 00:49:19
+
+
+searchlight: 30/120202, time to go: 11:20:41, time running: 00:00:10, finish: 2022/10/21 23:32:31
+
+
+searchlight: 40/120202, time to go: 10:50:27, time running: 00:00:12, finish: 2022/10/21 23:02:20
+
+
+searchlight: 50/120202, time to go: 10:42:28, time running: 00:00:16, finish: 2022/10/21 22:54:24
+
+
+searchlight: 100/120202, time to go: 10:16:55, time running: 00:00:30, finish: 2022/10/21 22:29:06
+
+
+searchlight: 200/120202, time to go: 09:56:16, time running: 00:00:59, finish: 2022/10/21 22:08:55
+
+
+searchlight: 300/120202, time to go: 09:18:09, time running: 00:01:23, finish: 2022/10/21 21:31:13
+
+
+searchlight: 400/120202, time to go: 09:19:27, time running: 00:01:52, finish: 2022/10/21 21:32:59
+
+
+searchlight: 500/120202, time to go: 09:08:20, time running: 00:02:17, finish: 2022/10/21 21:22:18
+
+
+searchlight: 1000/120202, time to go: 08:38:51, time running: 00:04:21, finish: 2022/10/21 20:54:52
+
+
+searchlight: 2000/120202, time to go: 08:10:11, time running: 00:08:29, finish: 2022/10/21 20:30:21
+
+
+searchlight: 3000/120202, time to go: 07:53:17, time running: 00:12:32, finish: 2022/10/21 20:17:29
+
+
+searchlight: 4000/120202, time to go: 07:53:26, time running: 00:16:36, finish: 2022/10/21 20:21:43
+
+
+searchlight: 5000/120202, time to go: 07:43:29, time running: 00:20:38, finish: 2022/10/21 20:15:47
+
+
+searchlight: 6000/120202, time to go: 07:27:24, time running: 00:24:33, finish: 2022/10/21 20:03:37
+
+
+searchlight: 7000/120202, time to go: 07:27:31, time running: 00:28:30, finish: 2022/10/21 20:07:41
+
+
+searchlight: 8000/120202, time to go: 07:28:24, time running: 00:32:30, finish: 2022/10/21 20:12:34
+
+
+searchlight: 9000/120202, time to go: 07:22:52, time running: 00:36:29, finish: 2022/10/21 20:11:01
+
+
+searchlight: 10000/120202, time to go: 07:16:12, time running: 00:40:26, finish: 2022/10/21 20:08:18
+
+
+searchlight: 11000/120202, time to go: 07:18:57, time running: 00:44:27, finish: 2022/10/21 20:15:05
+
+
+searchlight: 12000/120202, time to go: 07:13:07, time running: 00:48:27, finish: 2022/10/21 20:13:15
+
+
+searchlight: 13000/120202, time to go: 07:11:31, time running: 00:52:29, finish: 2022/10/21 20:15:41
+
+
+searchlight: 14000/120202, time to go: 07:02:06, time running: 00:56:27, finish: 2022/10/21 20:10:14
+
+
+searchlight: 15000/120202, time to go: 07:09:28, time running: 01:00:32, finish: 2022/10/21 20:21:40
+
+
+searchlight: 16000/120202, time to go: 06:56:25, time running: 01:04:32, finish: 2022/10/21 20:12:38
+
+
+searchlight: 17000/120202, time to go: 07:05:04, time running: 01:08:39, finish: 2022/10/21 20:25:24
+
+
+searchlight: 18000/120202, time to go: 06:48:43, time running: 01:12:39, finish: 2022/10/21 20:13:03
+
+
+searchlight: 19000/120202, time to go: 06:52:27, time running: 01:16:44, finish: 2022/10/21 20:20:51
+
+
+searchlight: 20000/120202, time to go: 06:50:00, time running: 01:20:49, finish: 2022/10/21 20:22:29
+
+
+searchlight: 21000/120202, time to go: 06:37:04, time running: 01:24:49, finish: 2022/10/21 20:13:33
+
+
+searchlight: 22000/120202, time to go: 06:46:42, time running: 01:28:58, finish: 2022/10/21 20:27:20
+
+
+searchlight: 23000/120202, time to go: 06:27:45, time running: 01:32:57, finish: 2022/10/21 20:12:22
+
+
+searchlight: 24000/120202, time to go: 06:26:45, time running: 01:36:59, finish: 2022/10/21 20:15:24
+
+
+searchlight: 25000/120202, time to go: 06:31:30, time running: 01:41:05, finish: 2022/10/21 20:24:16
+
+
+searchlight: 26000/120202, time to go: 06:16:46, time running: 01:45:05, finish: 2022/10/21 20:13:32
+
+
+searchlight: 27000/120202, time to go: 06:19:48, time running: 01:49:10, finish: 2022/10/21 20:20:38
+
+
+searchlight: 28000/120202, time to go: 06:15:27, time running: 01:53:14, finish: 2022/10/21 20:20:21
+
+
+searchlight: 29000/120202, time to go: 06:00:37, time running: 01:57:11, finish: 2022/10/21 20:09:29
+
+
+searchlight: 30000/120202, time to go: 06:04:56, time running: 02:01:14, finish: 2022/10/21 20:17:51
+
+
+searchlight: 31000/120202, time to go: 06:03:58, time running: 02:05:19, finish: 2022/10/21 20:20:58
+
+
+searchlight: 32000/120202, time to go: 05:47:57, time running: 02:09:16, finish: 2022/10/21 20:08:53
+
+
+searchlight: 33000/120202, time to go: 05:50:46, time running: 02:13:17, finish: 2022/10/21 20:15:44
+
+
+searchlight: 34000/120202, time to go: 05:47:26, time running: 02:17:19, finish: 2022/10/21 20:16:25
+
+
+searchlight: 35000/120202, time to go: 05:34:39, time running: 02:21:14, finish: 2022/10/21 20:07:34
+
+
+searchlight: 36000/120202, time to go: 05:37:17, time running: 02:25:15, finish: 2022/10/21 20:14:12
+
+
+searchlight: 37000/120202, time to go: 05:35:48, time running: 02:29:17, finish: 2022/10/21 20:16:45
+
+
+searchlight: 38000/120202, time to go: 05:23:09, time running: 02:33:13, finish: 2022/10/21 20:08:02
+
+
+searchlight: 39000/120202, time to go: 05:19:28, time running: 02:37:09, finish: 2022/10/21 20:08:17
+
+
+searchlight: 40000/120202, time to go: 05:25:37, time running: 02:41:13, finish: 2022/10/21 20:18:30
+
+
+searchlight: 41000/120202, time to go: 05:11:10, time running: 02:45:08, finish: 2022/10/21 20:07:58
+
+
+searchlight: 42000/120202, time to go: 05:07:36, time running: 02:49:04, finish: 2022/10/21 20:08:20
+
+
+searchlight: 43000/120202, time to go: 05:16:21, time running: 02:53:10, finish: 2022/10/21 20:21:11
+
+
+searchlight: 44000/120202, time to go: 04:59:06, time running: 02:57:06, finish: 2022/10/21 20:07:52
+

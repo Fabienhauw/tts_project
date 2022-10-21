@@ -1,0 +1,2 @@
+export jobid=`sbatch -p normal,bigmem -N 1 --cpus-per-task=1 --job-name=mvpa_ttest   -t 1-00:00:00 --mem=4000  -m block:block   -o /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/mvpa_ttest/log-%A_%a  -e /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/mvpa_ttest/err-%A_%a  --array=1-48  /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/mvpa_ttest/do_job_array.sh |awk '{print $4}'` 
+echo submitted job $jobid
