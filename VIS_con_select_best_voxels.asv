@@ -2,7 +2,7 @@ clear;
 
 %% parameters:
 select_con = [9]; % 9 = words - (faces + houses) in the visual GLM; %select_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
-test_con = [12]; % 12 = w-(f+h+t), 13 = f-(w+h+t), 14 = h-(f+w+t), 15 = t-(f+h+w), 16 = n-(f+h+t) %test_con = number of the contrast used to test the voxels (in SPM.mat of the select_path)
+test_con = [15]; % 12 = w-(f+h+t), 13 = f-(w+h+t), 14 = h-(f+w+t), 15 = t-(f+h+w), 16 = n-(f+h+t) %test_con = number of the contrast used to test the voxels (in SPM.mat of the select_path)
 diff_ref = 0; % 1 = use a different contrast for selecting the best_voxels and for comparing signals;
 only_right_hand = 1;
 volume_option = 2; %1 = ROI, 2 = coordinates;
@@ -48,21 +48,16 @@ if volume_option == 1
     all_xyzmm = ROInames;
 elseif volume_option == 2
     %different coordinates, according to where they come from
-    if test_con == 12 
-        coord_names = {'lOcc', 'rOcc', 'lIPS', 'rIPS', 'SMA', 'mIFG', 'iIFG', 'VWFA', 'lSTS', 'rSTS'};
-        all_xyzmm = [-20 -94 -4; 20 -88 -4; -30 -48 43; 38 -54 46; 0 12 53; -40 6 30; -50 36 13; -48 -54 -20; -68 -44 6; 58 -31 0]; %% VISUAL WORDS-(h+f+t), RH
+    if test_con == 12
+        all_xyzmm = [-20 -94 -4; 20 -88 -4; -30 -48 43; 38 -54 46; 0 12 53; -40 6 30; -50 36 13; -48 -54 -20; -68 -44 6; 58 -31 0]; %% VISUAL WORDS-(h+f+t), RH synesthetes,  lOcc, rOcc, lIPS, rIPS, SMA, mIFG, iIFG, VWFA, lSTS, rSTS.
     elseif test_con == 13
-        coord_names = {'FFA', 'OFA', 'lFFA'};
-        all_xyzmm = [42 -56 -20; 52 -64 16; -38 -51 -20]; %% VISUAL FACES-(w+h+t), rh, no difference.
+        all_xyzmm = [42 -56 -20; 52 -64 16; -38 -51 -20]; %% VISUAL FACES-(w+h+t), rh synesthetes, FFA, OFA, lFFA, no difference.
     elseif test_con == 14
-        coord_names = {'post rPPA', 'post lPPA', 'ant rPPA', 'ant lPPA'};
-        all_xyzmm = [22 -76 -12; -18 -78 -12; 28 -54 -7; -28 -46 -7]; %% VISUAL HOUSES-(w+f+t), rh, no difference.
+        all_xyzmm = [22 -76 -12; -18 -78 -12; 28 -54 -7; -28 -46 -7]; %% VISUAL HOUSES-(w+f+t), rh synesthetes, post rPPA, post lPPA, ant rPPA, ant lPPA, no difference.
     elseif test_con == 15
-        coord_names = {'lPPA', 'rPPA', 'lOTA', 'rOTA'};
-        all_xyzmm = [-25 -54 12; 30 -48 -12; -45 -68 -2; 48 -64 -7]; %% VISUAL TOOLS-(h+f+w), rh, no difference.
+        all_xyzmm = [-25 -54 12; 30 -48 -12; -45 -68 -2; 48 -64 -7]; %% VISUAL TOOLS-(h+f+w), rh synesthetes, lPPA, rPPA, lOTA, rOTA, no difference.
     elseif test_con == 16
-        coord_names = {'rIPS', 'lIPS'};
-        all_xyzmm = [32 -61 43; -45 -41 43]; %% VISUAL NUMBERS-(h+f+t), rh, no difference.
+        all_xyzmm = [32 -61 43; -45 -41 43]; %% VISUAL NUMBERS-(h+f+t), rh synesthetes, rIPS, lIPS, no difference.
     end
     
 end
@@ -108,6 +103,20 @@ if sum(~cellfun(@isempty,(regexp(str_path, 'Aud'))))
 elseif sum(~cellfun(@isempty,(regexp(str_path, 'Vis'))))
     ref_mod = 'visual';
 end
+
+if diff_ref
+    res_dir = sprintf('%scomparison_best_voxels_diff_reference/', res_dir);
+else
+    res_dir = sprintf('%scomparison_best_voxels/', res_dir);
+end
+
+if volume_option == 1
+    res_dir = fullfile(res_dir, 'ROI');
+elseif volume_option == 2
+    res_dir = fullfile(res_dir, 'coord');
+end
+
+res_dir = fullfile(res_dir, 'vis');
 
 if ~isdir(res_dir)
     mkdir(res_dir)
@@ -209,8 +218,8 @@ for zz=1:length(test_con)
                 anal{qq}.volume_str = sprintf('%d mm sphere centered at [%d %d %d]',sphereradius,xyzmm);
                 searchvol = spherevol;
             end
-            anal(qq).roi_name = coord_names{qq};
-            anal(qq).peaks_origin = peaks;            
+            
+            
             
             select_tvol(searchvol(:)==0) = Inf; % every voxel outside of the mask is set to 'Inf'
             tvol = flipsign * select_tvol(:) .* (searchvol(:)>0);
@@ -265,8 +274,6 @@ for zz=1:length(test_con)
                 anal{qq}.activation(i_subj)         = mean(test_convol(xyz));
                 anal{qq}.group(i_subj)              = group_S(i_subj);
             end
-            anal{qq}.ref_con_path{i_subj,1} = fullfile(experiments(i_subj).select_path, sprintf('spmT_%04d.nii',select_con));
-            anal{qq}.test_con_path{i_subj,1} = fullfile(experiments(i_subj).test_path, sprintf('spmT_%04d.nii',current_con));
             
             if voxel_option == 1
                 anal{qq}.voxel_str = sprintf('The %d best voxels for localizer contrast %d based on %s contrast %d',nvox,current_con, ref_mod, select_con);
@@ -293,19 +300,14 @@ for zz=1:length(test_con)
         close(h)
         
     end % coord loop
-    
-    if diff_ref
-        save_name = sprintf('best_voxels_in_vis_spmT%04d_based_on_%s_spmT%04d_%s_peaks', current_con, ref_mod, select_con, peaks)
-    else
-        save_name = sprintf('best_voxels_in_vis_spmT%04d_%s_peaks', current_con, peaks)
-    end
-    
     if volume_option == 1
-        save_name = sprintf('best_voxels_in_vis_spmT%04d_ROI.mat', current_con);
+        save(sprintf('%s/best_voxels_in_vis_spmT%04d.mat',...
+            res_dir, current_con), 'anal');
     elseif volume_option == 2
-        save_name = sprintf('%s_coord.mat',save_name);
+        save(sprintf('%s/best_voxels_in_vis_spmT%04d.mat',...
+            res_dir, current_con), 'anal');
     end
-    save(fullfile(res_dir, save_name), 'anal')
+    
 end % contrast loop
 
 % return
@@ -323,15 +325,15 @@ for tmp_anal = 1 : size(results, 1)
     clear matcon Group_Id Subj_Id vox_activ
     for j = 1 : size(anal,2) % j = ROI;
         count = 0;
-        for k = 1 : size(anal(j).all_activation,2) % k = subjs;
-            for l = 1 : size(anal(j).all_activation{k},1)
+        for k = 1 : size(anal{j}.all_activation,2) % k = subjs;
+            for l = 1 : size(anal{j}.all_activation{k},1)
                 count = count + 1;
-                matcon{j}{count, 1}     = anal(j).group(k);
-                Group_Id{j}{count, 1}   = anal(j).group(k);
+                matcon{j}{count, 1}     = anal{j}.group(k);
+                Group_Id{j}{count, 1}   = anal{j}.group(k);
                 matcon{j}{count, 2}     = k;
                 Subj_Id{j}{count, 1}    = k;
-                matcon{j}{count, 3}     = anal(j).all_activation{k}(l);
-                vox_activ{j}{count, 1}  = anal(j).all_activation{k}(l);
+                matcon{j}{count, 3}     = anal{j}.all_activation{k}(l);
+                vox_activ{j}{count, 1}  = anal{j}.all_activation{k}(l);
             end
         end
     end
@@ -363,84 +365,60 @@ for tmp_anal = 1 : size(results, 1)
     
     clear h
     for s = 1 : size(anal,2)
-        tmp_mask = cellfun(@isempty,(anal(s).all_activation(:)));
-        anal(s).activation(tmp_mask) = '';
-        anal(s).coordsmm(:,tmp_mask) = '';
-        anal(s).bvcoordsmm(:,tmp_mask) = '';
-        anal(s).group_mask = anal(s).group(~tmp_mask);
+        tmp_mask = cellfun(@isempty,(anal{1,s}.all_activation(:)));
+        anal{1,s}.activation(tmp_mask) = '';
+        anal{1,s}.coordsmm(:,tmp_mask) = '';
+        anal{1,s}.bvcoordsmm(:,tmp_mask) = '';
+        anal{1,s}.group_mask = anal{1,s}.group(~tmp_mask);
         
         [h{tmp_anal,s},p{tmp_anal,s},ci{tmp_anal,s},stats{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).activation(anal(s).group_mask == 1), ...
-            anal(s).activation(anal(s).group_mask == 2));
+            anal{1,s}.activation(anal{1,s}.group_mask == 1), ...
+            anal{1,s}.activation(anal{1,s}.group_mask == 2));
         tval{tmp_anal,s} = stats{tmp_anal,s}.tstat;
-        anal(s).p_val = p{tmp_anal,s};
-        anal(s).t_val = tval{tmp_anal,s};
         
         [h_coord1{tmp_anal,s},p_coord1{tmp_anal,s},ci_coord1{tmp_anal,s},stats_coord1{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).coordsmm(1,anal(s).group_mask == 1), ...
-            anal(s).coordsmm(1,anal(s).group_mask == 2));
+            anal{1,s}.coordsmm(1,anal{1,s}.group_mask == 1), ...
+            anal{1,s}.coordsmm(1,anal{1,s}.group_mask == 2));
         tval_coord1{tmp_anal,s} = stats_coord1{tmp_anal,s}.tstat;
-        anal(s).p_coord1 = p_coord1{tmp_anal,s};
-        anal(s).tval_coord1 = tval_coord1{tmp_anal,s};
-
+        
         [h_coord2{tmp_anal,s},p_coord2{tmp_anal,s},ci_coord2{tmp_anal,s},stats_coord2{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).coordsmm(2,anal(s).group_mask == 1), ...
-            anal(s).coordsmm(2,anal(s).group_mask == 2));
+            anal{1,s}.coordsmm(2,anal{1,s}.group_mask == 1), ...
+            anal{1,s}.coordsmm(2,anal{1,s}.group_mask == 2));
         tval_coord2{tmp_anal,s} = stats_coord2{tmp_anal,s}.tstat;
-        anal(s).p_coord2 = p_coord2{tmp_anal,s};
-        anal(s).tval_coord2 = tval_coord2{tmp_anal,s};
-
+        
         [h_coord3{tmp_anal,s},p_coord3{tmp_anal,s},ci_coord3{tmp_anal,s},stats_coord3{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).coordsmm(3,anal(s).group_mask == 1), ...
-            anal(s).coordsmm(3,anal(s).group_mask == 2));
+            anal{1,s}.coordsmm(3,anal{1,s}.group_mask == 1), ...
+            anal{1,s}.coordsmm(3,anal{1,s}.group_mask == 2));
         tval_coord3{tmp_anal,s} = stats_coord3{tmp_anal,s}.tstat;
-        anal(s).p_coord3 = p_coord3{tmp_anal,s};
-        anal(s).tval_coord3 = tval_coord3{tmp_anal,s};
-
+        
         [h_coord_bv_1{tmp_anal,s},p_coord_bv_1{tmp_anal,s},ci_coord_bv_1{tmp_anal,s},stats_coord_bv_1{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).bvcoordsmm(1,anal(s).group_mask == 1), ...
-            anal(s).bvcoordsmm(1,anal(s).group_mask == 2));
+            anal{1,s}.bvcoordsmm(1,anal{1,s}.group_mask == 1), ...
+            anal{1,s}.bvcoordsmm(1,anal{1,s}.group_mask == 2));
         tval_coord_bv_1{tmp_anal,s} = stats_coord_bv_1{tmp_anal,s}.tstat;
-        anal(s).p_coord_bv_1 = p_coord_bv_1{tmp_anal,s};
-        anal(s).tval_coord_bv_1 = tval_coord_bv_1{tmp_anal,s};
-
+        
         [h_coord_bv_2{tmp_anal,s},p_coord_bv_2{tmp_anal,s},ci_coord_bv_2{tmp_anal,s},stats_coord_bv_2{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).bvcoordsmm(2,anal(s).group_mask == 1), ...
-            anal(s).bvcoordsmm(2,anal(s).group_mask == 2));
+            anal{1,s}.bvcoordsmm(2,anal{1,s}.group_mask == 1), ...
+            anal{1,s}.bvcoordsmm(2,anal{1,s}.group_mask == 2));
         tval_coord_bv_2{tmp_anal,s} = stats_coord_bv_2{tmp_anal,s}.tstat;
-        anal(s).p_coord_bv_2 = p_coord_bv_2{tmp_anal,s};
-        anal(s).tval_coord_bv_2 = tval_coord_bv_2{tmp_anal,s};
-
+        
         [h_coord_bv_3{tmp_anal,s},p_coord_bv_3{tmp_anal,s},ci_coord_bv_3{tmp_anal,s},stats_coord_bv_3{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).bvcoordsmm(3,anal(s).group_mask == 1), ...
-            anal(s).bvcoordsmm(3,anal(s).group_mask == 2));
+            anal{1,s}.bvcoordsmm(3,anal{1,s}.group_mask == 1), ...
+            anal{1,s}.bvcoordsmm(3,anal{1,s}.group_mask == 2));
         tval_coord_bv_3{tmp_anal,s} = stats_coord_bv_3{tmp_anal,s}.tstat;
-        anal(s).p_coord_bv_3 = p_coord_bv_3{tmp_anal,s};
-        anal(s).tval_coord_bv_3 = tval_coord_bv_3{tmp_anal,s};
-        
-        [h_nvox{tmp_anal,s},p_nvox{tmp_anal,s},ci_nvox{tmp_anal,s},stats_nvox{tmp_anal,s}] = ...
-            ttest2(...
-            anal(s).nbvoxels(anal(s).group == 1), ...
-            anal(s).nbvoxels(anal(s).group == 2));
-        tval_nvox{tmp_anal,s} = stats_nvox{tmp_anal,s}.tstat;
-        anal(s).p_nvox = p_nvox{tmp_anal,s};
-        anal(s).tval_nvox = tval_nvox{tmp_anal,s};
         
         [h_nvox_thr{tmp_anal,s},p_nvox_thr{tmp_anal,s},ci_nvox_thr{tmp_anal,s},stats_nvox_thr{tmp_anal,s}] = ...
             ttest2(...
-            anal(s).nbvoxels_thr(anal(s).group == 1), ...
-            anal(s).nbvoxels_thr(anal(s).group == 2));
+            anal{1,s}.nbvoxels_thr(anal{1,s}.group == 1), ...
+            anal{1,s}.nbvoxels_thr(anal{1,s}.group == 2));
         tval_nvox_thr{tmp_anal,s} = stats_nvox_thr{tmp_anal,s}.tstat;
-        anal(s).p_nvox_thr = p_nvox_thr{tmp_anal,s};
-        anal(s).tval_nvox_thr = tval_nvox_thr{tmp_anal,s};
-end
+    end
     
     [cb] = cbrewer('qual', 'Set3', 12, 'pchip');
     nbgraph = size(anal,2);

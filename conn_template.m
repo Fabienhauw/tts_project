@@ -7,7 +7,7 @@ addpath(genpath('/network/lustre/isbackps02/home/fabien.hauw/Documents/MATLAB/co
 
 
 cwd = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs';
-only_right = 0;
+only_right = 1;
 roi_incl = 3; %1, 2, or 3 for brainnetome atlas, networks, or personnalized ROIs.
 
 %% definition of all subjects:
@@ -36,11 +36,11 @@ S = [Syn;Con];
 
 %%
 if only_right
-    proj_name = 'syn_group_rs_rh_s5';
+    proj_name = 'syn_group_rs_rh_s5_modif_freq';
     gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
     mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
 else
-    proj_name = 'syn_group_rs_s5';
+    proj_name = 'syn_group_rs_s5_modif_freq';
     gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
     mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
 end
@@ -331,8 +331,8 @@ batch.filename               = fullfile(cwd, proj_name);            % Existing c
 % ..........................................................................................
 % CONN Denoising                                    % Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options 
 
-batch.Denoising.filter      = [0.008, 0.09];                 % frequency filter (band-pass values, in Hz)
-% batch.Denoising.filter      = [0.01, 0.1];                 % frequency filter (band-pass values, in Hz)
+% batch.Denoising.filter      = [0.008, 0.09];                 % frequency filter (band-pass values, in Hz)
+batch.Denoising.filter      = [0.01, 0.1];                 % frequency filter (band-pass values, in Hz)
 batch.Denoising.detrending  = 1;
 batch.Denoising.regbp       = 1;
 batch.Denoising.done        = 1;

@@ -11,28 +11,29 @@ S = dir(D);
 mask = ismember({S.name}, {'.', '..'});
 S(mask) = [];
 wd = pwd;
+radius = 10;
 
 clear matlabbatch
 i=1;
 
 label1 = 'ScrSpeech';
 label2 =  'NormalSpeech';
-% 
+
 % label1 = 'PW';
 % label2 =  'Words';
 
 % a = 1; b = numel(S);
-a = 1; b = 48;
+a = 45; b = 45;
 
 for k = a:b
     % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
-%     matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {fullfile(D, S(k).name, 'Aud/loc/mvpa10mm')};
-    matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {fullfile(D, S(k).name, 'Aud/loc/mvpa')};
+    matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {sprintf('%s/%s/Aud/loc/mvpa%dmm', D, S(k).name, radius)};
+%     matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {fullfile(D, S(k).name, 'Aud/loc/mvpa')};
     matlabbatch{i}.spm.tools.tdt.decod.subj.conds.cond1 = label1;
     matlabbatch{i}.spm.tools.tdt.decod.subj.conds.cond2 = label2;
     matlabbatch{i}.spm.tools.tdt.decod.options.nrun = 8;
     matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.unit = 'mm';
-    matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.rad = 10;
+    matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.rad = radius;
     matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.mask = {fullfile(D, S(k).name, 'Aud/loc/mvpa/mask.nii')};    matlabbatch{i}.spm.tools.tdt.decod.options.meth = 'kernel';
     matlabbatch{i}.spm.tools.tdt.decod.options.analysis = 'accuracy';
     matlabbatch{i}.spm.tools.tdt.decod.options.display = 'no';
@@ -69,22 +70,24 @@ results_fold_inv = sprintf('results_%s_vs_%s', label2, label1);
 
 % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
 
-for k = 48 %a:b
-    mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
-%     mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa10mm');
+for k = a:b
+%     mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+    mvpa_res_dir = sprintf('%s/%s/Aud/loc/mvpa%dmm', D, S(k).name, radius);
     cd(mvpa_res_dir)
     files = dir;
     dirFlags = [files.isdir];
     subDirs = files(dirFlags);
     for dirname = 1 : length(subDirs)
         if ~isempty(regexp(subDirs(dirname).name,results_fold_inv))
-            results_folder=results_fold_inv;
-            fprintf('This analysis already exists, with %s labelled Condition1 and inversely (same decoding). Overwriting in the corresponding folder. \n', label2)
+            tmp_results_folder=results_fold_inv;
+            fprintf('This analysis already exists, with %s labelled Condition1 and conversely (same decoding). Overwriting in the corresponding folder. \n', label2)
+        elseif ~isempty(regexp(subDirs(dirname).name,results_folder))
+            tmp_results_folder = results_folder;
         end
     end
     
-    matlabbatch{i}.spm.tools.tdt.perm.res_cfg(1) = {fullfile(mvpa_res_dir, results_folder, 'res_cfg.mat')};
-    matlabbatch{i}.spm.tools.tdt.perm.res_dir = {fullfile(mvpa_res_dir, results_folder)};
+    matlabbatch{i}.spm.tools.tdt.perm.res_cfg(1) = {fullfile(mvpa_res_dir, tmp_results_folder, 'res_cfg.mat')};
+    matlabbatch{i}.spm.tools.tdt.perm.res_dir = {fullfile(mvpa_res_dir, tmp_results_folder)};
     matlabbatch{i}.spm.tools.tdt.perm.suffix_res_dir = 'perm';
     matlabbatch{i}.spm.tools.tdt.perm.options.all_perm = 'all';
     
@@ -94,7 +97,7 @@ end
 % spm_jobman('interactive', matlabbatch)
 
 %% ....................................
-cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/tmp2')
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/')
 
 par.run = 0;
 par.sge = 1;
@@ -117,7 +120,8 @@ results_fold_inv = sprintf('results_%s_vs_%s', label2, label1);
 % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
 
 for k = a:b
-    mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+%     mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+    mvpa_res_dir = sprintf('%s/%s/Aud/loc/mvpa%dmm', D, S(k).name, radius);
     cd(mvpa_res_dir)
     files = dir;
     dirFlags = [files.isdir];
@@ -125,8 +129,8 @@ for k = a:b
     for dirname = 1 : length(subDirs)
         if ~isempty(regexp(subDirs(dirname).name,results_fold_inv))
             tmp_results_folder = results_fold_inv;
-            fprintf('This analysis already exists, with %s labelled Condition1 and inversely (same decoding). Overwriting in the corresponding folder \n', label2)
-        else
+            fprintf('This analysis already exists, with %s labelled Condition1 and conversely (same decoding). Overwriting in the corresponding folder. \n', label2)
+        elseif ~isempty(regexp(subDirs(dirname).name,results_folder))
             tmp_results_folder = results_folder;
         end
     end
@@ -165,7 +169,8 @@ results_fold_inv = sprintf('results_%s_vs_%s', label2, label1);
 % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
 
 for k = a:b
-    mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+%     mvpa_res_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+    mvpa_res_dir = sprintf('%s/%s/Aud/loc/mvpa%dmm', D, S(k).name, radius);
     cd(mvpa_res_dir)
     files = dir;
     dirFlags = [files.isdir];
@@ -173,8 +178,8 @@ for k = a:b
     for dirname = 1 : length(subDirs)
         if ~isempty(regexp(subDirs(dirname).name,results_fold_inv))
             tmp_results_folder = results_fold_inv;
-            fprintf('This analysis already exists, with %s labelled Condition1 and inversely (same decoding). Overwriting in the corresponding folder. \n', label2)
-        else
+            fprintf('This analysis already exists, with %s labelled Condition1 and conversely (same decoding). Overwriting in the corresponding folder. \n', label2)
+        elseif ~isempty(regexp(subDirs(dirname).name,results_folder))
             tmp_results_folder = results_folder;
         end
     end

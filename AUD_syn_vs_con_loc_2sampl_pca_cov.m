@@ -24,13 +24,13 @@ S = [Syn;Con];
 gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
 % gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
-S_con_app = S;
-S_con_app(mask_gauch_con) = [];
+S_con = S;
+S_con(mask_gauch_con) = [];
 
 mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
 % mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
-S_droit = S;
-S_droit(mask_gauch) = [];
+S_syn = S;
+S_syn(mask_gauch) = [];
 
 vector_age = [
     25.1013699; 70.8219178; 23.6821918; 24.3342466; 21.109589; 31.7260274; 18.8438356; ...
@@ -47,7 +47,7 @@ vector_hand = [
     zeros(21,1); 1; 1; 1; 1; 1; ... % end of controls
     ]; %0 = right, 1 = left;
 
-S_effect = [S_droit ; S_con_app];
+S_effect = [S_syn ; S_con];
 
 for j = 1 : size(S,1)
     if ~isempty(find(~cellfun(@isempty,(regexp({S_effect.name},S(j).name)))))
@@ -85,8 +85,8 @@ names = {...
             'words', 'pseudowords', 'numbers', 'normal_speech', 'scramble_speech',...
             'odds', 'motor',...
             'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
-            'phonology', '-phonology', 'numbers - (words + pseudowords)', ...
-            'normal_speech - words', 'words + pseudowords + numbers + normal_speech', ...
+            'phonology', '-phonology', 'words + pseudowords', 'numbers - (words + pseudowords)', ...
+            'normal_speech - words', '(words + pseudowords + numbers + normal_speech) - scramble speech', ...
             'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
             '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
             '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
@@ -95,15 +95,16 @@ names = {...
             };
 
 for c = 1:length(all_contrast)
-    %% subject of interest:
     contrast = all_contrast(c).name;
-    scans = {};
-    for k = 1:length(S_effect)
-        vol_name = fullfile(D, S_effect(k).name,'Aud/loc/stats_s5/');
+    %% group 1:
+    scans1 = {};
+    for k = 1:length(S_syn)
+        vol_name = fullfile(D, S_syn(k).name,'Aud/loc/stats_s5/');
         vol_name = sprintf('%s%s,1',vol_name,contrast);
-        scans = [scans;vol_name];
+        scans1 = [scans1;vol_name];
     end
     res_dir = fullfile(res_dir_base,names{c});
+
     if ~isdir(res_dir)
         mkdir(res_dir)
     end
@@ -117,56 +118,84 @@ for c = 1:length(all_contrast)
         delete (filenames{:});
     end
     
-    matlabbatch{i}.spm.stats.factorial_design.dir = {res_dir};
-    matlabbatch{i}.spm.stats.factorial_design.des.t1.scans = scans;
-        
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'pca_score';
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
+    %% for group 2:
+    scans2 = {};
+    for k = 1:length(S_con) %S_con if all controls
+        vol_name = fullfile(D, S_con(k).name,'Aud/loc/stats_s5/');
+        vol_name = sprintf('%s%s,1',vol_name,contrast);
+        scans2 = [scans2;vol_name];
+    end
     
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'age';
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).iCC = 1;
-    
-    matlabbatch{i}.spm.stats.factorial_design.cov(3).c = vector_cov3;
-    matlabbatch{i}.spm.stats.factorial_design.cov(3).cname = 'handedness';
-    matlabbatch{i}.spm.stats.factorial_design.cov(3).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(3).iCC = 1;
-
-    
-%     matlabbatch{i}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
-    matlabbatch{i}.spm.stats.factorial_design.masking.tm.tm_none = 1;
-    matlabbatch{i}.spm.stats.factorial_design.masking.im = 1;
-    exp_mask = fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/masks',S_effect(1).name);
-    exp_mask = sprintf('%s_%s_aud_loc_mask_thr_s5.nii',exp_mask, S_effect(end).name);
-    matlabbatch{i}.spm.stats.factorial_design.masking.em = {exp_mask};
-    matlabbatch{i}.spm.stats.factorial_design.globalc.g_omit = 1;
-    matlabbatch{i}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
-    matlabbatch{i}.spm.stats.factorial_design.globalm.glonorm = 1;
-    
-    i = i+1;
-    
-    matlabbatch{i}.spm.stats.fmri_est.spmmat = {fullfile(res_dir,'SPM.mat')};
-    matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
-    matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
-    
-    i=i+1;
+%     matlabbatch{i}.spm.stats.factorial_design.dir = {res_dir};
+%     matlabbatch{i}.spm.stats.factorial_design.des.t2.scans1 = scans1;
+%     matlabbatch{i}.spm.stats.factorial_design.des.t2.scans2 = scans2;
+%     matlabbatch{i}.spm.stats.factorial_design.des.t2.dept = 0;
+%     matlabbatch{i}.spm.stats.factorial_design.des.t2.variance = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.des.t2.gmsca = 0;
+%     matlabbatch{i}.spm.stats.factorial_design.des.t2.ancova = 0;
+%      
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'pca_score';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
+%     
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'age';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCC = 1;
+%     
+%     matlabbatch{i}.spm.stats.factorial_design.cov(3).c = vector_cov3;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(3).cname = 'handedness';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(3).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(3).iCC = 1;
+% 
+%     
+% %     matlabbatch{i}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+%     matlabbatch{i}.spm.stats.factorial_design.masking.tm.tm_none = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.masking.im = 1;
+%     exp_mask = fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/masks',S_effect(1).name);
+%     exp_mask = sprintf('%s_%s_aud_loc_mask_thr_s5.nii',exp_mask, S_effect(end).name);
+%     matlabbatch{i}.spm.stats.factorial_design.masking.em = {exp_mask};
+%     matlabbatch{i}.spm.stats.factorial_design.globalc.g_omit = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.globalm.glonorm = 1;
+%     
+%     i = i+1;
+%     
+%     matlabbatch{i}.spm.stats.fmri_est.spmmat = {fullfile(res_dir,'SPM.mat')};
+%     matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
+%     matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
+%     
+%     i=i+1;
     
     matlabbatch{i}.spm.stats.con.spmmat = {fullfile(res_dir, 'SPM.mat')};
     matlabbatch{i}.spm.stats.con.consess{1}.tcon.name = 'all';
-    matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = 1;
+    matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = [1 1];
     matlabbatch{i}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
-    matlabbatch{i}.spm.stats.con.consess{2}.tcon.name = '- all';
-    matlabbatch{i}.spm.stats.con.consess{2}.tcon.weights = -1;
+    matlabbatch{i}.spm.stats.con.consess{2}.tcon.name = 'Syn';
+    matlabbatch{i}.spm.stats.con.consess{2}.tcon.weights = 1;
     matlabbatch{i}.spm.stats.con.consess{2}.tcon.sessrep = 'none';
-    matlabbatch{i}.spm.stats.con.consess{3}.tcon.name = 'effect of pca';
+    matlabbatch{i}.spm.stats.con.consess{3}.tcon.name = 'Con';
     matlabbatch{i}.spm.stats.con.consess{3}.tcon.weights = [0 1];
     matlabbatch{i}.spm.stats.con.consess{3}.tcon.sessrep = 'none';
-    matlabbatch{i}.spm.stats.con.consess{4}.tcon.name = 'effect of - pca';
-    matlabbatch{i}.spm.stats.con.consess{4}.tcon.weights = [0 -1];
+    matlabbatch{i}.spm.stats.con.consess{4}.tcon.name = '- all';
+    matlabbatch{i}.spm.stats.con.consess{4}.tcon.weights = [-1 -1];
     matlabbatch{i}.spm.stats.con.consess{4}.tcon.sessrep = 'none';
+    matlabbatch{i}.spm.stats.con.consess{5}.tcon.name = 'Syn - Con';
+    matlabbatch{i}.spm.stats.con.consess{5}.tcon.weights = [1 -1];
+    matlabbatch{i}.spm.stats.con.consess{5}.tcon.sessrep = 'none';
+    matlabbatch{i}.spm.stats.con.consess{6}.tcon.name = 'Syn - Con with PCA effect';
+    matlabbatch{i}.spm.stats.con.consess{6}.tcon.weights = [1 -1 1];
+    matlabbatch{i}.spm.stats.con.consess{6}.tcon.sessrep = 'none';
+    matlabbatch{i}.spm.stats.con.consess{7}.tcon.name = 'effect of pca';
+    matlabbatch{i}.spm.stats.con.consess{7}.tcon.weights = [0 0 1];
+    matlabbatch{i}.spm.stats.con.consess{7}.tcon.sessrep = 'none';
+    matlabbatch{i}.spm.stats.con.consess{8}.tcon.name = 'effect of - pca';
+    matlabbatch{i}.spm.stats.con.consess{8}.tcon.weights = [0 0 -1];
+    matlabbatch{i}.spm.stats.con.consess{8}.tcon.sessrep = 'none';
+    matlabbatch{i}.spm.stats.con.consess{9}.tcon.name = 'all with PCA effect';
+    matlabbatch{i}.spm.stats.con.consess{9}.tcon.weights = [1 1 1];
+    matlabbatch{i}.spm.stats.con.consess{9}.tcon.sessrep = 'none';
     matlabbatch{i}.spm.stats.con.delete = 1;
     
     i = i+1;

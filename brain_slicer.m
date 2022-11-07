@@ -11,23 +11,30 @@ res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/secon
 Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet'))));
 Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
 S = [Syn;Con];
+
 % left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
+
 % matched controls: Control02|Control04|Control05|Control07|Control17
-% gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
-gaucher_appar = {'Control02|Control04|Control07|Control17'};
+gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
+% gaucher_appar = {'Control02|Control04|Control07|Control17'};
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
 S_con_app = S;
 S_con_app(mask_gauch_con) = [];
-S = S_con_app;
 
+mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
+% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
+S_droit = S;
+S_droit(mask_gauch) = [];
+
+S = [S_con_app;S_droit];
 %%
 for k=1:length(S)
     anat_dir = fullfile(D, S(k).name, 'anat');
     cd(anat_dir)
     anat = dir('r_slicerwmv*'); anat = fullfile(anat_dir,anat.name);
-    aud_dir = fullfile(D, S(k).name, 'Aud/loc/stats_s5');
+    aud_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
     cd(aud_dir);
-    func = fullfile(aud_dir,'spmT_0011.nii');
+    func = fullfile(aud_dir,'mask.nii');
     slicer(...
         {anat,func},... % anatomy and activation volumes (must be same format, reslice if needed)
         'limits',{[],[2 100]},... % when a layer's limit is empty, limits will be adjusted automatically
