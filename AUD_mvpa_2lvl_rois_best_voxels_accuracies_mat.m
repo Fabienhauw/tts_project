@@ -59,26 +59,30 @@ for tmp_roi = 1 : length(ROIs)
         %% group 1:
         for k = 1:length(S_syn)
             if ~isdir(fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}))
-                load(fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp{tmp_comp}, '/res_accuracy_minus_chance.mat'));
+                tmp_file = fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp{tmp_comp}, '/res_accuracy_minus_chance.mat');
             else
-                load(fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.nii'));
+                tmp_file = fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.mat');
             end
+            load(tmp_file);
             summary(tmp_comp).comparison_name = all_comp{tmp_comp};
             summary(tmp_comp).analytics(tmp_roi).name = ROIs(tmp_roi).name;
-            summary(tmp_comp).analytics(tmp_roi).accuracies1{k} = results.accuracy_minus_chance.output;
+            summary(tmp_comp).analytics(tmp_roi).accuracies1{k,1} = results.accuracy_minus_chance.output;
+            summary(tmp_comp).analytics(tmp_roi).paths1{k,1} = tmp_file;
         end
-        summary(tmp_comp).analytics(tmp_roi).mean_accuracies1 = mean([summary.roi(tmp_roi).comparison(tmp_comp).accuracies1{:}]);
+        summary(tmp_comp).analytics(tmp_roi).mean_accuracies1 = mean([summary(tmp_comp).analytics(tmp_roi).accuracies1{:}]);
         
         %% for group 2:
         for k = 1:length(S_con) %S_con if all controls
             if ~isdir(fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}))
-                load(fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp{tmp_comp}, '/res_accuracy_minus_chance.mat'));
+                tmp_file = fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp{tmp_comp}, '/res_accuracy_minus_chance.mat');
             else
-                load(fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.nii'));
+                tmp_file = fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.nii');
             end
-            summary(tmp_comp).analytics(tmp_roi).accuracies2{k} = results.accuracy_minus_chance.output;
+            load(tmp_file);
+            summary(tmp_comp).analytics(tmp_roi).accuracies2{k,1} = results.accuracy_minus_chance.output;
+            summary(tmp_comp).analytics(tmp_roi).paths2{k,1} = tmp_file;
         end
-        summary(tmp_comp).analytics(tmp_roi).mean_accuracies2 = mean([summary.roi(tmp_roi).comparison(tmp_comp).accuracies2{:}]);
+        summary(tmp_comp).analytics(tmp_roi).mean_accuracies2 = mean([summary(tmp_comp).analytics(tmp_roi).accuracies2{:}]);
         
         [h{tmp_roi,tmp_comp},p{tmp_roi,tmp_comp},ci{tmp_roi,tmp_comp},stats{tmp_roi,tmp_comp}] = ...
             ttest2(...
@@ -90,11 +94,10 @@ for tmp_roi = 1 : length(ROIs)
         summary(tmp_comp).analytics(tmp_roi).t_val = tval{tmp_roi,tmp_comp};
     end
 end
-
+cd(res_dir_base)
 save(fullfile(res_dir_base, 'results_decoding_10_voxels_roi.mat'), 'summary');
 
-return
-
+clear summary
 %%
 cd(con_dir)
 ROIs = dir('*10mm_sphere*');
@@ -125,8 +128,8 @@ for tmp_comp = 1 : length(all_comp)
             load(tmp_file);
             summary(tmp_comp).comparison_name = all_comp{tmp_comp};
             summary(tmp_comp).analytics(tmp_roi).name = ROIs(tmp_roi).name;
-            summary(tmp_comp).analytics(tmp_roi).accuracies1{k} = results.accuracy_minus_chance.output;
-            summary(tmp_comp).analytics(tmp_roi).paths1{k} = tmp_file;
+            summary(tmp_comp).analytics(tmp_roi).accuracies1{k,1} = results.accuracy_minus_chance.output;
+            summary(tmp_comp).analytics(tmp_roi).paths1{k,1} = tmp_file;
         end
         summary(tmp_comp).analytics(tmp_roi).mean_accuracies1 = mean([summary(tmp_comp).analytics(tmp_roi).accuracies1{:}]);
         
@@ -138,8 +141,8 @@ for tmp_comp = 1 : length(all_comp)
                 tmp_file = fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm_rois/', ROIs(tmp_roi).name, all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.mat');
             end
             load(tmp_file)
-            summary(tmp_comp).analytics(tmp_roi).accuracies2{k} = results.accuracy_minus_chance.output;
-            summary(tmp_comp).analytics(tmp_roi).paths2{k} = tmp_file;
+            summary(tmp_comp).analytics(tmp_roi).accuracies2{k,1} = results.accuracy_minus_chance.output;
+            summary(tmp_comp).analytics(tmp_roi).paths2{k,1} = tmp_file;
         end
         summary(tmp_comp).analytics(tmp_roi).mean_accuracies2 = mean([summary(tmp_comp).analytics(tmp_roi).accuracies2{:}]);
         
@@ -154,6 +157,5 @@ for tmp_comp = 1 : length(all_comp)
     end
 end
 
+cd(res_dir_base)
 save(fullfile(res_dir_base, 'results_decoding_whole_roi.mat'), 'summary');
-
-cd(res_dir)

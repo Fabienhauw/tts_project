@@ -8,7 +8,8 @@ addpath(genpath('/network/lustre/isbackps02/home/fabien.hauw/Documents/MATLAB/co
 
 cwd = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs';
 only_right = 1;
-roi_incl = 3; %1, 2, or 3 for brainnetome atlas, networks, or personnalized ROIs.
+roi_incl = 3; %1, 2, 3 or 4 for brainnetome atlas, networks, or personnalized ROIs Aud or Vis.
+modif_freq = 0;
 
 %% definition of all subjects:
 subjs={};
@@ -17,6 +18,8 @@ path_to_scan = {};
 repet_time = [];
 STRUCTURAL_FILE = {};
 FUNCTIONAL_FILE = {};
+ROI_AUD_FILE = {};
+ROI_VIS_FILE = {};
 GM = {};
 WM = {};
 CSF = {};
@@ -24,7 +27,7 @@ nsessions = {};
 
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
 S = dir(D);
-Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
+Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet'))));
 Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
 
 S = [Syn;Con];
@@ -32,17 +35,21 @@ S = [Syn;Con];
 %%
 
 % left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
-% matched controls: Control02|Control04|Control05|Control07|Control17 
+% matched controls: Control02|Control04|Control05|Control07|Control17
 
 %%
 if only_right
-    proj_name = 'syn_group_rs_rh_s5_modif_freq';
+    proj_name = 'syn_group_rs_rh_s5';
     gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
     mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
 else
-    proj_name = 'syn_group_rs_s5_modif_freq';
+    proj_name = 'syn_group_rs_s5';
     gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
     mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
+end
+
+if modif_freq
+    proj_name = sprintf('%s_modif_freq', proj_name);
 end
 
 if roi_incl == 1
@@ -50,9 +57,11 @@ if roi_incl == 1
 elseif roi_incl == 2
     proj_name = (sprintf('%s_networks.mat', proj_name));
 elseif roi_incl == 3
-    proj_name = (sprintf('%s_pers_rois.mat', proj_name));
+    proj_name = (sprintf('%s_perso_rois_aud.mat', proj_name));
+elseif roi_incl == 4
+    proj_name = (sprintf('%s_perso_rois_vis.mat', proj_name));
 end
-
+proj_name = (sprintf('syn_group_rs_rh_s5_perso_rois_global_connec.mat', proj_name));
 % proj_name = 'syn_group_rs_s5_modified_hz_filter.mat';
 
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
@@ -91,6 +100,12 @@ vector_cov1 = vector_age(mask_cov==1);
 vector_cov2 = vector_hand(mask_cov==1);
 
 S = S_final;
+
+aud_coord_names = {'SMG', 'pSTS', 'aSTS', 'VWFA', 'aVWFA', 'iTPol', 'sTPol', 'sIFG', 'mIFG', 'iIFG', 'mSTG'};
+aud_all_xyzmm = [-58 -44 23; -52 -38 0; -58 -6 -2; -52 -51 -20; -40 -36 -27; -40 -11 -47; -40 -14 -34; -50 -8 50; -45 22 23; -50 26 -2; -52 -14 6];
+
+vis_coord_names = {'lOcc', 'rOcc', 'lIPS', 'rIPS', 'SMA', 'mIFG', 'iIFG', 'VWFA', 'lSTS', 'rSTS'};
+vis_all_xyzmm = [-20 -94 -4; 20 -88 -4; -30 -48 43; 38 -54 46; 0 12 53; -40 6 30; -50 36 13; -48 -54 -20; -68 -44 6; 58 -31 0];
 
 for k=1:numel(S)
     if ~isempty(regexp(S(k).name, 'Sujet'))
@@ -142,23 +157,23 @@ for k=1:numel(S)
     %get the functional scan:
     cd (fullfile(D,S(k).name,'RS/swf'));
     func = dir('s5w*.nii');
-    
-%     [status,header] = unix(sprintf('fslhd %s',func.name));
-%     dim4 = regexp(header, 'dim4\s*\d*', 'match'); dim4 = dim4{1};
-%     nb_vol = regexp(dim4,'\d*', 'match');
-%     nb_vol = str2double(nb_vol{2});
-%     
-%     
-%     vol_name = fullfile(vol_name,func.name);
-%     for v = 1:nb_vol
-%         volume = sprintf('%s%s%d',vol_name,',',v);
-%         scans = [scans;volume];
-%     end
-    
     func = fullfile(D,S(k).name,'RS/swf',func.name);
     FUNCTIONAL_FILE = [FUNCTIONAL_FILE;func];
     
+    cd (fullfile(D,S(k).name, 'Aud/loc/stats_s5'))
+    for tmp_roi = 1 : length(aud_coord_names)
+        xyz = aud_all_xyzmm(tmp_roi,:);
+        roi_filename = dir(sprintf('*best_vox*%d_%d_%d*_based_on_auditive*', xyz));
+        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5', roi_filename.name);
+        ROI_AUD_FILE{tmp_roi}{k,1} = roi;
+    end
     
+    for tmp_roi = 1 : length(vis_coord_names)
+        xyz = vis_all_xyzmm(tmp_roi,:);
+        roi_filename = dir(sprintf('*best_vox*%d_%d_%d*based_on_visual*', xyz));
+        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5', roi_filename.name);
+        ROI_VIS_FILE{tmp_roi}{k,1} = roi;
+    end
 end
 
 NSUBJECTS = length(subjs);
@@ -177,7 +192,7 @@ clear batch;
 batch.filename  = fullfile(cwd, proj_name);            % New conn_*.mat experiment name
 
 % SETUP & PREPROCESSING step (using default values for most parameters, see help conn_batch to define non-default values)
-% CONN Setup                                            % Default options (uses all ROIs in conn/rois/ directory); see conn_batch for additional options 
+% CONN Setup                                            % Default options (uses all ROIs in conn/rois/ directory); see conn_batch for additional options
 % CONN Setup.preprocessing                               (realignment/coregistration/segmentation/normalization/smoothing)
 batch.Setup.isnew       = 1;
 batch.Setup.nsubjects   = NSUBJECTS;
@@ -186,7 +201,7 @@ batch.Setup.functionals = repmat({{}},[NSUBJECTS,1]);       % Point to functiona
 
 for nsub = 1:NSUBJECTS
     for nses=1:nsessions
-        batch.Setup.functionals{nsub}{nses}{1}=FUNCTIONAL_FILE{nses,nsub}; 
+        batch.Setup.functionals{nsub}{nses}{1}=FUNCTIONAL_FILE{nses,nsub};
     end
 end %note: each subject's data is defined by three sessions and one single (4d) file per session
 
@@ -214,10 +229,10 @@ batch.Setup.covariates.names{1, 1}    = 'realignment';
 
 for cov = 1 : length(batch.Setup.covariates.names)
     for subj=1:nbsuj
-    cd (fullfile(D,S(subj).name,'RS/param'));
-    rp = dir('multiple_reg*.txt'); rp = rp.name;
-%     batch.Setup.l1covariates(1).values{subj}(1) = rp;
-    batch.Setup.covariates.files{cov}{subj}{1} = fullfile(D,S(subj).name,'RS/param',rp);
+        cd (fullfile(D,S(subj).name,'RS/param'));
+        rp = dir('multiple_reg*.txt'); rp = rp.name;
+        %     batch.Setup.l1covariates(1).values{subj}(1) = rp;
+        batch.Setup.covariates.files{cov}{subj}{1} = fullfile(D,S(subj).name,'RS/param',rp);
     end
 end
 
@@ -228,7 +243,7 @@ if only_right
     effects = {vector_cov1};
     batch.Setup.subjects.effect_names    = {'age'};
     batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls'};
-else 
+else
     effects = {vector_cov1, vector_cov2};
     batch.Setup.subjects.effect_names    = {'age', 'handedness'};
     batch.Setup.subjects.group_names    = {'rh_synesthetes', 'rh_controls', 'lh_syn', 'lh_con'};
@@ -253,7 +268,7 @@ batch.Setup.secondarydatasets(2).functionals_label  = 'smoothed data';
 batch.Setup.secondarydatasets(2).functionals_type   = 4;
 for nsub = 1:NSUBJECTS
     for nses=1:nsessions
-        batch.Setup.secondarydatasets(1).functionals_explicit{nsub}{nses}{1} = FUNCTIONAL_FILE{nses,nsub}; 
+        batch.Setup.secondarydatasets(1).functionals_explicit{nsub}{nses}{1} = FUNCTIONAL_FILE{nses,nsub};
         batch.Setup.secondarydatasets(2).functionals_explicit{nsub}{nses}{1} = FUNCTIONAL_FILE{nses,nsub};
     end
 end
@@ -295,7 +310,7 @@ elseif roi_incl == 2
     
 elseif roi_incl == 3
     
-    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF', 'IFG', 'SMG','VWFA', 'IFG_rh', 'SMG_rh','VWFA_rh'};
+    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF'};
     batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
     batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
     for nses = 1 : nsessions
@@ -303,13 +318,36 @@ elseif roi_incl == 3
             batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
             batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
             batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+            for tmp_roi = 1 : length(aud_coord_names)
+                batch.Setup.rois.files{tmp_roi + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_AUD_FILE{tmp_roi}{nsub};
+                batch.Setup.rois.names{tmp_roi + 3}                             = aud_coord_names{tmp_roi};
+            end
         end
-        batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/ifg_aud_norm_scr_sph_10_-50_-8_46.nii';
-        batch.Setup.rois.files{5,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/smg_aud_norm_scr_sph_10_-58_-44_23.nii';
-        batch.Setup.rois.files{6,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/vwfa_aud_norm_scr_sph_10_-40_-24_-22.nii';
-        batch.Setup.rois.files{7,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/ifg_rh_aud_norm_scr_sph_10_-45_22_23.nii';
-        batch.Setup.rois.files{8,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/smg_rh_aud_norm_scr_sph_10_-58_-44_23.nii';
-        batch.Setup.rois.files{9,nses}          = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/svc_roi/vwfa_rh_aud_norm_scr_sph_10_-52_-51_-20.nii';
+        batch.Setup.rois.files{length(aud_coord_names) + 4,nses}     = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/syn_group_rs_rh_s5_perso_rois_aud/results/secondlevel/V2V_01/rh_synesthetes(1).rh_controls(-1).age(0)/rest/GlobalCorrelation_5_Inf_0_0_0_1_64_1/lpfc_syn_minus_con_510-3_510-2.nii'
+        batch.Setup.rois.names{length(aud_coord_names) + 4} = 'lpfc_roi_global_connect';
+        batch.Setup.rois.files{length(aud_coord_names) + 5,nses}     = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/syn_group_rs_rh_s5_perso_rois_aud/results/secondlevel/V2V_01/rh_synesthetes(1).rh_controls(-1).age(0)/rest/GlobalCorrelation_5_Inf_0_0_0_1_64_1/sma_syn_minus_con_510-3_510-2.nii'
+        batch.Setup.rois.names{length(aud_coord_names) + 5} = 'sma_roi_global_connect';
+        batch.Setup.rois.dimensions{1,nses} = 1;
+        batch.Setup.rois.dimensions{2,nses} = 16;
+        batch.Setup.rois.dimensions{3,nses} = 16;
+    end
+    
+elseif roi_incl == 4
+    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF'};
+    batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
+    batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
+    for nses = 1 : nsessions
+        for nsub = 1 : NSUBJECTS
+            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+            for tmp_roi = 1 : length(vis_coord_names)
+                batch.Setup.rois.files{tmp_roi + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_VIS_FILE{tmp_roi}{nsub};
+                batch.Setup.rois.names{tmp_roi + 3}                             = vis_coord_names{tmp_roi};
+            end
+        end
+        batch.Setup.rois.files{length(aud_coord_names) + 4,nses}     = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/syn_group_rs_rh_s5_perso_rois_vis/results/secondlevel/V2V_01/rh_synesthetes(1).rh_controls(-1).age(0)/rest/GlobalCorrelation_5_Inf_0_0_0_1_64_1/lpfc_syn_minus_con_510-3_510-2.nii'
+        batch.Setup.rois.names{length(aud_coord_names) + 4} = 'lpfc_roi_global_connect';
         batch.Setup.rois.dimensions{1,nses} = 1;
         batch.Setup.rois.dimensions{2,nses} = 16;
         batch.Setup.rois.dimensions{3,nses} = 16;
@@ -329,10 +367,13 @@ batch.filename               = fullfile(cwd, proj_name);            % Existing c
 %% .................................... DENOISING step .....................................
 
 % ..........................................................................................
-% CONN Denoising                                    % Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options 
+% CONN Denoising                                    % Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options
 
-% batch.Denoising.filter      = [0.008, 0.09];                 % frequency filter (band-pass values, in Hz)
-batch.Denoising.filter      = [0.01, 0.1];                 % frequency filter (band-pass values, in Hz)
+if modif_freq
+    batch.Denoising.filter      = [0.01, 0.1];                 % frequency filter (band-pass values, in Hz)
+else
+    batch.Denoising.filter      = [0.008, 0.09];                 % frequency filter (band-pass values, in Hz)
+end
 batch.Denoising.detrending  = 1;
 batch.Denoising.regbp       = 1;
 batch.Denoising.done        = 1;
@@ -349,7 +390,7 @@ batch.filename=fullfile(cwd, proj_name);            % Existing conn_*.mat experi
 
 % ..........................................................................................
 
-% CONN Analysis                                     % Default options (uses all ROIs in conn/rois/ as connectivity sources); see conn_batch for additional options 
+% CONN Analysis                                     % Default options (uses all ROIs in conn/rois/ as connectivity sources); see conn_batch for additional options
 batch.Analysis.done=1;
 batch.Analysis.overwrite='Yes';
 conn_batch(batch);% Run all analyses

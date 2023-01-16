@@ -4,7 +4,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 
-res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/syn_vs_con_rh_s5';
+res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/syn_vs_con_rh_s5_without_resting';
 % res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/syn_vs_con_s5';
 
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -74,7 +74,7 @@ end
 clear matlabbatch
 i=1;
 
-cd(fullfile(D, S(1).name,'Aud/loc/stats_s5'))
+cd(fullfile(D, S(1).name,'Aud/loc/stats_s5_without_resting'))
 all_contrast = dir(sprintf('con*.nii'));
 all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, '^con_\d+\.nii'))));
 
@@ -83,7 +83,7 @@ names = {...
             'odds', 'motor',...
             'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
             'phonology', '-phonology', 'words + pseudowords', 'numbers - (words + pseudowords)', ...
-            'normal_speech - words', '(words + pseudowords + numbers + normal_speech) - scramble speech', ...
+            'normal_speech - words', 'words + pseudowords + numbers + normal_speech', ...
             'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
             '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
             '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
@@ -96,7 +96,7 @@ for c = 1:length(all_contrast)
     contrast = all_contrast(c).name;
     scans1 = {};
     for k = 1:length(S_droit)
-        vol_name = fullfile(D, S_droit(k).name,'Aud/loc/stats_s5/');
+        vol_name = fullfile(D, S_droit(k).name,'Aud/loc/stats_s5_without_resting/');
         vol_name = sprintf('%s%s,1',vol_name,contrast);
         scans1 = [scans1;vol_name];
     end
@@ -117,7 +117,7 @@ for c = 1:length(all_contrast)
     %% for group, M2 controls:
     scans2 = {};
     for k = 1:length(S_con_app) %S_con if all controls
-        vol_name = fullfile(D, S_con_app(k).name,'Aud/loc/stats_s5/');
+        vol_name = fullfile(D, S_con_app(k).name,'Aud/loc/stats_s5_without_resting/');
         vol_name = sprintf('%s%s,1',vol_name,contrast);
         scans2 = [scans2;vol_name];
     end
@@ -130,17 +130,17 @@ for c = 1:length(all_contrast)
     matlabbatch{i}.spm.stats.factorial_design.des.t2.gmsca = 0;
     matlabbatch{i}.spm.stats.factorial_design.des.t2.ancova = 0;
         
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'age';
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'age';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
+%     
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'handedness';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCC = 1;
     
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'handedness';
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).iCC = 1;
-    
-%     matlabbatch{i}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{i}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
     matlabbatch{i}.spm.stats.factorial_design.masking.tm.tm_none = 1;
     matlabbatch{i}.spm.stats.factorial_design.masking.im = 1;
     exp_mask = fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/masks',S_effect(1).name);
@@ -186,6 +186,6 @@ for c = 1:length(all_contrast)
     i = i+1;
 end
 
-spm_jobman('run', matlabbatch)
+spm_jobman('interactive', matlabbatch)
 
 cd(res_dir)

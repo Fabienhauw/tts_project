@@ -3,7 +3,7 @@ clear;
 
 %% parameters:
 select_con = [12]; % 9 = words - (faces + houses) in the visual GLM; %select_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
-test_con = [11]; % 11 = normal - scrambled; 22 = (normal + numbers + words + PW) - scr speech; %test_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
+test_con = [11]; % 11 = normal - scrambled; 16 = normal + numbers + words + PW; 24 = (normal + numbers + words + PW) - scr speech; %test_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
 diff_ref = 0; % 1 = use a different contrast for selecting the best_voxels and for comparing signals;
 only_right_hand = 1;
 volume_option = 2; %1 = ROI, 2 = coordinates;
@@ -24,11 +24,11 @@ S(mask) = [];
 if only_right_hand
     gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
     mask_gauch =  ~cellfun(@isempty,(regexp({S.name},{'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control'})));
-    res_dir = '/home/fabien.hauw/Desktop/Fabien/NeoTopLex/+tts_group/+second_level/RH_comparison_best_voxels';
+    res_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/RH_comparison_best_voxels';
 else
     gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
     mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
-    res_dir = '/home/fabien.hauw/Desktop/Fabien/NeoTopLex/+tts_group/+second_level/comparison_best_voxels';
+    res_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/comparison_best_voxels';
 end
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
 S_con_app = S;
@@ -54,20 +54,46 @@ if volume_option == 1
 elseif volume_option == 2
     % different coordinates, according to where they come from
     
-    %     AUD sent > scr, RH
-        peaks = 'aud_11';
-        coord_names = {'SMG', 'pSTS', 'aSTS', 'vis VWFA', 'VWFA', 'aVWFA', 'iTPol', 'sTPol', 'sIFG', 'mIFG', 'iIFG', 'mSTG'};
-        all_xyzmm = [-58 -44 23; -52 -38 0; -58 -6 -2; -48 -54 -20; -52 -51 -20; -40 -36 -27; -40 -11 -47; -40 -14 -34; -50 -8 50; -45 22 23; -50 26 -2; -52 -14 6];
+    %     AUD sent > scr, RH, TTEST
+%         peaks = 'aud_11'; % phonology contrast
+%         coord_names = {'SMG',   'pSTS',    'aSTS',    'vis VWFA',  'VWFA',      'aVWFA',     'iTPol',     'sTPol',     'sIFG',    'mIFG',    'iIFG',    'mSTG'};
+%         all_xyzmm = [-58 -44 23; -52 -38 0; -58 -6 -2; -48 -54 -20; -52 -51 -20; -40 -36 -27; -40 -11 -47; -40 -14 -34; -50 -8 50; -45 22 23; -50 26 -2; -52 -14 6];
     
+    %     AUD speech > baseline, syn > con, RH
+        peaks = 'aud_16'; % phonology contrast, through ANOVA and not ttests
+        coord_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG'};
+        all_xyzmm = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53]; % SMG, VWFA, IFG, MFG, mlSTG, SMA;
+
+    %     AUD sent > scr, RH, ANOVA
+%         peaks = 'aud_11'; % phonology contrast, through ANOVA and not ttests
+%         coord_names = {'SMG',    'VWFA',      'IFG',      'MFG',    'mlSTG',   'SMA'};
+%         all_xyzmm = [-48 -41 16; -48 -48 -14; -45 19 20; -50 -6 48; -58 -6 -4; -2 4 60]; % SMG, VWFA, IFG, MFG, mlSTG, SMA;
+
+        
     %     AUD "big" phonology, RH
-%         peaks = 'aud_22';
-%         coord_names = {'SMG', 'pSTS', 'aSTS', 'vis VWFA', 'VWFA', 'aVWFA', 'iTPol', 'sTPol', 'sIFG', 'mIFG', 'iIFG'};
+%         peaks = 'aud_24'; % "big" phonology contrast
+%         coord_names = {'SMG',   'pSTS',     'aSTS',   'vis VWFA',   'VWFA',     'aVWFA',     'iTPol',    'sTPol',     'sIFG',     'mIFG',     'iIFG'};
 %         all_xyzmm = [-48 -41 18; -52 -48 6; -58 -6 -4; -48 -54 -20; -42 -51 -14; -40 -38 -24; -38 -8 -44; -38 -18 -32; -50 -8 43; -42 12 26; -45 29 -2];
     
+    %     AUD sentences + numbers + words + PW, RH
+%           peaks = 'aud_16';
+%           coord_names = {'MTS',   'IFG'};
+%           all_xyzmm = [-60 -24 -4; -38 16 28];
+
+    %     AUD sentences + numbers + words + PW, RH
+%         peaks = 'aud_4';
+%         coord_names = {'STG',   'sTPol',     'lIPS'};
+%         all_xyzmm = [-52 -14 6; -38 -11 -34; -28 -64 43];
+
     %     VIS w>(f+h+t), RH
 %         peaks = 'vis_12';
 %         coord_names = {'lOcc', 'rOcc', 'lIPS', 'rIPS', 'SMA', 'mIFG', 'iIFG', 'VWFA', 'lSTS', 'rSTS'};
 %         all_xyzmm = [-20 -94 -4; 20 -88 -4; -30 -48 43; 38 -54 46; 0 12 53; -40 6 30; -50 36 13; -48 -54 -20; -68 -44 6; 58 -31 0];
+        
+     %    RS global connectivity
+%         peaks = 'resting_state';
+%         coord_names = {'mfg', 'sma', 'locc_lpfc', 'locc_sma'};
+%         all_xyzmm = [-42 46 20; 6 24 40; -34 -94 -8; -34 -96 -10];
 end
 
 %% paths and scans
@@ -75,7 +101,7 @@ end
 for k = 1:length(S)
     if ~isempty(regexp(S(k).name, 'Sujet'))
         group_S(k)    = 1; % 1 is for synesthetes, 2 for controls
-    elseif ~isempty(regexp(S(k).name, 'Control'))
+    elseif ~isempty(regexp(S(k).name, 'Control', 'once'))
         group_S(k)    = 2; % 1 is for synesthetes, 2 for controls
     end
 end
@@ -83,20 +109,24 @@ end
 path_to_stats = {};
 path_to_visual_stats = {};
 path_to_scan = {};
+path_to_stats_mask = {};
 subjs={};
 for k=1:numel(S)
     subjs                   = [subjs;S(k).name];
     path_to_subj            = fullfile(D, S(k).name);
     path_to_scan            = [path_to_scan; path_to_subj];
-    path_to_visual_sub      = fullfile(D, S(k).name, 'Vis/loc/stats_s5');
-    path_to_subj            = fullfile(D, S(k).name, 'Aud/loc/stats_s5');
+    path_to_visual_sub      = fullfile(D, S(k).name, 'Vis/loc/stats_s5_without_resting');
+    path_to_subj            = fullfile(D, S(k).name, 'Aud/loc/stats_s5_without_resting');
+    path_to_mask            = fullfile(D, S(k).name, 'Aud/loc/stats_s5_without_resting/mask.nii');
     path_to_visual_stats    = [path_to_visual_stats;path_to_visual_sub];
     path_to_stats           = [path_to_stats;path_to_subj];
+    path_to_stats_mask      = [path_to_stats_mask;path_to_mask];
 end
 
 experiments = struct(...
-    'select_path',  path_to_visual_stats,...  % subpath to the localizer SPM.mat inside each subject
-    'test_path',    path_to_stats,...  % subpath to the test data SPM.mat inside each subject
+    'select_path',  path_to_visual_stats,...  % subpath to the localizer SPM.mat for each subject
+    'test_path',    path_to_stats,...  % subpath to the test data SPM.mat for each subject
+    'test_mask',    path_to_stats_mask,... % subpath to the test data SPM.mat mask for each subject
     'data',         subjs...
     );
 if ~diff_ref
@@ -174,9 +204,9 @@ for zz=1:length(test_con)
                         voxy = y * select_theader.mat(2,2) + select_theader.mat(2,4);
                         voxz = z * select_theader.mat(3,3) + select_theader.mat(3,4);
                         if (norm([voxx voxy voxz]-spherecoords)<=sphereradius)
-                            spherevol(x,y,z)=1;
+                            spherevol_gen(x,y,z)=1;
                         else
-                            spherevol(x,y,z)=0;
+                            spherevol_gen(x,y,z)=0;
                         end
                     end
                 end
@@ -187,6 +217,8 @@ for zz=1:length(test_con)
         h = waitbar( 0, 'Finding best voxels...' ) ;
         
         for i_subj = 1:totsub  %%%% loop across subjects
+            clear tvol
+            clear searchvol
             
             %%% extract localizer t-test to optimize for this subject:
             clear select_tvol
@@ -203,6 +235,22 @@ for zz=1:length(test_con)
             test_conheader      = spm_vol(test_confile);
             test_convol         = spm_read_vols(test_conheader);
             
+            %%% read the mask.nii image
+            mask_confile        = experiments(i_subj).test_mask;
+            mask_conheader      = spm_vol(mask_confile);
+            mask_convol         = spm_read_vols(mask_conheader);
+            
+            for x=1:size(spherevol_gen,1)
+                for y=1:size(spherevol_gen,2)
+                    for z=1:size(spherevol_gen,3)
+                        if mask_convol(x,y,z)==1 & spherevol_gen(x,y,z)==1 % to exclude voxels which are outside the statistical map mask.nii
+                            spherevol(x,y,z)=1;
+                        else
+                            spherevol(x,y,z)=0;
+                        end
+                    end
+                end
+            end
             
             waitbar( (qq+(i_subj-1)*length(xyzmm))/(totsub*length(xyzmm)), h ) ;
             if (volume_option == 1)
@@ -262,6 +310,7 @@ for zz=1:length(test_con)
             if nvox>0
                 [x,y,z]=ind2sub(size(select_tvol),xyz);
                 anal(qq).voxels{i_subj}             = [ x y z ]';  %%% store the voxels for this subject
+                anal(qq).voxelsmm{i_subj}           = [ x*select_theader.mat(1,1)+select_theader.mat(1,4) y*select_theader.mat(2,2)+select_theader.mat(2,4) z*select_theader.mat(3,3)+select_theader.mat(3,4) ]';  %%% store the voxels for this subject
                 anal(qq).xyz{i_subj}                = xyz;  %%% this is the easiest storage: direct indexes to the data matrices, can be used as a data selector
                 anal(qq).coordsmm(1, i_subj)        = mean(x * select_theader.mat(1,1) + select_theader.mat(1,4)); %%% mean coordinates of the identified voxels
                 anal(qq).coordsmm(2, i_subj)        = mean(y * select_theader.mat(2,2) + select_theader.mat(2,4));
@@ -295,7 +344,7 @@ for zz=1:length(test_con)
                 test_conheader_copy.fname = sprintf('%s_best_vox_in_%s_based_on_%s_con_%d.nii',test_conheader.fname(1:end-4), xyzmm, ref_mod, select_con);
                 test_conheader_copy.descrip = sprintf('%s thresholded to 10 prc best voxels in region %s based on visual con %d',test_conheader.descrip, xyzmm, select_con);
             elseif volume_option ==2
-                test_conheader_copy.fname = sprintf('%s_best_vox_sph_%d_%d_%d_based_on_%s_con_%d.nii', test_conheader.fname(1:end-4),xyzmm, ref_mod, select_con);
+                test_conheader_copy.fname = sprintf('%s_best_vox_sph_%d_%d_%d_based_on_%s_con_%d_%s_peaks.nii', test_conheader.fname(1:end-4),xyzmm, ref_mod, select_con, peaks);
                 test_conheader_copy.descrip = sprintf('%s thresholded to 10 prc best voxels in 10 mm rad sphere centered on %d %d %d',test_conheader.descrip, xyzmm);
             end
             
@@ -311,7 +360,6 @@ for zz=1:length(test_con)
     else
         save_name = sprintf('best_voxels_in_aud_spmT%04d_%s_peaks', current_con, peaks);
     end
-    
     if volume_option == 1
         save_name = sprintf('best_voxels_in_aud_spmT%04d_ROI.mat', current_con);
     elseif volume_option == 2
@@ -330,7 +378,7 @@ do_plot = 0;
 results = dir('best*aud*');
 count_fig = 0;
 
-load('/home/fabien.hauw/Desktop/Fabien/NeoTopLex/+tts_group/cpt_data/pca_score.mat')
+% load('/home/fabien.hauw/Desktop/Fabien/NeoTopLex/+tts_group/cpt_data/pca_score.mat')
 
 for tmp_anal = 1 : size(results, 1)
     clear anal
@@ -393,14 +441,6 @@ for tmp_anal = 1 : size(results, 1)
         %             ttest2(...
         %             test(1:length(anal(s).activation(anal(s).group_mask == 1))),...
         %         test(length(anal(s).activation(anal(s).group_mask == 1))+1:end));
-        
-        [h{tmp_anal,s},p{tmp_anal,s},ci{tmp_anal,s},stats{tmp_anal,s}] = ...
-            ttest2(...
-            anal(s).activation(anal(s).group_mask == 1), ...
-            anal(s).activation(anal(s).group_mask == 2));
-        tval{tmp_anal,s} = stats{tmp_anal,s}.tstat;
-        anal(s).p_val = p{tmp_anal,s};
-        anal(s).t_val = tval{tmp_anal,s};
         
         [h{tmp_anal,s},p{tmp_anal,s},ci{tmp_anal,s},stats{tmp_anal,s}] = ...
             ttest2(...

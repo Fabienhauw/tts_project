@@ -6,6 +6,10 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/matvol'))
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/matlabbatch'))
 
 wd = pwd;
+all_con = [11;16];
+con = [1;2;3;4;5]; % 1=words, 2=pseudowords, 3=numbers, 4=normal_speech, 5=scramble_speech, 6=odds, 7=motor, 8=resting.
+con_names = {'words', 'pw', 'numb', 'norm', 'scr',...
+    'odds', 'motor', 'resting'};
 
 res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/MVPA/Aud/loc/syn_vs_con_rh_s5_10mm/roi_decoding_comparisons';
 % res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/MVPA/Aud/loc/syn_vs_con_rh_s5';
@@ -23,8 +27,11 @@ S = [Syn;Con];
 % left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
 % matched controls: Control02|Control04|Control05|Control07|Control17
 
-ROIs_names = {'SMG'; 'VWFA'; 'mIFG'; 'mSTG'}; % VOI mSTG, resulting from all subj, scr speech > silence
-ROIs_coord = [-58 -44 23; -52 -51 -20; -45 22 23; -52 -14 6];
+ROIs_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG'};
+ROIs_coord = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53];
+
+% ROIs_names = {'locc_lpfc'; 'locc_sma'}; % VOI mSTG, resulting from all subj, scr speech > silence
+% ROIs_coord = [-34 -94 -8; -34 -96 -10];
 
 gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
 mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
@@ -67,33 +74,34 @@ vector_cov1 = vector_age(mask_cov==1);
 vector_cov2 = vector_hand(mask_cov==1);
 
 i=1;
-
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROIs_names)
-    %% batch for VOI SMG, resulting from all subj, norm>scr speech
-    matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5/SPM.mat')}; % use this .mat to extract time series.
-    matlabbatch{i}.spm.util.voi.adjust = NaN;
-    matlabbatch{i}.spm.util.voi.session = 1;
-    matlabbatch{i}.spm.util.voi.name = sprintf('%s_PPI_adapted', ROIs_names{tmp_ROI});
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5/SPM.mat')}; % use this .mat to deduct the highest activated voxel.
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.contrast = 11;
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.conjunction = 1;
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.threshdesc = 'none';
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.thresh = 1;
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.extent = 0;
-    matlabbatch{i}.spm.util.voi.roi{1}.spm.mask = struct('contrast', {}, 'thresh', {}, 'mtype', {});
-    matlabbatch{i}.spm.util.voi.roi{2}.sphere.centre = ROIs_coord(tmp_ROI,:);
-    matlabbatch{i}.spm.util.voi.roi{2}.sphere.radius = 6;
-    matlabbatch{i}.spm.util.voi.roi{2}.sphere.move.fixed = 1;
-    matlabbatch{i}.spm.util.voi.roi{3}.sphere.centre = [0 0 0];
-    matlabbatch{i}.spm.util.voi.roi{3}.sphere.radius = 4;
-    matlabbatch{i}.spm.util.voi.roi{3}.sphere.move.global.spm = 1;
-    matlabbatch{i}.spm.util.voi.roi{3}.sphere.move.global.mask = 'i2';
-    matlabbatch{i}.spm.util.voi.expression = 'i1&i3';
-    i=i+1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            %% batch for VOI, resulting from all subj, norm>scr speech
+            matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to extract time series.
+            matlabbatch{i}.spm.util.voi.adjust = NaN;
+            matlabbatch{i}.spm.util.voi.session = 1;
+            matlabbatch{i}.spm.util.voi.name = sprintf('%s_PPI_adapted_to_con%d', ROIs_names{tmp_ROI}, select_con);
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to deduct the highest activated voxel.
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.contrast = select_con;
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.conjunction = 1;
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.threshdesc = 'none';
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.thresh = 1;
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.extent = 0;
+            matlabbatch{i}.spm.util.voi.roi{1}.spm.mask = struct('contrast', {}, 'thresh', {}, 'mtype', {});
+            matlabbatch{i}.spm.util.voi.roi{2}.sphere.centre = ROIs_coord(tmp_ROI,:);
+            matlabbatch{i}.spm.util.voi.roi{2}.sphere.radius = 6;
+            matlabbatch{i}.spm.util.voi.roi{2}.sphere.move.fixed = 1;
+            matlabbatch{i}.spm.util.voi.roi{3}.sphere.centre = ROIs_coord(tmp_ROI,:);
+            matlabbatch{i}.spm.util.voi.roi{3}.sphere.radius = 4;
+            matlabbatch{i}.spm.util.voi.roi{3}.sphere.move.global.spm = 1;
+            matlabbatch{i}.spm.util.voi.roi{3}.sphere.move.global.mask = 'i2';
+            matlabbatch{i}.spm.util.voi.expression = 'i1&i3';
+            i=i+1;
+        end
     end
 end
-
 %%
 
 % spm_jobman('run', matlabbatch)
@@ -114,27 +122,36 @@ job_ending_rountines(matlabbatch, [], par);
 %%
 clear matlabbatch
 i=1;
-ROI_files = {
-    'spmT_0011_best_vox_sph_-58_-44_23_based_on_auditive_con_11.nii';
-    'spmT_0011_best_vox_sph_-52_-51_-20_based_on_auditive_con_11.nii';
-    'spmT_0011_best_vox_sph_-45_22_23_based_on_auditive_con_11.nii';
-    'spmT_0011_best_vox_sph_-52_-14_6_based_on_auditive_con_11.nii';
-    };
-
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROI_files)
-    %% batch for VOI SMG, resulting from all subj, norm>scr speech
-    matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5/SPM.mat')}; % use this .mat to extract time series.
-    matlabbatch{i}.spm.util.voi.adjust = NaN;
-    matlabbatch{i}.spm.util.voi.session = 1;
-    matlabbatch{i}.spm.util.voi.name = sprintf('%s_best_vox_PPI_adapted', ROIs_names{tmp_ROI});
-    matlabbatch{i}.spm.util.voi.roi{1}.mask.image = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5', ROI_files{tmp_ROI})};
-    matlabbatch{i}.spm.util.voi.roi{1}.mask.threshold = 0.5;
-    matlabbatch{i}.spm.util.voi.expression = 'i1';
-    i=i+1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    
+    ROI_files = {
+        sprintf('spmT_00%d_best_vox_sph_-48_-44_23_based_on_auditive_con_%d_aud_16_peaks.nii', select_con, select_con);
+        sprintf('spmT_00%d_best_vox_sph_-45_-51_-10_based_on_auditive_con_%d_aud_16_peaks.nii', select_con, select_con);
+        sprintf('spmT_00%d_best_vox_sph_-40_-41_46_based_on_auditive_con_%d_aud_16_peaks.nii', select_con, select_con);
+        sprintf('spmT_00%d_best_vox_sph_-50_-16_50_based_on_auditive_con_%d_aud_16_peaks.nii', select_con, select_con);
+        sprintf('spmT_00%d_best_vox_sph_-50_6_53_based_on_auditive_con_%d_aud_16_peaks.nii', select_con, select_con);
+        };
+    
+    % ROI_files = {
+    %     'spmT_0011_best_vox_sph_-34_-94_-8_based_on_auditive_con_11_resting_state_peaks.nii';
+    %     'spmT_0011_best_vox_sph_-34_-96_-10_based_on_auditive_con_11_resting_state_peaks.nii';
+    %     };
+    
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROI_files)
+            %% batch for VOI best voxels, resulting from all subj, norm>scr speech
+            matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to extract time series.
+            matlabbatch{i}.spm.util.voi.adjust = NaN;
+            matlabbatch{i}.spm.util.voi.session = 1;
+            matlabbatch{i}.spm.util.voi.name = sprintf('%s_best_vox_PPI_adapted_to_con%d', ROIs_names{tmp_ROI}, select_con);
+            matlabbatch{i}.spm.util.voi.roi{1}.mask.image = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting', ROI_files{tmp_ROI})};
+            matlabbatch{i}.spm.util.voi.roi{1}.mask.threshold = 0.5;
+            matlabbatch{i}.spm.util.voi.expression = 'i1';
+            i=i+1;
+        end
     end
 end
-
 %%
 
 cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
@@ -153,182 +170,66 @@ job_ending_rountines(matlabbatch, [], par);
 %%
 clear matlabbatch
 i=1;
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROIs_names)
-        %% batch for PPI ROI X (norm-scr)
-        
-        SPM_dir = fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5/SPM.mat');
-        
-        matlabbatch{i}.spm.stats.ppi.spmmat = {SPM_dir};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.voi = {fullfile(D, S_effect(k).name, sprintf('/Aud/loc/stats_s5/VOI_%s_PPI_adapted_1.mat', ROIs_names{tmp_ROI}))};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.u = [4 1 1
-            5 1 -1];
-        matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_adaptx(norm-scr)', ROIs_names{tmp_ROI});
-        matlabbatch{i}.spm.stats.ppi.disp = 0; %1 to display
-        i=i+1;
-    end
-end
-
-%%
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROI_files)
-        %% batch for PPI ROI X (norm-scr)
-        
-        SPM_dir = fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5/SPM.mat');
-        
-        matlabbatch{i}.spm.stats.ppi.spmmat = {SPM_dir};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.voi = {fullfile(D, S_effect(k).name, sprintf('/Aud/loc/stats_s5/VOI_%s_best_vox_PPI_adapted_1.mat', ROIs_names{tmp_ROI}))};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.u = [4 1 1
-            5 1 -1];
-        matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_best_vox_adaptx(norm-scr)', ROIs_names{tmp_ROI});
-        matlabbatch{i}.spm.stats.ppi.disp = 0; %1 to display
-        i=i+1;
-    end
-end
-%%
-cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
-
-par.run = 1;
-par.sge = 0;
-par.sge_queu = 'normal,bigmem';
-par.pct = 1;
-par.walltime = '00:30:00';
-par.jobname  = 'ppi_voi_x_conds';
-%%%%%%%% this line below to comment to avoid re estimating
-%%%%%%%% models
-
-job_ending_rountines(matlabbatch, [], par);
-
-%%
-clear matlabbatch
-i=1;
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROIs_names)
-        %% PPI model with ROI VOI
-        PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/PPI_%s/PPI_%s_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
-        if ~isdir(PPI_SPM_dir)
-            mkdir(PPI_SPM_dir)
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            %% batch for PPI ROI X (norm-scr)
+            
+            SPM_dir = fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat');
+            
+            matlabbatch{i}.spm.stats.ppi.spmmat = {SPM_dir};
+            matlabbatch{i}.spm.stats.ppi.type.ppi.voi = {fullfile(D, S_effect(k).name, sprintf('/Aud/loc/stats_s5_without_resting/VOI_%s_PPI_adapted_to_con%d_1.mat', ROIs_names{tmp_ROI}, select_con))};
+            if select_con == 16
+                matlabbatch{i}.spm.stats.ppi.type.ppi.u = [con(1) 1 1
+                    con(2) 1 1
+                    con(3) 1 1
+                    con(4) 1 1
+                    ];
+                matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_adaptx(speech-baseline)', ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                matlabbatch{i}.spm.stats.ppi.type.ppi.u = [con(4) 1 1
+                    con(5) 1 -1
+                    ];
+                matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_adaptx(norm-scr)', ROIs_names{tmp_ROI});
+            end
+            matlabbatch{i}.spm.stats.ppi.disp = 0; %1 to display
+            i=i+1;
         end
-        
-        filename = fullfile(D,S_effect(k).name,'Aud/loc/param');
-        cd (filename);
-        json=dir('*.json');
-        json=json.name;
-        
-        res = get_string_from_json(json, {'RepetitionTime'}, {'num'});
-        if res{1}>100
-            TR          = res{1}/1000; % millisecond -> second
-        else
-            TR          = res{1}; % second
-        end
-        
-        scans={};
-        cd(fullfile(D, S_effect(k).name,'Aud/loc/swf'))
-        vol_name = dir('s5*wts_OC.nii');
-        vol_name=fullfile(D, S_effect(k).name,'Vis/loc/swf', vol_name(1).name);
-        nb_vol = size(spm_vol(vol_name),1);
-        
-        
-        matlabbatch{i}.spm.stats.fmri_spec.dir = {PPI_SPM_dir};
-        matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
-        matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
-        matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
-        matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
-        
-        for v=1:nb_vol
-            volume=sprintf('%s,%d',vol_name,v);
-            scans=[scans;volume];
-        end
-        
-        cd (fullfile(D,S_effect(k).name,'Aud/loc/stats_s5'))
-        load(sprintf('PPI_%s_adaptx(norm-rev)', ROIs_names{tmp_ROI}));
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-        matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {''};
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).name = 'PPI-interaction';
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).val = PPI.ppi;
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).name = sprintf('%s-BOLD', ROIs_names{tmp_ROI});
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).val = PPI.Y;
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).name = 'Psych_norm-scr';
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).val = PPI.P;
-        
-        multi_reg=fullfile(D,S_effect(k).name,'Aud/loc/param');
-        cd (multi_reg);
-        mr = dir('multiple*.txt');
-        mr = mr.name;
-        multi_reg = fullfile(multi_reg,mr);
-        matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg = {multi_reg};
-        matlabbatch{i}.spm.stats.fmri_spec.sess.hpf = 192;
-        matlabbatch{i}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
-        matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
-        matlabbatch{i}.spm.stats.fmri_spec.volt = 1;
-        matlabbatch{i}.spm.stats.fmri_spec.global = 'None';
-        matlabbatch{i}.spm.stats.fmri_spec.mthresh = 0;
-        mask = fullfile(D,S_effect(k).name,'anat/brain_extraction_mask.nii');
-        matlabbatch{i}.spm.stats.fmri_spec.mask = {mask};
-        matlabbatch{i}.spm.stats.fmri_spec.cvi = 'AR(1)';
-        i=i+1;
-        
-        matlabbatch{i}.spm.stats.fmri_est.spmmat(1) = fullfile(PPI_SPM_dir, 'SPM.mat');
-        matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
-        matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
-        i=i+1;
-        
-        matlabbatch{i}.spm.stats.con.spmmat(1) = fullfile(PPI_SPM_dir, 'SPM.mat');
-        matlabbatch{i}.spm.stats.con.consess{1}.tcon.name = 'PPI-interaction';
-        matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = 1;
-        matlabbatch{i}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
-        matlabbatch{i}.spm.stats.con.delete = 0;
-        
-        clear(sprintf('PPI_%s_adaptx(norm-scr)', ROIs_names{tmp_ROI}));
     end
 end
-
 %%
-cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
-
-par.run = 1;
-par.sge = 0;
-par.sge_queu = 'normal,bigmem';
-par.pct = 1;
-par.walltime = '01:00:00';
-par.jobname  = 'ppi_glm_models';
-%%%%%%%% this line below to comment to avoid re estimating
-%%%%%%%% models
-
-job_ending_rountines(matlabbatch, [], par);
-
-
-%% batch for each VOI x each condition separately
-clear matlabbatch
-i=1;
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROIs_names)
-        SPM_dir = fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5/SPM.mat');
-        
-        matlabbatch{i}.spm.stats.ppi.spmmat = {SPM_dir};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.voi = {fullfile(D, S_effect(k).name, sprintf('/Aud/loc/stats_s5/VOI_%s_PPI_adapted_1.mat', ROIs_names{tmp_ROI}))};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.u = [4 1 1];
-        matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_adapt_x_norm', ROIs_names{tmp_ROI});
-        matlabbatch{i}.spm.stats.ppi.disp = 0;
-        i=i+1;
-        
-        matlabbatch{i}.spm.stats.ppi.spmmat = {SPM_dir};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.voi = {fullfile(D, S_effect(k).name, sprintf('/Aud/loc/stats_s5/VOI_%s_PPI_adapted_1.mat', ROIs_names{tmp_ROI}))};
-        matlabbatch{i}.spm.stats.ppi.type.ppi.u = [5 1 1];
-        matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_adapt_x_scr', ROIs_names{tmp_ROI});
-        matlabbatch{i}.spm.stats.ppi.disp = 0;
-        i=i+1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROI_files)
+            %% batch for PPI ROI X (norm-scr)
+            
+            SPM_dir = fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat');
+            
+            matlabbatch{i}.spm.stats.ppi.spmmat = {SPM_dir};
+            matlabbatch{i}.spm.stats.ppi.type.ppi.voi = {fullfile(D, S_effect(k).name, sprintf('/Aud/loc/stats_s5_without_resting/VOI_%s_best_vox_PPI_adapted_to_con%d_1.mat', ROIs_names{tmp_ROI}, select_con))};
+            
+            if select_con == 16
+                matlabbatch{i}.spm.stats.ppi.type.ppi.u = [con(1) 1 1
+                    con(2) 1 1
+                    con(3) 1 1
+                    con(4) 1 1
+                    ];
+                matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_best_vox_adaptx(speech-baseline)', ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                matlabbatch{i}.spm.stats.ppi.type.ppi.u = [con(4) 1 1
+                    con(5) 1 -1
+                    ];
+                matlabbatch{i}.spm.stats.ppi.name = sprintf('%s_best_vox_adaptx(norm-scr)', ROIs_names{tmp_ROI});
+            end
+            matlabbatch{i}.spm.stats.ppi.disp = 0; %1 to display
+            i=i+1;
+        end
     end
 end
-
 %%
 cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
 
@@ -343,92 +244,344 @@ par.jobname  = 'ppi_voi_x_conds';
 
 job_ending_rountines(matlabbatch, [], par);
 
-
-%% PPI model with SMG VOI
+%%
 clear matlabbatch
 i=1;
-for k = 1 : numel(S_effect)
-    for tmp_ROI = 1 : numel(ROIs_names)
-        PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/PPI_%s/PPI_%s_norm', S_effect(k).name, ROIs_names{tmp_ROI});
-        if ~isdir(PPI_SPM_dir)
-            mkdir(PPI_SPM_dir)
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            % PPI model with ROI VOI
+            if select_con == 16
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_speech_baseline', S_effect(k).name, ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
+            end
+            if ~isdir(PPI_SPM_dir)
+                mkdir(PPI_SPM_dir)
+            end
+            
+            %delete the previous SPM.mat
+            %         dinfo = dir(PPI_SPM_dir);
+            %         dinfo([dinfo.isdir]) = [];   %skip directories
+            %         filenames = fullfile(PPI_SPM_dir, {dinfo.name});
+            %         if ~isempty (filenames)
+            %             delete (filenames{:});
+            %         end
+            
+            filename = fullfile(D,S_effect(k).name,'Aud/loc/param');
+            cd (filename);
+            json=dir('*.json');
+            json=json.name;
+            
+            res = get_string_from_json(json, {'RepetitionTime'}, {'num'});
+            if res{1}>100
+                TR          = res{1}/1000; % millisecond -> second
+            else
+                TR          = res{1}; % second
+            end
+            
+            scans={};
+            cd(fullfile(D, S_effect(k).name,'Aud/loc/swf'))
+            vol_name = dir('s5*wts_OC.nii');
+            vol_name = fullfile(D, S_effect(k).name,'Aud/loc/swf', vol_name(1).name);
+            nb_vol = size(spm_vol(vol_name),1);
+            
+            
+            matlabbatch{i}.spm.stats.fmri_spec.dir = {PPI_SPM_dir};
+            matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
+            matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
+            matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
+            matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
+            
+            for v=1:nb_vol
+                volume=sprintf('%s,%d',vol_name,v);
+                scans=[scans;volume];
+            end
+            
+            cd (fullfile(D,S_effect(k).name,'Aud/loc/stats_s5_without_resting'))
+            if select_con == 16
+                load(sprintf('PPI_%s_adaptx(speech-baseline)', ROIs_names{tmp_ROI}));
+            elseif select_con == 11
+                load(sprintf('PPI_%s_adaptx(norm-scr)', ROIs_names{tmp_ROI}));
+            end
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
+            matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {''};
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).name = 'PPI-interaction';
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).val = PPI.ppi;
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).name = sprintf('%s-BOLD', ROIs_names{tmp_ROI});
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).val = PPI.Y;
+            
+            if select_con == 16
+                matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).name = sprintf('Psych_speech-baseline');
+            elseif select_con == 11
+                matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).name = sprintf('Psych_norm-scr');
+            end
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).val = PPI.P;
+            
+            multi_reg=fullfile(D,S_effect(k).name,'Aud/loc/param');
+            cd (multi_reg);
+            mr = dir('multiple*.txt');
+            mr = mr.name;
+            multi_reg = fullfile(multi_reg,mr);
+            matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg = {multi_reg};
+            matlabbatch{i}.spm.stats.fmri_spec.sess.hpf = 192;
+            matlabbatch{i}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
+            matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
+            matlabbatch{i}.spm.stats.fmri_spec.volt = 1;
+            matlabbatch{i}.spm.stats.fmri_spec.global = 'None';
+            matlabbatch{i}.spm.stats.fmri_spec.mthresh = 0;
+            mask = fullfile(D,S_effect(k).name,'anat/brain_extraction_mask.nii');
+            matlabbatch{i}.spm.stats.fmri_spec.mask = {mask};
+            matlabbatch{i}.spm.stats.fmri_spec.cvi = 'AR(1)';
+            i=i+1;
+            
+            if select_con == 16
+                clear(sprintf('PPI_%s_adaptx(speech-baseline)', ROIs_names{tmp_ROI}));
+            elseif select_con == 11
+                clear(sprintf('PPI_%s_adaptx(norm-scr)', ROIs_names{tmp_ROI}));
+            end
         end
-        
-        filename = fullfile(D,S_effect(k).name,'Aud/loc/param');
-        cd (filename);
-        json=dir('*.json');
-        json=json.name;
-        
-        res = get_string_from_json(json, {'RepetitionTime'}, {'num'});
-        if res{1}>100
-            TR          = res{1}/1000; % millisecond -> second
-        else
-            TR          = res{1}; % second
-        end
-        
-        scans={};
-        cd(fullfile(D, S_effect(k).name,'Aud/loc/swf'))
-        vol_name = dir('s5*wts_OC.nii');
-        vol_name=fullfile(D, S_effect(k).name,'Vis/loc/swf', vol_name(1).name);
-        nb_vol = size(spm_vol(vol_name),1);
-        
-        matlabbatch{i}.spm.stats.fmri_spec.dir = {PPI_SPM_dir};
-        matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
-        matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
-        matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
-        matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
-        
-        for v=1:nb_vol
-            volume=sprintf('%s,%d',vol_name,v);
-            scans=[scans;volume];
-        end
-        
-        cd (fullfile(D,S_effect(k).name,'Aud/loc/stats_s5'))
-        load(sprintf('PPI_%s_adapt_x_norm', ROIs_names{tmp_ROI}));
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-        matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {''};
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).name = 'PPI-interaction';
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).val = PPI.ppi;
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).name = sprintf('%s-BOLD', ROIs_names{tmp_ROI});
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).val = PPI.Y;
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).name = 'Psych_norm';
-        
-        matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).val = PPI.P;
-        
-        multi_reg=fullfile(D,S_effect(k).name,'Aud/loc/param');
-        cd (multi_reg);
-        mr = dir('multiple*.txt');
-        mr = mr.name;
-        multi_reg=fullfile(multi_reg,mr);
-        matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg = {''}; %{multi_reg};
-        matlabbatch{i}.spm.stats.fmri_spec.sess.hpf = 192;
-        matlabbatch{i}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
-        matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
-        matlabbatch{i}.spm.stats.fmri_spec.volt = 1;
-        matlabbatch{i}.spm.stats.fmri_spec.global = 'None';
-        matlabbatch{i}.spm.stats.fmri_spec.mthresh = 0;
-        mask = fullfile(D,S_effect(k).name,'anat/brain_extraction_mask.nii');
-        matlabbatch{i}.spm.stats.fmri_spec.mask = {mask};
-        matlabbatch{i}.spm.stats.fmri_spec.cvi = 'AR(1)';
-        i=i+1;
-        
-        matlabbatch{i}.spm.stats.fmri_est.spmmat(1) = cfg_dep('fMRI model specification: SPM.mat File', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
-        matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
-        matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
-        i=i+1;
-        
-        matlabbatch{i}.spm.stats.con.spmmat(1) = cfg_dep('Model estimation: SPM.mat File', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
-        matlabbatch{i}.spm.stats.con.consess{1}.tcon.name = 'PPI-interaction';
-        matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = 1;
-        matlabbatch{i}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
-        matlabbatch{i}.spm.stats.con.delete = 0;
-        i=i+1;
     end
 end
+%%
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+
+par.run = 0;
+par.sge = 1;
+par.sge_queu = 'normal,bigmem';
+par.pct = 1;
+par.walltime = '01:00:00';
+par.jobname  = 'ppi_glm_models_spec';
+%%%%%%%% this line below to comment to avoid re estimating
+%%%%%%%% models
+
+job_ending_rountines(matlabbatch, [], par);
+
+%%
+clear matlabbatch
+i=1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            if select_con == 16
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_speech_baseline', S_effect(k).name, ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
+            end
+            matlabbatch{i}.spm.stats.fmri_est.spmmat(1) = {fullfile(PPI_SPM_dir, 'SPM.mat')};
+            matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
+            matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
+            i=i+1;
+        end
+    end
+end
+%%
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+par.jobname  = 'ppi_glm_models_estim';
+
+job_ending_rountines(matlabbatch, [], par);
+
+%%
+clear matlabbatch
+i=1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            if select_con == 16
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_speech_baseline', S_effect(k).name, ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
+            end
+            matlabbatch{i}.spm.stats.con.spmmat(1) = {fullfile(PPI_SPM_dir, 'SPM.mat')};
+            matlabbatch{i}.spm.stats.con.consess{1}.tcon.name = 'PPI-interaction';
+            matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = 1;
+            matlabbatch{i}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
+            matlabbatch{i}.spm.stats.con.delete = 0;
+            i=i+1;
+        end
+    end
+end
+%%
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+par.jobname  = 'ppi_glm_models_con';
+
+job_ending_rountines(matlabbatch, [], par);
+
+%%
+clear matlabbatch
+i=1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROI_files)
+            % PPI model with ROI VOI
+            if select_con == 16
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_best_vox_speech_baseline', S_effect(k).name, ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_best_vox_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
+            end
+            if ~isdir(PPI_SPM_dir)
+                mkdir(PPI_SPM_dir)
+            end
+            %delete the previous SPM.mat
+            dinfo = dir(PPI_SPM_dir);
+            dinfo([dinfo.isdir]) = [];   %skip directories
+            filenames = fullfile(PPI_SPM_dir, {dinfo.name});
+            if ~isempty (filenames)
+                delete (filenames{:});
+            end
+            
+            filename = fullfile(D,S_effect(k).name,'Aud/loc/param');
+            cd (filename);
+            json=dir('*.json');
+            json=json.name;
+            
+            res = get_string_from_json(json, {'RepetitionTime'}, {'num'});
+            if res{1}>100
+                TR          = res{1}/1000; % millisecond -> second
+            else
+                TR          = res{1}; % second
+            end
+            
+            scans={};
+            cd(fullfile(D, S_effect(k).name,'Aud/loc/swf'))
+            vol_name = dir('s5*wts_OC.nii');
+            vol_name=fullfile(D, S_effect(k).name,'Aud/loc/swf', vol_name(1).name);
+            nb_vol = size(spm_vol(vol_name),1);
+            
+            
+            matlabbatch{i}.spm.stats.fmri_spec.dir = {PPI_SPM_dir};
+            matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
+            matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
+            matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
+            matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
+            
+            for v=1:nb_vol
+                volume=sprintf('%s,%d',vol_name,v);
+                scans=[scans;volume];
+            end
+            
+            cd (fullfile(D,S_effect(k).name,'Aud/loc/stats_s5_without_resting'))
+            if select_con == 16
+                load(sprintf('PPI_%s_best_vox_adaptx(speech-baseline)', ROIs_names{tmp_ROI}));
+            elseif select_con == 11
+                load(sprintf('PPI_%s_best_vox_adaptx(norm-scr)', ROIs_names{tmp_ROI}));
+            end
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
+            matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {''};
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).name = 'PPI-interaction';
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(1).val = PPI.ppi;
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).name = sprintf('%s-BOLD', ROIs_names{tmp_ROI});
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(2).val = PPI.Y;
+            
+            
+            if select_con == 16
+                matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).name = sprintf('Psych_speech-baseline');
+            elseif select_con == 11
+                matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).name = sprintf('Psych_norm-scr');
+            end
+            
+            matlabbatch{i}.spm.stats.fmri_spec.sess.regress(3).val = PPI.P;
+            
+            multi_reg=fullfile(D,S_effect(k).name,'Aud/loc/param');
+            cd (multi_reg);
+            mr = dir('multiple*.txt');
+            mr = mr.name;
+            multi_reg = fullfile(multi_reg,mr);
+            matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg = {multi_reg};
+            matlabbatch{i}.spm.stats.fmri_spec.sess.hpf = 192;
+            matlabbatch{i}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
+            matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
+            matlabbatch{i}.spm.stats.fmri_spec.volt = 1;
+            matlabbatch{i}.spm.stats.fmri_spec.global = 'None';
+            matlabbatch{i}.spm.stats.fmri_spec.mthresh = 0;
+            mask = fullfile(D,S_effect(k).name,'anat/brain_extraction_mask.nii');
+            matlabbatch{i}.spm.stats.fmri_spec.mask = {mask};
+            matlabbatch{i}.spm.stats.fmri_spec.cvi = 'AR(1)';
+            i=i+1;
+            
+        end
+    end
+end
+%%
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+par.jobname  = 'ppi_glm_models_spec';
+
+job_ending_rountines(matlabbatch, [], par);
+
+%%
+clear matlabbatch
+i=1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            if select_con == 16
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_best_vox_speech_baseline', S_effect(k).name, ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_best_vox_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
+            end
+            
+            matlabbatch{i}.spm.stats.fmri_est.spmmat(1) = {fullfile(PPI_SPM_dir, 'SPM.mat')};
+            matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
+            matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
+            i=i+1;
+        end
+    end
+end
+%%
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+par.jobname  = 'ppi_glm_models_estim';
+
+job_ending_rountines(matlabbatch, [], par);
+
+%%
+clear matlabbatch
+i=1;
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        for tmp_ROI = 1 : numel(ROIs_names)
+            if select_con == 16
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_best_vox_speech_baseline', S_effect(k).name, ROIs_names{tmp_ROI});
+            elseif select_con == 11
+                PPI_SPM_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/%s/%s_best_vox_norm_scr', S_effect(k).name, ROIs_names{tmp_ROI});
+            end
+            matlabbatch{i}.spm.stats.con.spmmat(1) = {fullfile(PPI_SPM_dir, 'SPM.mat')};
+            matlabbatch{i}.spm.stats.con.consess{1}.tcon.name = 'PPI-interaction';
+            matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = 1;
+            matlabbatch{i}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
+            matlabbatch{i}.spm.stats.con.delete = 0;
+            
+            i=i+1;
+            if select_con == 16
+                clear(sprintf('PPI_%s_best_vox_adaptx(speech-baseline)', ROIs_names{tmp_ROI}));
+            elseif select_con == 11
+                clear(sprintf('PPI_%s_best_vox_adaptx(norm-scr)', ROIs_names{tmp_ROI}));
+            end
+        end
+    end
+end
+%%
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+par.jobname  = 'ppi_glm_models_con';
+
+job_ending_rountines(matlabbatch, [], par);
+

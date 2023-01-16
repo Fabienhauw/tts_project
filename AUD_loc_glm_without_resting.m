@@ -10,8 +10,12 @@ S = dir(D);
 mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 
-a = 1; b = 48;
-erase = input('Do you want to erase previous visual models? [yes/no] ', 's');
+Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
+Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
+S = [Syn;Con];
+
+a = 1; b = length(S);
+erase = input('Do you want to erase previous auditive models? [yes/no] ', 's');
 
 redo = 1;
 if isequal(erase,'yes')
@@ -21,28 +25,24 @@ elseif isequal(erase,'no')
 end
 
 for k = a:b
-    if isdir (fullfile(D, S(k).name,'Vis'))
+    if isdir (fullfile(D, S(k).name,'Aud'))
         %% modele specification:
         if exist ('i', 'var')==0
             i=1;
         end
-        
-        which_dir = fullfile(D, S(k).name,'Vis/loc/stats_s5');
-        if ~isdir(which_dir)
-            mkdir(which_dir)
-        end
-        
+        filenames={};
+        which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting');
         dinfo = dir(which_dir);
         dinfo([dinfo.isdir]) = [];   %skip directories
-        files = fullfile(which_dir, {dinfo.name});
+        filenames = fullfile(which_dir, {dinfo.name});
         if ~exist('redo','var')
             redo=0;
         end
-        if redo & ~isempty (files)
-            delete (files{:});
+        if redo & ~isempty (filenames)
+            delete( filenames{:} );
         end
         
-        filename = fullfile(D,S(k).name,'Vis/loc/param');
+        filename = fullfile(D,S(k).name,'Aud/loc/param');
         cd (filename);
         json=dir('*.json');
         json=json.name;
@@ -60,10 +60,11 @@ for k = a:b
 %         matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t = 16;
 %         matlabbatch{i}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
 %         
+%         clear scans;
 %         scans={};
-%         cd(fullfile(D, S(k).name,'Vis/loc/swf'))
-%         vol_name = dir('s5*wts_OC.nii');
-%         vol_name=fullfile(D, S(k).name,'Vis/loc/swf', vol_name(1).name);
+%         cd(fullfile(D, S(k).name,'Aud/loc/swf'))
+%         vol_name = dir('s5wts_OC.nii');
+%         vol_name=fullfile(D, S(k).name,'Aud/loc/swf', vol_name(1).name);
 %         nb_vol = size(spm_vol(vol_name),1);
 %         
 %         for v=1:nb_vol
@@ -72,11 +73,11 @@ for k = a:b
 %         end
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-%         multi_name=fullfile(D,S(k).name,'Vis/loc/cpt_data/Timedata_');
-%         multi_name = sprintf('%s%s_Vis.mat',multi_name,S(k).name);
+%         multi_name=fullfile(D,S(k).name,'Aud/loc/cpt_data/Timedata_');
+%         multi_name = sprintf('%s%s%s',multi_name,S(k).name,'_Aud_without_resting.mat');
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {multi_name};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.regress = struct('name', {}, 'val', {});
-%         multi_reg=fullfile(D,S(k).name,'Vis/loc/param');
+%         multi_reg=fullfile(D,S(k).name,'Aud/loc/param');
 %         cd (multi_reg);
 %         mr = 'multiple_regressors.txt';
 %         multi_reg=fullfile(multi_reg,mr);
@@ -96,35 +97,45 @@ for k = a:b
 %         matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
 %         matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
 %         i=i+1;
-% %         
+%         
         matlabbatch{i}.spm.stats.con.spmmat = {fullfile(which_dir, 'SPM.mat')};
-        faces           = [1 0 0 0 0 0 0 0];
-        houses          = [0 1 0 0 0 0 0 0];
-        tools           = [0 0 1 0 0 0 0 0];
-        numbers         = [0 0 0 1 0 0 0 0];
-        words           = [0 0 0 0 1 0 0 0];
-        odds            = [0 0 0 0 0 1 0 0];
-        motor           = [0 0 0 0 0 0 1 0];
-        resting         = [0 0 0 0 0 0 0 1];
-
-        EOI             = [eye(5)];
         
-        images =        houses + faces + tools;
+        words           = [1 0 0 0 0 0 0];
+        pseudowords     = [0 1 0 0 0 0 0];
+        numbers         = [0 0 1 0 0 0 0];
+        normal_speech   = [0 0 0 1 0 0 0];
+        scramble_speech = [0 0 0 0 1 0 0];
+        odds            = [0 0 0 0 0 1 0];
+        motor           = [0 0 0 0 0 0 1];
+        EOI             = [eye(7)];
+        
+        phonology       = normal_speech - scramble_speech;
+        lexicality      = words - pseudowords;
         
         values = {...
-            faces - resting, houses - resting, tools - resting, numbers - resting, words - resting, odds - resting, motor - resting, images, ...
-            2*words - (faces+houses), 2*faces-(houses+words), 2*houses-(faces+words), ...
-            3*words - (faces+houses+tools), 3*faces-(houses+words+tools), 3*houses-(faces+words+tools), 3*tools-(faces+houses+words),...
-            3*numbers-(faces+houses+tools), 3*numbers-(faces+houses+words), numbers-words, words - numbers, 2*numbers-(faces+houses), ...
+            words, pseudowords, numbers, normal_speech, scramble_speech, ...
+            odds, motor,...
+            lexicality, -lexicality, (words + normal_speech + numbers) - 3*pseudowords,...
+            phonology, -phonology, words + pseudowords, 2*numbers - (words + pseudowords), ...
+            normal_speech - words, words + pseudowords + numbers + normal_speech, ...
+            words - normal_speech, words - scramble_speech, pseudowords - scramble_speech, (words+pseudowords) - 2*scramble_speech, ...
+            (words + normal_speech) - 2*scramble_speech, (normal_speech + pseudowords) - 2*scramble_speech, ...
+            (normal_speech + pseudowords + words) - 3*scramble_speech, (normal_speech + pseudowords + words + numbers) - 4*scramble_speech,...
+            numbers - words, words - numbers,...
             EOI, ...
             };
         
         names = {...
-            'faces', 'houses', 'tools', 'numbers', 'words', 'odds', 'motor', 'images', ...
-            'words - (faces+houses)', 'faces-(houses+words)', 'houses-(faces+words)', ...
-            'words - (faces+houses+tools)', 'faces-(houses+words+tools)', 'houses-(faces+words+tools)', 'tools -(faces+houses+words)', ...
-            'numbers-(faces+houses+tools)', 'numbers-(faces+houses+words)', 'numbers-words', 'words - numbers', '2*numbers-(faces+houses)', ...
-            'EOI',...
+            'words', 'pseudowords', 'numbers', 'normal_speech', 'scramble_speech',...
+            'odds', 'motor',...
+            'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
+            'phonology', '-phonology', 'words + pseudowords', 'numbers - (words + pseudowords)', ...
+            'normal_speech - words', 'words + pseudowords + numbers + normal_speech', ...
+            'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
+            '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
+            '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
+            'numbers - words', 'words - numbers', ...
+            'EOI', ...
             };
         
         for j=1:length(values)-1
@@ -151,7 +162,7 @@ par.sge = 1;
 par.sge_queu = 'normal,bigmem';
 par.pct = 1;
 par.walltime = '00:30:00';
-par.jobname  = 'vis_glm';
+par.jobname  = 'aud_glm';
 %%%%%%%% this line below to comment to avoid re estimating
 %%%%%%%% models
 

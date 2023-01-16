@@ -7,7 +7,7 @@ S = dir(D);
 mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 
-a = 41; b = 41;
+a = 3; b = 50;
 
 
 DF = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/cpt_data_fmri';
@@ -246,8 +246,8 @@ for k = a:b
     cd (DF)
     data_fold           = dir(sprintf('*%s',subject{1}));
     cd (fullfile(DF,data_fold(1).name));
-    aud_onsets          = dir('*Aud*mat');
-    vis_onsets          = dir('*Vis.mat');
+    aud_onsets          = dir('*Aud_without*mat');
+    vis_onsets          = dir('*Vis_without*mat');
     col_onsets          = dir(sprintf('*%s_Color.mat',subject{1}));
     if isempty(col_onsets), col_onsets = dir(sprintf('*%s_Col.mat',subject{1})); end
     unfr_col_onsets     = dir('*Unframed_Col.mat');
@@ -391,7 +391,7 @@ for k = a:b
             copyfile(S1_s6, fullfile(T,subject{1},'Vis/loc/swf',simage_1_s6(1).name));
         end
         cd (fullfile(T,subject{1},'Vis/loc/cpt_data'));
-        if isempty(dir('*.mat'))
+        if isempty(dir('*without*.mat'))
             for k = 1:length(vis_data_cpt)
                 copyfile(vis_data_cpt{k}, fullfile(T,subject{1},'Vis/loc/cpt_data',vis_onsets(k).name));
             end
@@ -434,7 +434,7 @@ for k = a:b
                     copyfile(S2_s6, fullfile(T,subject{1},'Aud/loc/swf',simage_2_s6(1).name));
                 end
                 cd (fullfile(T,subject{1},'Aud/loc/cpt_data'));
-                if isempty(dir('*.mat'))
+                if isempty(dir('*without*.mat'))
                     for k = 1:length(aud_data_cpt)
                         copyfile(aud_data_cpt{k}, fullfile(T,subject{1},'Aud/loc/cpt_data',aud_onsets(k).name));
                     end

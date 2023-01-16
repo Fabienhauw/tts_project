@@ -27,7 +27,7 @@ for k = a:b
             i=1;
         end
         
-        which_dir = fullfile(D, S(k).name,'Vis/loc/stats_s5');
+        which_dir = fullfile(D, S(k).name,'Vis/loc/stats_s5_without_resting');
         if ~isdir(which_dir)
             mkdir(which_dir)
         end
@@ -53,7 +53,7 @@ for k = a:b
         else
             TR          = res{1}; % second
         end
-%         
+        
 %         matlabbatch{i}.spm.stats.fmri_spec.dir = {which_dir};
 %         matlabbatch{i}.spm.stats.fmri_spec.timing.units = 'secs';
 %         matlabbatch{i}.spm.stats.fmri_spec.timing.RT = TR;
@@ -73,7 +73,7 @@ for k = a:b
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
 %         multi_name=fullfile(D,S(k).name,'Vis/loc/cpt_data/Timedata_');
-%         multi_name = sprintf('%s%s_Vis.mat',multi_name,S(k).name);
+%         multi_name = sprintf('%s%s_Vis_without_resting.mat',multi_name,S(k).name);
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {multi_name};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.regress = struct('name', {}, 'val', {});
 %         multi_reg=fullfile(D,S(k).name,'Vis/loc/param');
@@ -96,23 +96,21 @@ for k = a:b
 %         matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
 %         matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
 %         i=i+1;
-% %         
+%         
         matlabbatch{i}.spm.stats.con.spmmat = {fullfile(which_dir, 'SPM.mat')};
-        faces           = [1 0 0 0 0 0 0 0];
-        houses          = [0 1 0 0 0 0 0 0];
-        tools           = [0 0 1 0 0 0 0 0];
-        numbers         = [0 0 0 1 0 0 0 0];
-        words           = [0 0 0 0 1 0 0 0];
-        odds            = [0 0 0 0 0 1 0 0];
-        motor           = [0 0 0 0 0 0 1 0];
-        resting         = [0 0 0 0 0 0 0 1];
-
+        faces           = [1 0 0 0 0 0 0];
+        houses          = [0 1 0 0 0 0 0];
+        tools           = [0 0 1 0 0 0 0];
+        numbers         = [0 0 0 1 0 0 0];
+        words           = [0 0 0 0 1 0 0];
+        odds            = [0 0 0 0 0 1 0];
+        motor           = [0 0 0 0 0 0 1];
         EOI             = [eye(5)];
         
         images =        houses + faces + tools;
         
         values = {...
-            faces - resting, houses - resting, tools - resting, numbers - resting, words - resting, odds - resting, motor - resting, images, ...
+            faces, houses, tools, numbers, words, odds, motor, images, ...
             2*words - (faces+houses), 2*faces-(houses+words), 2*houses-(faces+words), ...
             3*words - (faces+houses+tools), 3*faces-(houses+words+tools), 3*houses-(faces+words+tools), 3*tools-(faces+houses+words),...
             3*numbers-(faces+houses+tools), 3*numbers-(faces+houses+words), numbers-words, words - numbers, 2*numbers-(faces+houses), ...

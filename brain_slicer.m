@@ -32,16 +32,16 @@ for k=1:length(S)
     anat_dir = fullfile(D, S(k).name, 'anat');
     cd(anat_dir)
     anat = dir('r_slicerwmv*'); anat = fullfile(anat_dir,anat.name);
-    aud_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa');
+    aud_dir = fullfile(D, S(k).name, 'Aud/loc/stats_s5');
     cd(aud_dir);
-    func = fullfile(aud_dir,'mask.nii');
+    func = fullfile(aud_dir,'VOI_SMG_PPI_adapted_mask.nii');
     slicer(...
         {anat,func},... % anatomy and activation volumes (must be same format, reslice if needed)
-        'limits',{[],[2 100]},... % when a layer's limit is empty, limits will be adjusted automatically
+        'limits',{[],[0 1]},... % when a layer's limit is empty, limits will be adjusted automatically
         'minClusterSize',{0,0},....
         'p-map',{false, false},... % to replace p with 1-p in case of p-map
-        'slices',[25],... % slice to show: 0 is the right hemisphere, 40 median sagital.
-        'view','ax',... % ax sag cor
+        'slices',[37],... % slice to show: 0 is the right hemisphere, 40 median sagital.
+        'view','sag',... % ax sag cor
         'colormaps',{1,2},... % 1: grey 2: hot 3: cold, type colormaps for options
         'labels',{[],[]},... % no colorbar
         'colormode','black',... % background
