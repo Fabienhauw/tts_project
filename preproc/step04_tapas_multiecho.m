@@ -17,7 +17,7 @@ CLUSTER = 0; % autoaddobjet = 0 when par.sge = 1; so no cluster for this one;
 
 
 main_dir_physio = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/NIFTI';
-subj_to_preproc = 'Control18';
+subj_to_preproc = 'Sujet01';
 % subj_to_preproc = 'Sujet\d[4-9]|Sujet1[0-2]|Sujet1[4-9]|Sujet[2][0-9]';
 % subj_to_preproc = 'Control\d[2-9]|Control[1][0-2]';
 
@@ -26,11 +26,11 @@ e_physio = exam(main_dir_physio, subj_to_preproc); % all subjects with multi-ech
 % beware because order of the sequences matters here, while in step01, it is
 % automatically reordered according to the num of the sequence (S03, S04,
 % etc)
-e_physio.addSerie('RS_PhysioLog$','physio_rs',1)
-e_physio.addSerie('visual_PhysioLog$','physio_visual',1)
+% e_physio.addSerie('RS_PhysioLog$','physio_rs',1)
+% e_physio.addSerie('visual_PhysioLog$','physio_visual',1)
 e_physio.addSerie('unframed_color_PhysioLog$','physio_unframed_color',1)
 % % e_physio.addSerie('color_PhysioLog$','physio_color',1)
-e_physio.addSerie( 'audio_PhysioLog$','physio_audio' ,1)
+% e_physio.addSerie( 'audio_PhysioLog$','physio_audio' ,1)
 
 
 e_physio.getSerie('physio').addVolume('dcm$','dcm',1)
@@ -87,7 +87,7 @@ clear par
 % ALWAYS MANDATORY
 %----------------------------------------------------------------------------------------------------------------------------------------------------
 
-par.physio   = 1; % put to 0 if error during recording of physio
+par.physio   = 0; % put to 0 if error during recording of physio
 par.noiseROI = 1;
 par.rp       = 1;
 

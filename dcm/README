@@ -1,0 +1,12 @@
+Different steps for DCM preparation and analysis:
+
+1/ reorganization of the onsets and duration with parametric modulation: 
+reorg_onsets_dcm_param_mod.m
+
+2/ make new GLMs with these new onsets:
+AUD_loc_glm_dcm_param.m
+
+3/ extract signals from the VOIs, selected on whatever you want (here from the auditive run):
+AUD_loc_dcm_voi_creation.m
+
+4/

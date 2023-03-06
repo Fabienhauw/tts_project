@@ -32,43 +32,54 @@ for k = a : b
     new_onsets(:,1)     = vertcat(onsets{1:nb_cond}); % all the onsets
     new_onsets(:,2)     = vertcat(durations{1:nb_cond}); % all the durations
     new_onsets2(:,1)    = vertcat(onsets{1:all_speech_cond}); % all the onsets for only words
-    new_onsets2(:,2)    = vertcat(durations{1:all_speech_cond}); % all the onsets for only words
+    new_onsets2(:,2)    = vertcat(durations{1:all_speech_cond}); % all the durations for only words
     
-    new_onsets3(:,1)    = vertcat(onsets{1:all_lists_cond}); % all the onsets for words and PW
-    new_onsets3(:,2)    = vertcat(durations{1:all_lists_cond}); % all the durations for words and PW
-    new_onsets4(:,1)    = onsets{1}; % all the onsets for words
-    new_onsets4(:,2)    = durations{1}; % all the durations for words
+    new_onsets3(:,1)    = onsets{1}; % all the onsets for words
+    new_onsets3(:,2)    = durations{1}; % all the durations for words
+    new_onsets4(:,1)    = onsets{2}; % all the onsets for pw
+    new_onsets4(:,2)    = durations{2}; % all the durations for pw
     
     for mp = 1:length(new_onsets(:,1))
         if ~isempty(find(new_onsets(mp,1) == new_onsets2(:,1)))
-            new_onsets(mp,3)=1;
+            new_onsets(mp,3)=1; % when speech
             new_onsets(mp,4)=-1;
         else
             new_onsets(mp,3)=-1;
             new_onsets(mp,4)=1;
         end
-    end
-    
-    for mp = 1:length(new_onsets3(:,1))
-        if ~isempty(find(new_onsets3(mp,1) == new_onsets4(:,1)))
-            new_onsets3(mp,3)=1;
-            new_onsets3(mp,4)=-1;
+        if ~isempty(find(new_onsets(mp,1) == new_onsets3(:,1)))
+            new_onsets(mp,5)=1; % when words
+            new_onsets(mp,6)=-1;
+        elseif ~isempty(find(new_onsets(mp,1) == new_onsets4(:,1)))
+            new_onsets(mp,5)=-1;
+            new_onsets(mp,6)=1;
         else
-            new_onsets3(mp,3)=-1;
-            new_onsets3(mp,4)=1;
+            new_onsets(mp,5)=0;
+            new_onsets(mp,6)=0;
         end
     end
     
+%     for mp = 1:length(new_onsets3(:,1))
+%         if ~isempty(find(new_onsets3(mp,1) == new_onsets4(:,1)))
+%             new_onsets3(mp,3)=1;
+%             new_onsets3(mp,4)=-1;
+%         else
+%             new_onsets3(mp,3)=-1;
+%             new_onsets3(mp,4)=1;
+%         end
+%     end
+    
     new_onsets  = sortrows(new_onsets);
-    new_onsets3 = sortrows(new_onsets3);
   
-    names2              = {'sounds'; 'lists'};
+    names2              = 'sounds';
+%     names2              = {'sounds'; 'lists'};
     onsets2{1}          = new_onsets(:,1);
-    onsets2{2}          = new_onsets3(:,1);
+%     onsets2{2}          = new_onsets3(:,1);
     durations2{1}       = new_onsets(:,2);
-    durations2{2}       = new_onsets3(:,2);
-    parametric_modul{1} = new_onsets(:,3);
-    parametric_modul{2} = new_onsets3(:,3);
+%     durations2{2}       = new_onsets3(:,2);
+    parametric_modul{1} = new_onsets(:,3); % 1 = speech, -1 = scr;
+    parametric_modul{2} = new_onsets(:,5); % 1 = words, -1 = pw;
+%     parametric_modul{2} = new_onsets3(:,3);
 
     names=names2;
     onsets=onsets2;

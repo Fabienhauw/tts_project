@@ -5,8 +5,12 @@ spm('defaults','FMRI')
 global defaults
 global UFp; UFp = 0.001;
 % categ='controls';
-tts_group.path_to_subject;
+D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
+S = dir(D);
+mask = ismember({S.name}, {'.', '..'});
+S(mask) = [];
 
+radius = 10;
 
 Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
 Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
@@ -34,9 +38,9 @@ nsub(2) = length(S_con_app); % controls
 ngroups = 2;
 
 S_effect = [S_droit ; S_con_app];
-res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_%s_to_%s_s8', S_effect(1).name, S_effect(end).name);
-% res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_test');
-
+res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa_without_resting_%dmm_no_smooth', radius);
+% res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa_without_resting_%dmm_s6', radius);
+% res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa_without_resting_%dmm_s8', radius);
 
 vector_age = [
     25.1013699; 70.8219178; 23.6821918; 24.3342466; 21.109589; 31.7260274; 18.8438356; ...
@@ -69,9 +73,23 @@ subname = {S_effect.name};
 totsub=length(subname);
 
 %-----------------------------------------------------------------
-cd(fullfile(D,S(1).name, 'Aud/loc/stats_s5_without_resting'));
-cont = [1 : 5];
-% words, pseudowords, numbers, normal_speech, scramble_speech, odds, motor
+con_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/',S(1).name, radius);
+cd(con_dir)
+% comp = dir('results*');
+% comp = 'results_PW_vs_Words';
+% comp = 'results_ScrSpeech_vs_NormalSpeech';
+comp = 'results_Words_vs_Numbers';
+
+res_dir_base = fullfile(res_dir_base, comp);
+
+% mask = ~cellfun(@isempty,(regexp({comp.name},'best_vox')));
+mask = ~cellfun(@isempty,(regexp({comp},'best_vox')));
+comp(mask) = '';
+all_comp = [comp];
+% all_comp_names = {all_comp.name};
+all_comp_names = {all_comp};
+cont = 1; %[1 : length(all_comp)];
+% PPI-interaction
 %-----------------------------------------------------------------
 
 ncon = length(cont);
@@ -87,7 +105,9 @@ P={};
 for con=1:ncon
     for s=1:totsub
         sub=subname{s};
-        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/stats_s5_without_resting/s8con_%04d.nii'],sub,cont(con));
+        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+%         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s6res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+%         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s8res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
     end
 end
 
@@ -95,13 +115,15 @@ j=0;
 for i=1:length(P)
     if ~exist(P{i})
         j=j+1;
-        filestosmooth{j}=strrep(P{i},'s8con','con');
+        filestosmooth{j}=strrep(P{i},'s6res','res');
+%         filestosmooth{j}=strrep(P{i},'s8res','res');
     end
 end
 
 if j>0
     for u=1:j
-        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'con_','s8con_'),[8 8 8],0); 
+        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s6res_'),[6 6 6],0); 
+%         spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s8res_'),[8 8 8],0); 
     end
 end
 
@@ -130,15 +152,6 @@ for group=1:ngroups
         cname{k} = sprintf('sub %d group %d',c,group);
     end
 end
-
-% for c=1:ncon
-%     for group=1:ngroups
-%         for tmp_sub=1:nsub(group)
-%             k=k+1;
-%             cname{k} = sprintf('con %d sub %d group %d', c, tmp_sub, group);
-%         end
-%     end
-% end
 
 %%%% define the subject part of the matrix
 oc = ones(ncon,1);
@@ -243,56 +256,14 @@ save SPM SPM
 SPM = spm_spm(SPM);
 
 %%%%%% Second, define the contrasts and estimate them
+w_all_comp_names{1} = [1 zeros(1, length(all_comp_names)-1)];
+for tmp_name = 1 : length(all_comp_names)
+    w_all_comp_names{tmp_name} = [zeros(1, tmp_name-1) 1 zeros(1, length(all_comp_names)-tmp_name)];
+end
 
-words           = [1 0 0 0 0];
-pseudowords     = [0 1 0 0 0];
-numbers         = [0 0 1 0 0];
-normal_speech   = [0 0 0 1 0];
-scramble_speech = [0 0 0 0 1];
-% odds            = [0 0 0 0 0 1 0];
-% motor           = [0 0 0 0 0 0 1];
-EOI             = [eye(5)];
+Xvalues = w_all_comp_names;
 
-% words           = [1 zeros(1,ncon-1)];
-% pseudowords     = zeros(1,length(words)); pseudowords(2) = 1;
-% numbers         = zeros(1,length(words)); numbers(3) = 1;
-% normal_speech   = zeros(1,length(words)); normal_speech(4) = 1;
-% scramble_speech = zeros(1,length(words)); scramble_speech(5) = 1;
-% odds            = zeros(1,length(words)); odds(6) = 1;
-% motor           = zeros(1,length(words)); motor(7) = 1;
-
-phonology       = normal_speech - scramble_speech;
-lexicality      = words - pseudowords;
-
-Xvalues = {...
-    words, pseudowords, numbers, normal_speech, scramble_speech,...
-    lexicality, -lexicality, (words + normal_speech + numbers) - 3*pseudowords,...
-    phonology, -phonology, 2*numbers - (words + pseudowords), ...
-    normal_speech - words, words + pseudowords + numbers + normal_speech, ...
-    words - normal_speech, words - scramble_speech, pseudowords - scramble_speech, (words+pseudowords) - 2*scramble_speech, ...
-    (words + normal_speech) - 2*scramble_speech, (normal_speech + pseudowords) - 2*scramble_speech, ...
-    (normal_speech + pseudowords + words) - 3*scramble_speech, (normal_speech + pseudowords + words + numbers) - 4*scramble_speech,...
-    numbers - words, words - numbers,...
-    EOI, ...
-    };
-
-% % expand contrasts for a model with derivatives:
-% [a,b]=size(parameters.contrast.values);
-% for u=1:length(parameters.contrast.values)
-% parameters.contrast.values{u}=reshape([parameters.contrast.values{u};zeros(1,b)],1,2*b);
-% end
-
-Xnames = {...
-    'words', 'pseudowords', 'numbers', 'normal_speech', 'scramble_speech',...
-    'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
-    'phonology', '-phonology', 'numbers - (words + pseudowords)', ...
-    'normal_speech - words', 'words + pseudowords + numbers + normal_speech',...
-    'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
-    '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
-    '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
-    'numbers - words', 'words - numbers', ...
-    'EOI', ...
-    };
+Xnames = all_comp_names;
 
 numcomp=length(Xvalues);
 
@@ -331,20 +302,20 @@ for n=1:size(values,2)
     values{n}=[values{n} zeros(size(values{n},1),totsub)];
 end
 
-for n = 1 : numcomp-1
+for n = 1 : numcomp
     types{n} = 'T';
     types{numcomp+n} = 'T';
     types{2*numcomp+n} = 'T';
     types{3*numcomp+n} = 'T';
     types{4*numcomp+n} = 'T';
 end
-for n = numcomp
-    types{n}='F';
-    types{numcomp+n} = 'F';
-    types{2*numcomp+n} = 'F';
-    types{3*numcomp+n} = 'F';
-    types{4*numcomp+n} = 'F';
-end
+% for n = numcomp
+%     types{n}='F';
+%     types{numcomp+n} = 'F';
+%     types{2*numcomp+n} = 'F';
+%     types{3*numcomp+n} = 'F';
+%     types{4*numcomp+n} = 'F';
+% end
 
 %%
 

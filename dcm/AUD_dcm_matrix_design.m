@@ -1,29 +1,29 @@
 % to create all matrices possible for your DCM model;
 nbreg=4;
-stgm=1; smg=2; mfg=3; vwfa=4;
+lpstg=1; smg=2; mfg=3; vwfa=4;
 
 % basic matrices
 A=eye(nbreg);
 A(smg,mfg) = 1;
 A(mfg,smg) = 1;
-A(vwfa,stgm) = 0;
+A(vwfa,lpstg) = 0;
 A(smg,vwfa) = 0;
 A(mfg,vwfa) = 0; % vwfa nevers sends back connectivity;
-A(stgm,vwfa) = 0;
-A(stgm,smg) = 0;
-A(stgm,mfg) = 0; % stgm never receives feedback;
+A(lpstg,vwfa) = 0;
+A(lpstg,smg) = 0;
+A(lpstg,mfg) = 0; % stgm never receives feedback;
 
 B=zeros(nbreg);
 fix_conn_matrix = {
     smg,mfg;
     mfg,smg; % mtg and smg are always connected
-    vwfa,stgm;
+    vwfa,lpstg;
     smg,vwfa;
     mfg,vwfa; % vwfa nevers sends back connectivity;
-    stgm,vwfa;
-    stgm,smg;
-    stgm,mfg; % stgm never receives feedback;
-    stgm,stgm;
+    lpstg,vwfa;
+    lpstg,smg;
+    lpstg,mfg; % stgm never receives feedback;
+    lpstg,lpstg;
     smg,smg;
     mfg,mfg;
     vwfa,vwfa;
@@ -90,7 +90,7 @@ nb_struc_mod=length(a);
 % now you have to delete models with no connexions from the stgm or no
 % connexions to the vwfa:
 for aa=1:nb_struc_mod
-    if a{1,aa}(smg,stgm)==0 & a{1,aa}(mtg,stgm)==0 | a{1,aa}(vwfa,smg)==0 & a{1,aa}(vwfa,mtg)==0
+    if a{1,aa}(smg,lpstg)==0 & a{1,aa}(mfg,lpstg)==0 | a{1,aa}(vwfa,smg)==0 & a{1,aa}(vwfa,mfg)==0
         a{1,aa}=[];
     end
 end
@@ -99,20 +99,20 @@ a=a(~cellfun('isempty',a));
 %% note : essayer avec boucle while ?
 
 %% matrices for modulation connectivity
-stgm=1; smg=2; mtg=3; vwfa=4;
+lpstg=1; smg=2; mfg=3; vwfa=4;
 A=zeros(nbreg);
 
 B=zeros(nbreg);
 fix_conn_matrix = {
-    stgm,stgm;
+    lpstg,lpstg;
     smg,smg; % mtg and smg are always connected
-    mtg,mtg;
+    mfg,mfg;
     vwfa,vwfa;
-    stgm,smg; % vwfa nevers sends back connectivity;
-    stgm,mtg;
-    stgm,vwfa;
-    vwfa,stgm;
-    mtg,vwfa; % stgm never receives feedback;
+    lpstg,smg; % vwfa nevers sends back connectivity;
+    lpstg,mfg;
+    lpstg,vwfa;
+    vwfa,lpstg;
+    mfg,vwfa; % stgm never receives feedback;
     smg,vwfa;
     };
 

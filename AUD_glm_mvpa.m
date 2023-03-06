@@ -16,13 +16,13 @@ S(mask) = [];
 a = 1; b = 48;
 
 nb_repeat       = 8;
-ncondition1     = 8;
+ncondition1     = 5;
 ncondition2     = 0;
 ncondition      = ncondition1 + ncondition2;
 redo = 0;
 
 % for k = a:b
-%     new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa10mm_rois');
+%     new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa_without_resting_8mm');
 %     
 %     if exist(new_spm_1) == 0
 %         mkdir(new_spm_1)
@@ -44,7 +44,7 @@ redo = 0;
 %     
 %     % names
 %     
-%     names = repmat(names,nb_repeat,1);
+%     names = repmat(names(1:ncondition),nb_repeat,1);
 %     
 %     % onsets
 %     
@@ -93,8 +93,9 @@ redo = 0;
 %% batch specification for mvpa
 clear matlabbatch
 i = 1;
+
 for k = a : b
-    new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa10mm_rois');
+    new_spm_1   = fullfile(D,S(k).name,'Aud/loc/mvpa_without_resting_8mm');
     filename = fullfile(D,S(k).name,'Aud/loc/param');
     cd (filename);
     json=dir('*.json');
@@ -135,7 +136,7 @@ for k = a : b
 %     
 %     matlabbatch{i}.spm.stats.fmri_spec.sess.scans       = scans;
 %     matlabbatch{i}.spm.stats.fmri_spec.sess.cond        = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-%     multi_name=fullfile(D,S(k).name,'Aud/loc/mvpa/mvpa_Timedata_');
+%     multi_name=fullfile(D,S(k).name,'Aud/loc/mvpa_without_resting_8mm/mvpa_Timedata_');
 %     multi_name = sprintf('%s%s%s',multi_name,S(k).name,'_Aud.mat');
 %     matlabbatch{i}.spm.stats.fmri_spec.sess.multi       = {multi_name};
 %     matlabbatch{i}.spm.stats.fmri_spec.sess.regress     = struct('name', {}, 'val', {});
@@ -164,14 +165,14 @@ for k = a : b
 %     i=i+1;
 % 
     matlabbatch{i}.spm.stats.con.spmmat = {filename};
-    words           = [repmat([1 0 0 0 0 0 0 0],1,nb_repeat)];
-    pseudowords     = [repmat([0 1 0 0 0 0 0 0],1,nb_repeat)];
-    numbers         = [repmat([0 0 1 0 0 0 0 0],1,nb_repeat)];
-    normal_speech   = [repmat([0 0 0 1 0 0 0 0],1,nb_repeat)];
-    scramble_speech = [repmat([0 0 0 0 1 0 0 0],1,nb_repeat)];
-    odds            = [repmat([0 0 0 0 0 1 0 0],1,nb_repeat)];
-    motor           = [repmat([0 0 0 0 0 0 1 0],1,nb_repeat)];
-    resting         = [repmat([0 0 0 0 0 0 0 1],1,nb_repeat)];
+    words           = [repmat([1 0 0 0 0],1,nb_repeat)];
+    pseudowords     = [repmat([0 1 0 0 0],1,nb_repeat)];
+    numbers         = [repmat([0 0 1 0 0],1,nb_repeat)];
+    normal_speech   = [repmat([0 0 0 1 0],1,nb_repeat)];
+    scramble_speech = [repmat([0 0 0 0 1],1,nb_repeat)];
+%     odds            = [repmat([0 0 0 0 0 1 0 0],1,nb_repeat)];
+%     motor           = [repmat([0 0 0 0 0 0 1 0],1,nb_repeat)];
+%     resting         = [repmat([0 0 0 0 0 0 0 1],1,nb_repeat)];
 
     
     alphabetic      =    words + pseudowords;
@@ -179,8 +180,8 @@ for k = a : b
     phonology       =    normal_speech - scramble_speech;
     
     values = {...
-        words - resting, pseudowords - resting, alphabetic, lexicality, -lexicality, numbers - resting, ...
-        normal_speech - resting, scramble_speech - resting,...
+        words, pseudowords, alphabetic, lexicality, -lexicality, numbers, ...
+        normal_speech, scramble_speech,...
         phonology
         };
     

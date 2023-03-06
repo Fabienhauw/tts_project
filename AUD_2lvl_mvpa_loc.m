@@ -1,10 +1,11 @@
+clear; clc;
 addpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/matvol'))
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/matlabbatch'))
 
 wd = pwd;
 
-res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/MVPA/Aud/loc/syn_vs_con_rh_s5_10mm';
+res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa__without_resting_ttest_s8';
 % res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/MVPA/Aud/loc/syn_vs_con_rh_s5';
 
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -12,6 +13,8 @@ cd (D);
 S = dir(D);
 mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
+
+radius = 10;
 
 Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
 Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
@@ -59,7 +62,7 @@ end
 vector_cov1 = vector_age(mask_cov==1);
 vector_cov2 = vector_hand(mask_cov==1);
 
-con_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa10mm/',S_effect(1).name);
+con_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/',S_effect(1).name, radius);
 cd(con_dir)
 results = dir('results*');
 for tmp_comp = 1 : length(results)
@@ -87,83 +90,6 @@ elseif isequal(erase_model,'no')
     redo_model = 0;
 end
 
-%% first, get images to smooth; uncomment the next section if you want to smooth the nifti.
-% scans1={};
-% smoothcontrast = 0;
-% 
-% if ~exist ('i', 'var')
-%     i=1;
-% end
-% 
-% scans_to_smooth = {};
-% 
-% a = 1; b = numel(S);
-% 
-% for tmp_comp = 1 : length(results)
-%     for k = a:b %for each subject;
-%         con_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa/',S(k).name);
-%         if ~isdir(fullfile(con_dir, all_comp_inv{tmp_comp}))
-%             cd(fullfile(con_dir, all_comp{tmp_comp}));
-%         else
-%             cd(fullfile(con_dir, all_comp_inv{tmp_comp}));
-%         end
-%         all_smooth_contrast = dir('s*minus_chance.nii*');
-%         if ~exist('redo_scon','var')
-%             redo_scon=0;
-%         end
-%         if redo_scon & ~isempty (all_smooth_contrast)
-%             try
-%                 delete (all_smooth_contrast.name)
-%                 all_smooth_contrast={};
-%             end
-%         end
-%         
-%         all_contrast = dir('*minus_chance.nii');
-%         allsmooth = {};
-%         for asc = 1:length(all_smooth_contrast)
-%             smoothcon = all_smooth_contrast(asc).name;
-%             allsmooth = [allsmooth;smoothcon];
-%         end
-%         
-%         allcon = {};
-%         for ac = 1:length(all_contrast)
-%             con = all_contrast(ac).name;
-%             allcon = [allcon;con];
-%         end
-%         
-%         desmoothcon={};
-%         if ~isempty(allsmooth)
-%             for y=1:length(allsmooth)
-%                 desmoothcon(y,:) = strrep(allsmooth(y,:),'sres_AUC*.nii','res_AUC*.nii');
-%             end
-%         end
-%         if ~isempty(desmoothcon)
-%             contrast = setdiff(allcon,desmoothcon);
-%         elseif isempty(desmoothcon) | ~exist(desmoothcon)
-%             contrast = allcon;
-%         end
-%         
-%         for c = 1:length(contrast)
-%             con = contrast(c);
-%             if ~isdir(fullfile(con_dir, all_comp_inv{tmp_comp}))
-%                 vol_name = fullfile(con_dir, all_comp{tmp_comp}, con);
-%             else
-%                 vol_name = fullfile(con_dir, all_comp_inv{tmp_comp},con);
-%             end
-%             scans_to_smooth=[scans_to_smooth;vol_name];
-%         end
-%     end
-% end
-% 
-% matlabbatch{i}.spm.spatial.smooth.data = scans_to_smooth;
-% matlabbatch{i}.spm.spatial.smooth.fwhm = [6 6 6];
-% matlabbatch{i}.spm.spatial.smooth.dtype = 0;
-% matlabbatch{i}.spm.spatial.smooth.im = 0;
-% matlabbatch{i}.spm.spatial.smooth.prefix = 's';
-% i=i+1;
-% 
-% spm_jobman('run', matlabbatch)
-
 %% second level:
 clear matlabbatch
 i=1;
@@ -172,10 +98,10 @@ for tmp_comp = 1 : length(all_comp)
     %% group 1:
     scans1 = {};
     for k = 1:length(S_syn)
-        if ~isdir(fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm/',all_comp_inv{tmp_comp}))
-            vol_name = fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm/',all_comp{tmp_comp}, '/res_accuracy_minus_chance.nii');
+        if ~isdir(fullfile(D, S_syn(k).name,sprintf('Aud/loc/mvpa_without_resting_%dmm', radius),all_comp_inv{tmp_comp}))
+            vol_name = fullfile(D, S_syn(k).name,sprintf('Aud/loc/mvpa_without_resting_%dmm', radius),all_comp{tmp_comp}, 's8res_accuracy_minus_chance.nii');
         else
-            vol_name = fullfile(D, S_syn(k).name,'Aud/loc/mvpa10mm/',all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.nii');
+            vol_name = fullfile(D, S_syn(k).name,sprintf('Aud/loc/mvpa_without_resting_%dmm', radius),all_comp_inv{tmp_comp}, 's8res_accuracy_minus_chance.nii');
         end
         scans1 = [scans1;vol_name];
     end
@@ -198,10 +124,10 @@ for tmp_comp = 1 : length(all_comp)
     %% for group 2:
     scans2 = {};
     for k = 1:length(S_con) %S_con if all controls
-        if ~isdir(fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm/',all_comp_inv{tmp_comp}))
-            vol_name = fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm/',all_comp{tmp_comp}, '/res_accuracy_minus_chance.nii');
+        if ~isdir(fullfile(D, S_con(k).name,sprintf('Aud/loc/mvpa_without_resting_%dmm', radius),all_comp_inv{tmp_comp}))
+            vol_name = fullfile(D, S_con(k).name,sprintf('Aud/loc/mvpa_without_resting_%dmm', radius),all_comp{tmp_comp}, 's8res_accuracy_minus_chance.nii');
         else
-            vol_name = fullfile(D, S_con(k).name,'Aud/loc/mvpa10mm/',all_comp_inv{tmp_comp}, '/res_accuracy_minus_chance.nii');
+            vol_name = fullfile(D, S_con(k).name,sprintf('Aud/loc/mvpa_without_resting_%dmm', radius),all_comp_inv{tmp_comp}, 's8res_accuracy_minus_chance.nii');
         end
         scans2 = [scans2;vol_name];
     end
@@ -214,17 +140,17 @@ for tmp_comp = 1 : length(all_comp)
     matlabbatch{i}.spm.stats.factorial_design.des.t2.gmsca = 0;
     matlabbatch{i}.spm.stats.factorial_design.des.t2.ancova = 0;
         
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'age';
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'age';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
+%     
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'handedness';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
+%     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCC = 1;
     
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'handedness';
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
-    matlabbatch{i}.spm.stats.factorial_design.cov(2).iCC = 1;
-    
-%     matlabbatch{i}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{i}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
     matlabbatch{i}.spm.stats.factorial_design.masking.tm.tm_none = 1;
     matlabbatch{i}.spm.stats.factorial_design.masking.im = 1;
     exp_mask = fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/MVPA/mask',S_effect(1).name);

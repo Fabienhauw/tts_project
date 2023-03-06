@@ -12,7 +12,7 @@ main_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/NIFTI';
 
 % subj_to_preproc = 'Sujet\d[4-9]|Sujet[1-2][0-9]|Control\d[2-9]|Control[1-2][0-2]'; % this one is for subjects who had the unframed color sequence
 % subj_to_preproc = 'Sujet0[123]|Control01'; % this one is for subjects who had the framed color sequence;
-subj_to_preproc = 'Control(17|18)';
+subj_to_preproc = 'Sujet01';
 % subj_to_preproc = '';
 e = exam(main_dir, subj_to_preproc); % all subjects with multi-echo
 
@@ -25,11 +25,11 @@ e.addSerie('T1w$', 'anat_T1', 1 );
 e.getSerie('anat').addVolume('^v_.*nii','v',1);
 
 % Func
-e.addSerie('Localizer_visual$' , 'run_localizer_visual', 1 );
-e.addSerie('Localizer_audio$'  , 'run_localizer_audio' , 1 );
+% e.addSerie('Localizer_visual$' , 'run_localizer_visual', 1 );
+% e.addSerie('Localizer_audio$'  , 'run_localizer_audio' , 1 );
 e.addSerie('Localizer_unframed_color$'  , 'run_localizer_unframed_color' , 1 );
 % e.addSerie('Localizer_color$'  , 'run_localizer_color' , 1 );
-e.addSerie('RS$'  , 'run_rs' , 1 );
+% e.addSerie('RS$'  , 'run_rs' , 1 );
 
 e.getSerie('run').addVolume('^v_.*nii','v',3);
 

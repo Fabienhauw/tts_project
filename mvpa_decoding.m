@@ -16,25 +16,29 @@ radius = 10;
 clear matlabbatch
 i=1;
 
-label1 = 'ScrSpeech';
-label2 =  'NormalSpeech';
+label1 = 'Words';
+label2 =  'Numbers';
+
+% label1 = 'ScrSpeech';
+% label2 =  'NormalSpeech';
 
 % label1 = 'PW';
 % label2 =  'Words';
 
-% a = 1; b = numel(S);
-a = 45; b = 45;
+a = 1; b = numel(S);
+% a = 45; b = 45;
 
 for k = a:b
     % Conditions: Motor, NormalSpeech, Numbers, Odds, PW, ScrSpeech, Words    
-    matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {sprintf('%s/%s/Aud/loc/mvpa%dmm', D, S(k).name, radius)};
+    matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {sprintf('%s/%s/Aud/loc/mvpa_without_resting_%dmm', D, S(k).name, radius)};
 %     matlabbatch{i}.spm.tools.tdt.decod.subj.dir = {fullfile(D, S(k).name, 'Aud/loc/mvpa')};
     matlabbatch{i}.spm.tools.tdt.decod.subj.conds.cond1 = label1;
     matlabbatch{i}.spm.tools.tdt.decod.subj.conds.cond2 = label2;
     matlabbatch{i}.spm.tools.tdt.decod.options.nrun = 8;
     matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.unit = 'mm';
     matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.rad = radius;
-    matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.mask = {fullfile(D, S(k).name, 'Aud/loc/mvpa/mask.nii')};    matlabbatch{i}.spm.tools.tdt.decod.options.meth = 'kernel';
+    matlabbatch{i}.spm.tools.tdt.decod.options.anal.searchlight.mask = {sprintf('%s/%s/Aud/loc/mvpa_without_resting_%dmm/mask.nii', D, S(k).name, radius)};    
+    matlabbatch{i}.spm.tools.tdt.decod.options.meth = 'kernel';
     matlabbatch{i}.spm.tools.tdt.decod.options.analysis = 'accuracy';
     matlabbatch{i}.spm.tools.tdt.decod.options.display = 'no';
     
@@ -58,6 +62,21 @@ par.jobname  = 'mvpa_decod';
 %%%%%%%% models
 
 job_ending_rountines(matlabbatch, [], par);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 %% Permutations
 

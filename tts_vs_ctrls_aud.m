@@ -22,14 +22,14 @@ S = [Syn;Con];
 % left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
 % matched controls: Control02|Control04|Control07|Control17
 
-% gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
-gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
+gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
+% gaucher_appar = {'Control02|Control04|Control07|Control17|Sujet'};
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
 S_con_app = S;
 S_con_app(mask_gauch_con) = [];
 
-% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
-mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
+mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
+% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
 S_droit = S;
 S_droit(mask_gauch) = [];
 

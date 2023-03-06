@@ -77,6 +77,7 @@ i=1;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI';
 cd(fullfile(D, S(1).name))
 all_ppi = dir(sprintf('*speech_baseline'));
+% all_ppi = dir(sprintf('*norm_scr'));
 all_ppi_con = fullfile({all_ppi.name}, 'con_0001.nii');
 
 
@@ -84,17 +85,45 @@ all_ppi_con = fullfile({all_ppi.name}, 'con_0001.nii');
 
 names = {
     all_ppi.name
-            };
+    };
+totsub = length(S_effect);
+ncon = length(all_ppi_con);
+nscan = ncon*totsub;
 
+% get image files names
+P={};
+for con=1:ncon
+    for s=1:totsub
+        P{(con-1)*totsub+s} =	fullfile(D, S_effect(s).name, all_ppi(con).name, 's4con_0001.nii');
+    end
+end
+
+j=0;
+for i=1:length(P)
+    if ~exist(P{i})
+        j=j+1;
+        filestosmooth{j}=strrep(P{i},'s4con','con');
+    end
+end
+
+if j>0
+    for u=1:j
+        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'con_','s4con_'),[4 4 4],0);
+    end
+end
+
+i=1;
 for c = 1:length(all_ppi_con)
     %% subject of interest:
-    contrast = all_ppi_con{c};
+    contrast = fullfile(all_ppi(c).name, 'con_0001.nii');
     scans1 = {};
+
+%% models
     for k = 1:length(S_syn)
         vol_name = fullfile(D, S_syn(k).name, contrast);
         scans1 = [scans1;vol_name];
     end
-    res_dir = fullfile(res_dir_base,names{c});
+    res_dir = fullfile(res_dir_base, sprintf('%s', names{c}));
     if ~isdir(res_dir)
         mkdir(res_dir)
     end

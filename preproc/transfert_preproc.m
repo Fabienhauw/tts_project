@@ -246,11 +246,11 @@ for k = a:b
     cd (DF)
     data_fold           = dir(sprintf('*%s',subject{1}));
     cd (fullfile(DF,data_fold(1).name));
-    aud_onsets          = dir('*Aud_without*mat');
-    vis_onsets          = dir('*Vis_without*mat');
+    aud_onsets          = dir('*Aud*mat');
+    vis_onsets          = dir('*Vis*mat');
     col_onsets          = dir(sprintf('*%s_Color.mat',subject{1}));
     if isempty(col_onsets), col_onsets = dir(sprintf('*%s_Col.mat',subject{1})); end
-    unfr_col_onsets     = dir('*Unframed_Col.mat');
+    unfr_col_onsets     = dir('*Unframed_Col*.mat');
     if ~isempty(loc_aud)
         for k = 1: length(aud_onsets)
             aud_data_cpt{k} = fullfile(DF,data_fold(1).name,aud_onsets(k).name);

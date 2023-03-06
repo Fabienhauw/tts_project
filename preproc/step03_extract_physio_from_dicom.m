@@ -5,10 +5,11 @@ clc
 
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/matvol'))
 addpath(genpath('/network/lustre/iss01/home/fabien.hauw/Documents/MATLAB'));
+addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/CMRR'))
 
 main_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/NIFTI';
 % subj_to_preproc = '((SYNESTHEX_Sujet)|(SYNESTHEX_Control))';
-subj_to_preproc = 'Control18';
+subj_to_preproc = 'Sujet01';
 % subj_to_preproc = 'Sujet\d[4-9]|Sujet[1-2][0-9]';
 e = exam(main_dir, subj_to_preproc); % all subjects with multi-echo
 

@@ -7,37 +7,6 @@ global UFp; UFp = 0.001;
 % categ='controls';
 tts_group.path_to_subject;
 
-
-Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
-Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
-S = [Syn;Con];
-
-% left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
-% matched controls: Control02|Control04|Control05|Control07|Control17 
-
-gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
-% gaucher_appar = {'Control02|Control04|Control05|Control07|Control17|Sujet'};
-mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
-S_con_app = S;
-S_con_app(mask_gauch_con) = [];
-con_group = repmat({'control'}, 1, length(S_con_app));
-
-mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Control')));
-% mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Control')));
-S_droit = S;
-S_droit(mask_gauch) = [];
-syn_group = repmat({'syn'}, 1, length(S_droit));
-
-categ = [syn_group, con_group];
-nsub(1) = length(S_droit); % synesthetes
-nsub(2) = length(S_con_app); % controls
-ngroups = 2;
-
-S_effect = [S_droit ; S_con_app];
-res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_%s_to_%s_s8', S_effect(1).name, S_effect(end).name);
-% res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_test');
-
-
 vector_age = [
     25.1013699; 70.8219178; 23.6821918; 24.3342466; 21.109589; 31.7260274; 18.8438356; ...
     36.3424658; 49.7753425; 27.2767123; 26.3616438; 40.8876712; 22.8246575; 43.1013699; 44.309589; ...
@@ -48,11 +17,47 @@ vector_age = [
     29.865753; 26.57534247; 24.67945205; 29.72328767; 58.97534247; ...
     ];
 
-vector_hand = [
-    0; 0; 0; 0; 1; 0; 1; 0; 0; 0; 1; 0; 0; 1; 0; 1; 0; 0; 0; 0; 0; 0;... % end of synesthetes
-    zeros(21,1); 1; 1; 1; 1; 1; ... % end of controls
-    ]; %0 = right, 1 = left;
+Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
+Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
+S = [Syn;Con];
+mask = ismember({S.name}, {'Sujet02', 'Sujet03', 'Control01'});
+S(mask) = [];
+vector_age(mask) = [];
 
+% left handed syn: Sujet05|Sujet07|Sujet11|Sujet14|Sujet16
+% matched controls: Control02|Control04|Control05|Control07|Control17 
+
+gaucher_appar = {'Control02|Control04|Control07|Control17|Control22|Control23|Control24|Control25|Control26|Sujet'};
+% gaucher_appar = {'Control02|Control04|Control05|Control07|Control17|Sujet'};
+mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
+S_con_app = S;
+S_con_app(mask_gauch_con) = [];
+vector_age_con = vector_age;
+vector_age_con(mask_gauch_con) = [];
+con_group = repmat({'control'}, 1, length(S_con_app));
+
+mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet01|Sujet12|Sujet13')));
+S_color = S(mask_gauch);
+vector_age_syn_color = vector_age;
+vector_age_syn_color(mask_gauch_con) = [];
+syn_color_group = repmat({'syn_color'}, 1, length(S_color));
+
+mask_gauch =  ~cellfun(@isempty,(regexp({S.name},'Sujet05|Sujet07|Sujet11|Sujet14|Sujet16|Sujet01|Sujet12|Sujet13|Control')));
+S_non_color = S;
+S_non_color(mask_gauch) = [];
+vector_age_syn_non_color = vector_age;
+vector_age_syn_non_color(mask_gauch_con) = [];
+syn_non_color_group = repmat({'syn_non_color'}, 1, length(S_non_color));
+
+categ = [syn_color_group, syn_non_color_group, con_group];
+vec_age = [vector_age_syn_color, vector_age_syn_non_color, vector_age_con];
+nsub(1) = length(S_color); % synesthetes
+nsub(2) = length(S_non_color); % controls
+nsub(3) = length(S_con_app); % controls
+ngroups = 3;
+
+S_effect = [S_color ; S_non_color; S_con_app];
+res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Vis/unfr_col/ANOVA_s5_without_resting_%s_to_%s_s8', S_effect(1).name, S_effect(end).name);
 
 for j = 1 : size(S,1)
     if ~isempty(find(~cellfun(@isempty,(regexp({S_effect.name},S(j).name)))))
@@ -62,16 +67,15 @@ for j = 1 : size(S,1)
     end
 end
 
-vector_cov1 = vector_age(mask_cov==1);
-vector_cov2 = vector_hand(mask_cov==1);
+vector_cov1 = vec_age;
 subname = {S_effect.name};
 
 totsub=length(subname);
 
 %-----------------------------------------------------------------
-cd(fullfile(D,S(1).name, 'Aud/loc/stats_s5_without_resting'));
-cont = [1 : 5];
-% words, pseudowords, numbers, normal_speech, scramble_speech, odds, motor
+cd(fullfile(D,S(1).name, 'Vis/unfr_col/stats_s5_without_resting'));
+cont = [1 : 2];
+% color, uncolor
 %-----------------------------------------------------------------
 
 ncon = length(cont);
@@ -87,7 +91,7 @@ P={};
 for con=1:ncon
     for s=1:totsub
         sub=subname{s};
-        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/stats_s5_without_resting/s8con_%04d.nii'],sub,cont(con));
+        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Vis/unfr_col/stats_s5_without_resting/scon_%04d.nii'],sub,cont(con));
     end
 end
 
@@ -95,17 +99,17 @@ j=0;
 for i=1:length(P)
     if ~exist(P{i})
         j=j+1;
-        filestosmooth{j}=strrep(P{i},'s8con','con');
+        filestosmooth{j}=strrep(P{i},'scon','con');
     end
 end
 
 if j>0
     for u=1:j
-        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'con_','s8con_'),[8 8 8],0); 
+        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'con_','scon_'),[8 8 8],0); 
     end
 end
 
-%% -Assemble SPM structure
+%-Assemble SPM structure
 %=======================================================================
 
 SPM.nscan = nscan;
@@ -218,7 +222,7 @@ Mdes 	= struct(	'Analysis_threshold',	{'None (-Inf)'},...
     'Implicit_masking',	{'No'},...
     'Explicit_masking',	{'Yes'});
 exp_mask = fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/masks',S_effect(1).name);
-exp_mask = sprintf('%s_%s_aud_loc_mask_thr_s5.nii',exp_mask, S_effect(end).name);
+exp_mask = sprintf('%s_%s_vis_col_mask_thr_s5.nii',exp_mask, S_effect(end).name);
 SPM.xM	= struct(	'T',-Inf,'TH',ones(nscan,1)*-Inf,...
     'I',1,'VM',spm_vol([exp_mask]),'xs',Mdes);
 % SPM.xM	= struct(	'T',-Inf,'TH',ones(nscan,1)*-Inf,...
@@ -244,35 +248,14 @@ SPM = spm_spm(SPM);
 
 %%%%%% Second, define the contrasts and estimate them
 
-words           = [1 0 0 0 0];
-pseudowords     = [0 1 0 0 0];
-numbers         = [0 0 1 0 0];
-normal_speech   = [0 0 0 1 0];
-scramble_speech = [0 0 0 0 1];
-% odds            = [0 0 0 0 0 1 0];
-% motor           = [0 0 0 0 0 0 1];
-EOI             = [eye(5)];
+color           = [1 0];
+uncolor         = [0 1];
+EOI             = [eye(2)];
 
-% words           = [1 zeros(1,ncon-1)];
-% pseudowords     = zeros(1,length(words)); pseudowords(2) = 1;
-% numbers         = zeros(1,length(words)); numbers(3) = 1;
-% normal_speech   = zeros(1,length(words)); normal_speech(4) = 1;
-% scramble_speech = zeros(1,length(words)); scramble_speech(5) = 1;
-% odds            = zeros(1,length(words)); odds(6) = 1;
-% motor           = zeros(1,length(words)); motor(7) = 1;
-
-phonology       = normal_speech - scramble_speech;
-lexicality      = words - pseudowords;
+images =        color + uncolor;
 
 Xvalues = {...
-    words, pseudowords, numbers, normal_speech, scramble_speech,...
-    lexicality, -lexicality, (words + normal_speech + numbers) - 3*pseudowords,...
-    phonology, -phonology, 2*numbers - (words + pseudowords), ...
-    normal_speech - words, words + pseudowords + numbers + normal_speech, ...
-    words - normal_speech, words - scramble_speech, pseudowords - scramble_speech, (words+pseudowords) - 2*scramble_speech, ...
-    (words + normal_speech) - 2*scramble_speech, (normal_speech + pseudowords) - 2*scramble_speech, ...
-    (normal_speech + pseudowords + words) - 3*scramble_speech, (normal_speech + pseudowords + words + numbers) - 4*scramble_speech,...
-    numbers - words, words - numbers,...
+    color, uncolor, images, color-uncolor, ...
     EOI, ...
     };
 
@@ -283,49 +266,63 @@ Xvalues = {...
 % end
 
 Xnames = {...
-    'words', 'pseudowords', 'numbers', 'normal_speech', 'scramble_speech',...
-    'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
-    'phonology', '-phonology', 'numbers - (words + pseudowords)', ...
-    'normal_speech - words', 'words + pseudowords + numbers + normal_speech',...
-    'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
-    '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
-    '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
-    'numbers - words', 'words - numbers', ...
-    'EOI', ...
+    'color', 'uncolor', 'images', 'color - uncolor', 'uncolor - color' ...
+    'EOI',...
     };
 
 numcomp=length(Xvalues);
 
-% synesthetes
+% synesthetes color
 for u=1:numcomp
-    values{u}               = reshape( [Xvalues{u};zeros(size(Xvalues{u}))],     size(Xvalues{u},1) , 2*size(Xvalues{u},2));
-%     values{u}               = reshape( [repmat(Xvalues{u}, nsub(1),1); repmat(zeros(size(Xvalues{u})), nsub(2),1)],     size(Xvalues{u},1) , totsub*size(Xvalues{u},2));
-    names{u}                = ['S ' Xnames{u}];
+    values{u}               = reshape( [Xvalues{u};zeros(size(Xvalues{u}));zeros(size(Xvalues{u}))],     size(Xvalues{u},1) , 3*size(Xvalues{u},2));
+    names{u}                = ['Scol ' Xnames{u}];
+end
+% synesthetes non color
+for u=1:numcomp
+    values{numcomp+u}       = reshape( [zeros(size(Xvalues{u})); Xvalues{u};zeros(size(Xvalues{u}))],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{numcomp+u}        = ['Snocol ' Xnames{u}];
+end
+% all synesthetes
+for u=1:numcomp
+    values{2*numcomp+u}     = reshape( [Xvalues{u}; Xvalues{u}; zeros(size(Xvalues{u}))],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{2*numcomp+u}      = ['S ' Xnames{u}];
 end
 % controls
 for u=1:numcomp
-    values{numcomp+u}       = reshape([zeros(size(Xvalues{u})); Xvalues{u}],size(Xvalues{u},1),2*size(Xvalues{u},2));
-%     values{numcomp+u}       = reshape([repmat(zeros(size(Xvalues{u})), nsub(1),1); repmat(Xvalues{u}, nsub(2),1)],     size(Xvalues{u},1) , totsub*size(Xvalues{u},2));
-    names{numcomp+u}        = ['C ' Xnames{u}];
+    values{3*numcomp+u}      = reshape( [zeros(size(Xvalues{u}));zeros(size(Xvalues{u}));Xvalues{u}],     size(Xvalues{u},1) , 3*size(Xvalues{u},2));
+    names{3*numcomp+u}       = ['C ' Xnames{u}];
 end
 % (synesthetes+controls)
 for u=1:numcomp
-    values{2*numcomp+u}     = reshape([Xvalues{u};Xvalues{u}],size(Xvalues{u},1),2*size(Xvalues{u},2));
-%     values{2*numcomp+u}     = reshape([repmat(Xvalues{u}, nsub(1),1); repmat(Xvalues{u}, nsub(2),1)], size(Xvalues{u},1) , totsub*size(Xvalues{u},2));
-    names{2*numcomp+u}      = ['S+C ' Xnames{u}];
+    values{4*numcomp+u}     = reshape([Xvalues{u};Xvalues{u};Xvalues{u}],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{4*numcomp+u}      = ['S+C ' Xnames{u}];
 end
 % synesthetes-controls
 for u=1:numcomp
-    values{3*numcomp+u}     = reshape([Xvalues{u};-Xvalues{u}],size(Xvalues{u},1),2*size(Xvalues{u},2));
-%     values{3*numcomp+u}     = reshape([repmat(Xvalues{u}, nsub(1),1); repmat(-Xvalues{u}, nsub(2),1)], size(Xvalues{u},1) , totsub*size(Xvalues{u},2));
-    names{3*numcomp+u}      = ['S-C ' Xnames{u}];
+    values{5*numcomp+u}     = reshape([Xvalues{u};Xvalues{u};-2*Xvalues{u}],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{5*numcomp+u}      = ['S-C ' Xnames{u}];
 end
 % controls-synesthetes
 for u=1:numcomp
-    values{4*numcomp+u}     = reshape([-Xvalues{u};Xvalues{u}],size(Xvalues{u},1),2*size(Xvalues{u},2));    
-%     values{4*numcomp+u}     = reshape([repmat(-Xvalues{u}, nsub(1),1); repmat(Xvalues{u}, nsub(2),1)], size(Xvalues{u},1) , totsub*size(Xvalues{u},2));
-    names{4*numcomp+u}      = ['C-S ' Xnames{u}];
+    values{6*numcomp+u}     = reshape([-Xvalues{u};-Xvalues{u};2*Xvalues{u}],size(Xvalues{u},1),3*size(Xvalues{u},2));    
+    names{6*numcomp+u}      = ['C-S ' Xnames{u}];
 end
+% synesthetes color-controls
+for u=1:numcomp
+    values{7*numcomp+u}     = reshape([Xvalues{u};zeros(size(Xvalues{u}));-Xvalues{u}],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{7*numcomp+u}      = ['Scol-C ' Xnames{u}];
+end
+% synesthetes non color-controls
+for u=1:numcomp
+    values{8*numcomp+u}     = reshape([zeros(size(Xvalues{u}));Xvalues{u};-Xvalues{u}],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{8*numcomp+u}      = ['Snocol-C ' Xnames{u}];
+end
+% synesthetes color-synesthetes non color
+for u=1:numcomp
+    values{9*numcomp+u}     = reshape([Xvalues{u};-Xvalues{u};zeros(size(Xvalues{u}))],size(Xvalues{u},1),3*size(Xvalues{u},2));
+    names{9*numcomp+u}      = ['S col-S non col ' Xnames{u}];
+end
+
 
 for n=1:size(values,2)
     values{n}=[values{n} zeros(size(values{n},1),totsub)];
@@ -337,6 +334,11 @@ for n = 1 : numcomp-1
     types{2*numcomp+n} = 'T';
     types{3*numcomp+n} = 'T';
     types{4*numcomp+n} = 'T';
+    types{5*numcomp+n} = 'T';
+    types{6*numcomp+n} = 'T';
+    types{7*numcomp+n} = 'T';
+    types{8*numcomp+n} = 'T';
+    types{9*numcomp+n} = 'T';
 end
 for n = numcomp
     types{n}='F';
@@ -344,6 +346,11 @@ for n = numcomp
     types{2*numcomp+n} = 'F';
     types{3*numcomp+n} = 'F';
     types{4*numcomp+n} = 'F';
+    types{5*numcomp+n} = 'F';
+    types{6*numcomp+n} = 'F';
+    types{7*numcomp+n} = 'F';
+    types{8*numcomp+n} = 'F';
+    types{9*numcomp+n} = 'F';
 end
 
 %%

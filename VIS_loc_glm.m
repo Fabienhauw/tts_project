@@ -13,7 +13,6 @@ S(mask) = [];
 a = 1; b = 48;
 erase = input('Do you want to erase previous visual models? [yes/no] ', 's');
 
-redo = 1;
 if isequal(erase,'yes')
     redo = 1;
 elseif isequal(erase,'no')

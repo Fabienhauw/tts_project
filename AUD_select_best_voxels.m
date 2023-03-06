@@ -3,7 +3,7 @@ clear;
 
 %% parameters:
 select_con = [12]; % 9 = words - (faces + houses) in the visual GLM; %select_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
-test_con = [11]; % 11 = normal - scrambled; 16 = normal + numbers + words + PW; 24 = (normal + numbers + words + PW) - scr speech; %test_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
+test_con = [16]; % 11 = normal - scrambled; 16 = normal + numbers + words + PW; 24 = (normal + numbers + words + PW) - scr speech; %test_con = number of the contrast used to select the voxels (in SPM.mat of the select_path)
 diff_ref = 0; % 1 = use a different contrast for selecting the best_voxels and for comparing signals;
 only_right_hand = 1;
 volume_option = 2; %1 = ROI, 2 = coordinates;
@@ -54,46 +54,31 @@ if volume_option == 1
 elseif volume_option == 2
     % different coordinates, according to where they come from
     
-    %     AUD sent > scr, RH, TTEST
+    %     AUD sent > scr, all subj, RH, TTEST
 %         peaks = 'aud_11'; % phonology contrast
 %         coord_names = {'SMG',   'pSTS',    'aSTS',    'vis VWFA',  'VWFA',      'aVWFA',     'iTPol',     'sTPol',     'sIFG',    'mIFG',    'iIFG',    'mSTG'};
 %         all_xyzmm = [-58 -44 23; -52 -38 0; -58 -6 -2; -48 -54 -20; -52 -51 -20; -40 -36 -27; -40 -11 -47; -40 -14 -34; -50 -8 50; -45 22 23; -50 26 -2; -52 -14 6];
     
     %     AUD speech > baseline, syn > con, RH
-        peaks = 'aud_16'; % phonology contrast, through ANOVA and not ttests
-        coord_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG'};
-        all_xyzmm = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53]; % SMG, VWFA, IFG, MFG, mlSTG, SMA;
+        peaks = 'tts_network_aud_16'; % phonology contrast, through ANOVA and not ttests
+        coord_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG',  'lpSTG',   'laSTG',  'rpSTG',   'raSTG'};
+        all_xyzmm = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53; -70 -28 3; -60 12 -7; 50 -24 16; 65 4 0]; 
 
-    %     AUD sent > scr, RH, ANOVA
+     %     AUD speech > baseline, syn > con, RH
+%         peaks = 'aud_16'; % phonology contrast, through ANOVA and not ttests
+%         coord_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG',  'lpSTG',   'laSTG',  'rpSTG',   'raSTG'};
+%         all_xyzmm = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53; -70 -28 3; -60 12 -7; 50 -24 16; 65 4 0]; 
+
+    %     AUD sent + scr,all subj, RH, ANOVA
 %         peaks = 'aud_11'; % phonology contrast, through ANOVA and not ttests
 %         coord_names = {'SMG',    'VWFA',      'IFG',      'MFG',    'mlSTG',   'SMA'};
-%         all_xyzmm = [-48 -41 16; -48 -48 -14; -45 19 20; -50 -6 48; -58 -6 -4; -2 4 60]; % SMG, VWFA, IFG, MFG, mlSTG, SMA;
-
-        
-    %     AUD "big" phonology, RH
-%         peaks = 'aud_24'; % "big" phonology contrast
-%         coord_names = {'SMG',   'pSTS',     'aSTS',   'vis VWFA',   'VWFA',     'aVWFA',     'iTPol',    'sTPol',     'sIFG',     'mIFG',     'iIFG'};
-%         all_xyzmm = [-48 -41 18; -52 -48 6; -58 -6 -4; -48 -54 -20; -42 -51 -14; -40 -38 -24; -38 -8 -44; -38 -18 -32; -50 -8 43; -42 12 26; -45 29 -2];
-    
-    %     AUD sentences + numbers + words + PW, RH
-%           peaks = 'aud_16';
-%           coord_names = {'MTS',   'IFG'};
-%           all_xyzmm = [-60 -24 -4; -38 16 28];
-
-    %     AUD sentences + numbers + words + PW, RH
-%         peaks = 'aud_4';
-%         coord_names = {'STG',   'sTPol',     'lIPS'};
-%         all_xyzmm = [-52 -14 6; -38 -11 -34; -28 -64 43];
+%         all_xyzmm = [-48 -41 16; -48 -48 -14; -45 19 20; -50 -6 48; -58 -6 -4; -2 4 60];
 
     %     VIS w>(f+h+t), RH
 %         peaks = 'vis_12';
 %         coord_names = {'lOcc', 'rOcc', 'lIPS', 'rIPS', 'SMA', 'mIFG', 'iIFG', 'VWFA', 'lSTS', 'rSTS'};
 %         all_xyzmm = [-20 -94 -4; 20 -88 -4; -30 -48 43; 38 -54 46; 0 12 53; -40 6 30; -50 36 13; -48 -54 -20; -68 -44 6; 58 -31 0];
         
-     %    RS global connectivity
-%         peaks = 'resting_state';
-%         coord_names = {'mfg', 'sma', 'locc_lpfc', 'locc_sma'};
-%         all_xyzmm = [-42 46 20; 6 24 40; -34 -94 -8; -34 -96 -10];
 end
 
 %% paths and scans

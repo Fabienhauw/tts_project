@@ -8,41 +8,28 @@ S = dir(D);
 mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 a = 1; b = 48;
-for k = a:b
-    which_dir = fullfile(D, S(k).name, 'Aud/loc/stats_s5_without_resting');
-    cd(which_dir)
-    files = dir('*PPI*');
-    filenames = fullfile(which_dir, {files.name});
-    try
-        delete( filenames{:} );
-    end
-    
-    
-    files = dir('*sphere*');
-    filenames = fullfile(which_dir, {files.name});
-    try
-        delete( filenames{:} );
-    end
-    
-    
-    which_dir = fullfile(D, S(k).name);
-    cd(which_dir)
-    files = dir('*words_pw*');
-    files = files([files.isdir]);
-    filenames = fullfile(which_dir, {files.name});
-    for tmp = 1 : length(filenames)
-        try
-            rmdir(filenames{tmp}, 's')
-        end
-    end
-    
-    files = dir('*sphere*');
-    files = files([files.isdir]);
-    filenames = fullfile(which_dir, {files.name});
-    for tmp = 1 : length(filenames)
-        try
-            rmdir(filenames{tmp}, 's')
-        end
-    end
 
+
+for k = a:b
+    which_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa_without_resting');
+    cd(which_dir)
+    files = dir('SPM.mat');
+    filenames = fullfile(which_dir, {files.name});
+    try
+        delete( filenames{:} );
+    end
+end
+
+% for dir
+for k = a:b
+    which_dir = fullfile(D, S(k).name,'Aud/loc/');
+    cd(which_dir)
+    files = dir('mvpa_*resting'); % never enter the exact name, or it will also erase repo '.' and '..', so the repo above...
+    files = files([files.isdir]);
+    filenames = fullfile(which_dir, {files.name});
+    for tmp = 1 : length(filenames)
+        try
+            rmdir(filenames{tmp}, 's')
+        end
+    end
 end

@@ -7,7 +7,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 
-res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/one_vs_all';
+res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/one_vs_all_s8';
 
 %% to erase previous smoothed contrasts;
 erase_model = input('Do you want to erase previous auditive models? [yes/no] ', 's');
@@ -45,17 +45,19 @@ S_syn = S;
 S_syn(mask_gauch) = [];
 
 S_effect = [S_syn ; S_con];
-nb_subj  = numel(S_effect);
+subname = {S_effect.name};
+
+totsub=length(subname);
 
 path_to_scan_syn = {};
 path_to_scan_con = {};
 for k = 1 : numel(S_syn)
-    path_to_subj = fullfile(D, S_syn(k).name, 'Aud/loc/stats_s5');
+    path_to_subj = fullfile(D, S_syn(k).name, 'Aud/loc/stats_s5_without_resting');
     path_to_scan_syn = [path_to_scan_syn;path_to_subj];
 end
 
 for k = 1 : numel(S_con)
-    path_to_subj = fullfile(D, S_con(k).name, 'Aud/loc/stats_s5');
+    path_to_subj = fullfile(D, S_con(k).name, 'Aud/loc/stats_s5_without_resting');
     path_to_scan_con = [path_to_scan_con;path_to_subj];
 end
 
@@ -123,25 +125,53 @@ if ~exist ('i', 'var')
     i=1;
 end
 
+% get image files names
+cd(path_to_scan_con{1})
+cont = dir('con_00*.nii');
+all_cont = [1 : length(cont)];
+all_cont_names = {cont.name};
+ncon = length(cont);
+P={};
+for con=1:ncon
+    for s=1:totsub
+        sub=subname{s};
+        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/stats_s5_without_resting/s8%s'], sub, all_cont_names{con});
+    end
+end
+
+j=0;
+for i=1:length(P)
+    if ~exist(P{i})
+        j=j+1;
+        filestosmooth{j}=strrep(P{i},'s8con','con');
+    end
+end
+
+if j>0
+    for u=1:j
+        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'con_','s8con_'),[8 8 8],0); 
+    end
+end
+
 %% second level:
 clear matlabbatch
 i=1;
 
-cd(fullfile(D, S_effect(1).name,'Aud/loc/stats_s5'))
-all_contrast = dir(sprintf('con*.nii'));
-all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, '^con_\d+\.nii'))));
+cd(fullfile(D, S_effect(1).name,'Aud/loc/stats_s5_without_resting'))
+all_contrast = dir(sprintf('s8con*.nii'));
+all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, '^s8con_\d+\.nii'))));
 
 names = {...
     'words', 'pseudowords', 'numbers', 'normal_speech', 'scramble_speech',...
     'odds', 'motor',...
     'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
     'phonology', '-phonology', 'words + pseudowords', 'numbers - (words + pseudowords)', ...
-    'normal_speech - words', '(words + pseudowords + numbers + normal_speech) - scramble speech', ...
-    'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
+    'normal_speech - words', 'words + pseudowords + numbers + normal_speech', ...
+    'all', 'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
     '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
     '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
     'numbers - words', 'words - numbers', ...
-    'EOI', ...
+    'EOI', 'EOI2', ...
     };
 
 for k = 1 : length(S_syn)
@@ -250,7 +280,7 @@ par.jobname  = 'aud_glm';
 %%%%%%%% this line below to comment to avoid re estimating
 %%%%%%%% models
 
-job_ending_rountines(matlabbatch, [], par);
+% job_ending_rountines(matlabbatch, [], par);
 
 %% part to compare one control vs other controls
 
@@ -334,7 +364,7 @@ for k = 1 : length(S_con)
 %         matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
 %         
 %         i=i+1;
-
+% 
         matlabbatch{i}.spm.stats.con.spmmat = {fullfile(res_dir, 'SPM.mat')};
         matlabbatch{i}.spm.stats.con.consess{1}.tcon.name = 'Positive';
         matlabbatch{i}.spm.stats.con.consess{1}.tcon.weights = 1;

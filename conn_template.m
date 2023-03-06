@@ -61,7 +61,8 @@ elseif roi_incl == 3
 elseif roi_incl == 4
     proj_name = (sprintf('%s_perso_rois_vis.mat', proj_name));
 end
-proj_name = (sprintf('syn_group_rs_rh_s5_perso_rois_global_connec.mat', proj_name));
+proj_name = (sprintf('rh_s5_final_with_gcorr.mat', proj_name));
+% proj_name = (sprintf('syn_group_rs_rh_s5_perso_rois_global_connec.mat', proj_name));
 % proj_name = 'syn_group_rs_s5_modified_hz_filter.mat';
 
 mask_gauch_con = ~cellfun(@isempty,(regexp({S.name},gaucher_appar)));
@@ -101,8 +102,8 @@ vector_cov2 = vector_hand(mask_cov==1);
 
 S = S_final;
 
-aud_coord_names = {'SMG', 'pSTS', 'aSTS', 'VWFA', 'aVWFA', 'iTPol', 'sTPol', 'sIFG', 'mIFG', 'iIFG', 'mSTG'};
-aud_all_xyzmm = [-58 -44 23; -52 -38 0; -58 -6 -2; -52 -51 -20; -40 -36 -27; -40 -11 -47; -40 -14 -34; -50 -8 50; -45 22 23; -50 26 -2; -52 -14 6];
+aud_coord_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG',  'lpSTG',   'laSTG',  'rpSTG',   'raSTG'};
+aud_all_xyzmm = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53; -70 -28 3; -60 12 -7; 50 -24 16; 65 4 0]; 
 
 vis_coord_names = {'lOcc', 'rOcc', 'lIPS', 'rIPS', 'SMA', 'mIFG', 'iIFG', 'VWFA', 'lSTS', 'rSTS'};
 vis_all_xyzmm = [-20 -94 -4; 20 -88 -4; -30 -48 43; 38 -54 46; 0 12 53; -40 6 30; -50 36 13; -48 -54 -20; -68 -44 6; 58 -31 0];
@@ -160,18 +161,21 @@ for k=1:numel(S)
     func = fullfile(D,S(k).name,'RS/swf',func.name);
     FUNCTIONAL_FILE = [FUNCTIONAL_FILE;func];
     
-    cd (fullfile(D,S(k).name, 'Aud/loc/stats_s5'))
+    cd (fullfile(D,S(k).name, 'Aud/loc/stats_s5_without_resting'))
     for tmp_roi = 1 : length(aud_coord_names)
         xyz = aud_all_xyzmm(tmp_roi,:);
-        roi_filename = dir(sprintf('*best_vox*%d_%d_%d*_based_on_auditive*', xyz));
-        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5', roi_filename.name);
-        ROI_AUD_FILE{tmp_roi}{k,1} = roi;
+        roi_filename = dir(sprintf('*best_vox*%d_%d_%d*tts_network*', xyz));
+        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5_without_resting', roi_filename.name);
+        ROI_AUD_FILE{2*(tmp_roi-1)+1}{k,1} = roi;
+        roi_filename = dir(sprintf('VOI*%d_%d_%d*4mm*sph_ROI_adapted*mask.nii', xyz));
+        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5_without_resting', roi_filename.name);
+        ROI_AUD_FILE{2*(tmp_roi-1)+2}{k,1} = roi;
     end
     
     for tmp_roi = 1 : length(vis_coord_names)
         xyz = vis_all_xyzmm(tmp_roi,:);
         roi_filename = dir(sprintf('*best_vox*%d_%d_%d*based_on_visual*', xyz));
-        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5', roi_filename.name);
+        roi = fullfile(D,S(k).name, 'Aud/loc/stats_s5_without_resting', roi_filename.name);
         ROI_VIS_FILE{tmp_roi}{k,1} = roi;
     end
 end
@@ -274,85 +278,86 @@ for nsub = 1:NSUBJECTS
 end
 
 %% roi part;
-if roi_incl == 1
-    
-    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','atlas_brainnet'};
-    batch.Setup.rois.multiplelabels     = [0,0,0,1];
-    batch.Setup.rois.regresscovariates  = [0,1,1,0];
-    for nses = 1 : nsessions
-        for nsub = 1 : NSUBJECTS
-            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
-            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
-            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
-        end
-        batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/atlas/brainnetome/BN_Atlas_246_1mm_reoriented.nii';
-        batch.Setup.rois.dimensions{1,nses} = 1;
-        batch.Setup.rois.dimensions{2,nses} = 16;
-        batch.Setup.rois.dimensions{3,nses} = 16;
-    end
-    
-elseif roi_incl == 2
-    
-    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','networks'};
-    batch.Setup.rois.multiplelabels     = [0,0,0,1];
-    batch.Setup.rois.regresscovariates  = [0,1,1,0];
-    for nses = 1 : nsessions
-        for nsub = 1 : NSUBJECTS
-            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
-            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
-            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
-        end
-        batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/conn18.b/rois/networks.nii';
-        batch.Setup.rois.dimensions{1,nses} = 1;
-        batch.Setup.rois.dimensions{2,nses} = 16;
-        batch.Setup.rois.dimensions{3,nses} = 16;
-    end
-    
-elseif roi_incl == 3
-    
-    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF'};
-    batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
-    batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
-    for nses = 1 : nsessions
-        for nsub = 1 : NSUBJECTS
-            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
-            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
-            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
-            for tmp_roi = 1 : length(aud_coord_names)
-                batch.Setup.rois.files{tmp_roi + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_AUD_FILE{tmp_roi}{nsub};
-                batch.Setup.rois.names{tmp_roi + 3}                             = aud_coord_names{tmp_roi};
+switch roi_incl
+    case 1
+        
+        batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','atlas_brainnet'};
+        batch.Setup.rois.multiplelabels     = [0,0,0,1];
+        batch.Setup.rois.regresscovariates  = [0,1,1,0];
+        for nses = 1 : nsessions
+            for nsub = 1 : NSUBJECTS
+                batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+                batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+                batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
             end
+            batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/cohen/data/Fabien_official/atlas/brainnetome/BN_Atlas_246_1mm_reoriented.nii';
+            batch.Setup.rois.dimensions{1,nses} = 1;
+            batch.Setup.rois.dimensions{2,nses} = 16;
+            batch.Setup.rois.dimensions{3,nses} = 16;
         end
-        batch.Setup.rois.files{length(aud_coord_names) + 4,nses}     = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/syn_group_rs_rh_s5_perso_rois_aud/results/secondlevel/V2V_01/rh_synesthetes(1).rh_controls(-1).age(0)/rest/GlobalCorrelation_5_Inf_0_0_0_1_64_1/lpfc_syn_minus_con_510-3_510-2.nii'
-        batch.Setup.rois.names{length(aud_coord_names) + 4} = 'lpfc_roi_global_connect';
-        batch.Setup.rois.files{length(aud_coord_names) + 5,nses}     = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/syn_group_rs_rh_s5_perso_rois_aud/results/secondlevel/V2V_01/rh_synesthetes(1).rh_controls(-1).age(0)/rest/GlobalCorrelation_5_Inf_0_0_0_1_64_1/sma_syn_minus_con_510-3_510-2.nii'
-        batch.Setup.rois.names{length(aud_coord_names) + 5} = 'sma_roi_global_connect';
-        batch.Setup.rois.dimensions{1,nses} = 1;
-        batch.Setup.rois.dimensions{2,nses} = 16;
-        batch.Setup.rois.dimensions{3,nses} = 16;
-    end
-    
-elseif roi_incl == 4
-    batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF'};
-    batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
-    batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
-    for nses = 1 : nsessions
-        for nsub = 1 : NSUBJECTS
-            batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
-            batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
-            batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
-            for tmp_roi = 1 : length(vis_coord_names)
-                batch.Setup.rois.files{tmp_roi + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_VIS_FILE{tmp_roi}{nsub};
-                batch.Setup.rois.names{tmp_roi + 3}                             = vis_coord_names{tmp_roi};
+        
+    case 2
+        
+        batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF','networks'};
+        batch.Setup.rois.multiplelabels     = [0,0,0,1];
+        batch.Setup.rois.regresscovariates  = [0,1,1,0];
+        for nses = 1 : nsessions
+            for nsub = 1 : NSUBJECTS
+                batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+                batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+                batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
             end
+            batch.Setup.rois.files{4,nses}           = '/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/conn18.b/rois/networks.nii';
+            batch.Setup.rois.dimensions{1,nses} = 1;
+            batch.Setup.rois.dimensions{2,nses} = 16;
+            batch.Setup.rois.dimensions{3,nses} = 16;
         end
-        batch.Setup.rois.files{length(aud_coord_names) + 4,nses}     = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/syn_group_rs_rh_s5_perso_rois_vis/results/secondlevel/V2V_01/rh_synesthetes(1).rh_controls(-1).age(0)/rest/GlobalCorrelation_5_Inf_0_0_0_1_64_1/lpfc_syn_minus_con_510-3_510-2.nii'
-        batch.Setup.rois.names{length(aud_coord_names) + 4} = 'lpfc_roi_global_connect';
-        batch.Setup.rois.dimensions{1,nses} = 1;
-        batch.Setup.rois.dimensions{2,nses} = 16;
-        batch.Setup.rois.dimensions{3,nses} = 16;
-    end
-    
+        
+    case 3
+        
+        batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF'};
+        batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
+        batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
+        for nses = 1 : nsessions
+            for nsub = 1 : NSUBJECTS
+                batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+                batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+                batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+                for tmp_roi = 1 : length(aud_coord_names)
+                    batch.Setup.rois.files{2*(tmp_roi-1)+1 + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_AUD_FILE{2*(tmp_roi-1)+1}{nsub};
+                    batch.Setup.rois.names{2*(tmp_roi-1)+1 + 3}                             = sprintf('%s best voxels', aud_coord_names{tmp_roi});
+                    batch.Setup.rois.files{2*(tmp_roi-1)+2 + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_AUD_FILE{2*(tmp_roi-1)+2}{nsub};
+                    batch.Setup.rois.names{2*(tmp_roi-1)+2 + 3}                             = sprintf('%s roi', aud_coord_names{tmp_roi});
+                end
+            end
+            batch.Setup.rois.files{length(aud_coord_names)*2 + 4,nses}  = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/images/gcorr/lantmfg_bin_gcorr_syn>con_510-3_510-2.nii';
+            batch.Setup.rois.names{length(aud_coord_names)*2 + 4}       = 'left_ant_mfg_roi_global_connect';
+            batch.Setup.rois.files{length(aud_coord_names)*2 + 5,nses}  = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/rs/images/gcorr/sma_bin_gcorr_syn>con_510-3_510-2.nii';
+            batch.Setup.rois.names{length(aud_coord_names)*2 + 5}       = 'sma_roi_global_connect';
+            batch.Setup.rois.dimensions{1,nses}                         = 1;
+            batch.Setup.rois.dimensions{2,nses}                         = 16;
+            batch.Setup.rois.dimensions{3,nses}                         = 16;
+        end
+        
+    case 4
+        batch.Setup.rois.names              = {'Grey Matter','White Matter','CSF'};
+        batch.Setup.rois.multiplelabels     = [0,0,0,0,0,0,0,0,0];
+        batch.Setup.rois.regresscovariates  = [0,1,1,0,0,0,0,0,0];
+        for nses = 1 : nsessions
+            for nsub = 1 : NSUBJECTS
+                batch.Setup.rois.files{1,nses}{1, nsub}{1, 1}{1, 1}  = GM{nsub,nses};
+                batch.Setup.rois.files{2,nses}{1, nsub}{1, 1}{1, 1}  = WM{nsub,nses};
+                batch.Setup.rois.files{3,nses}{1, nsub}{1, 1}{1, 1}  = CSF{nsub,nses};
+                for tmp_roi = 1 : length(vis_coord_names)
+                    batch.Setup.rois.files{tmp_roi + 3, nses}{1, nsub}{1, 1}{1, 1}  = ROI_VIS_FILE{tmp_roi}{nsub};
+                    batch.Setup.rois.names{tmp_roi + 3}                             = vis_coord_names{tmp_roi};
+                end
+            end
+            batch.Setup.rois.dimensions{1,nses} = 1;
+            batch.Setup.rois.dimensions{2,nses} = 16;
+            batch.Setup.rois.dimensions{3,nses} = 16;
+        end
+        
 end
 
 batch.Setup.rois.add = 0;

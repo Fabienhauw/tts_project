@@ -1,3 +1,6 @@
+% to define a GLM for words/pseudowords run, with normal/reverse speech as a
+% modulatory parameter 1/-1 for the DCM model.
+
 clear;clc;
 
 addpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
@@ -20,14 +23,18 @@ elseif isequal(erase,'no')
     redo = 0;
 end
 
-for k = a:b
+for k = a : b
     if isdir (fullfile(D, S(k).name,'Aud'))
         %% modele specification:
         if exist ('i', 'var')==0
             i=1;
         end
-        filenames={};
-        which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5');
+        which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
+%         which_dir=fullfile(D, S(k).name,'Aud/loc/stats/dcm_model_param_modul_endroit');
+        if ~isdir(which_dir)
+            mkdir(which_dir)
+        end
+        
         dinfo = dir(which_dir);
         dinfo([dinfo.isdir]) = [];   %skip directories
         filenames = fullfile(which_dir, {dinfo.name});
@@ -67,90 +74,97 @@ for k = a:b
 %             volume=sprintf('%s,%d',vol_name,v);
 %             scans=[scans;volume];
 %         end
+%         
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
-%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-%         multi_name=fullfile(D,S(k).name,'Aud/loc/cpt_data/Timedata_');
-%         multi_name = sprintf('%s%s%s',multi_name,S(k).name,'_Aud.mat');
-%         matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {multi_name};
+%         cd(fullfile(D,S(k).name,'Aud/loc/cpt_data'))
+%         multi_name = dir('onsets_dcm_param*.mat');
+%         load(multi_name.name)
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.name = names;
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.onset = onsets{1};
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.duration = durations{1};
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.tmod = 0;
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'speech_scrambled';
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).param = parametric_modul{1};
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).poly = 1;
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).name = 'words_pw';
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).param = parametric_modul{2};
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).poly = 1;
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.orth = 0; % orthogonalization, try with 1 or 0...
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {''};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.regress = struct('name', {}, 'val', {});
 %         multi_reg=fullfile(D,S(k).name,'Aud/loc/param');
 %         cd (multi_reg);
 %         mr = 'multiple_regressors.txt';
 %         multi_reg=fullfile(multi_reg,mr);
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.multi_reg = {multi_reg};
+%         
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.hpf = 128;
 %         matlabbatch{i}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
 %         matlabbatch{i}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
 %         matlabbatch{i}.spm.stats.fmri_spec.volt = 1;
 %         matlabbatch{i}.spm.stats.fmri_spec.global = 'None';
 %         matlabbatch{i}.spm.stats.fmri_spec.mthresh = 0;
-%         mask = fullfile(D,S(k).name,'anat/brain_extraction_mask.nii');
+%         anat=fullfile(D,S(k).name,'anat');
+%         mask = fullfile(anat,'brain_extraction_mask.nii');
 %         matlabbatch{i}.spm.stats.fmri_spec.mask = {mask};%mask
 %         matlabbatch{i}.spm.stats.fmri_spec.cvi = 'AR(1)';
 %         i=i+1;
         
-%         matlabbatch{i}.spm.stats.fmri_est.spmmat = {fullfile(which_dir, 'SPM.mat')};
+        filename=fullfile(which_dir,'SPM.mat');
+%         matlabbatch{i}.spm.stats.fmri_est.spmmat = {filename};
 %         matlabbatch{i}.spm.stats.fmri_est.write_residuals = 0;
 %         matlabbatch{i}.spm.stats.fmri_est.method.Classical = 1;
 %         i=i+1;
+%         
+        matlabbatch{i}.spm.stats.con.spmmat = {filename};
         
-        matlabbatch{i}.spm.stats.con.spmmat = {fullfile(which_dir, 'SPM.mat')};
-        
-        words           = [1 0 0 0 0 0 0 0];
-        pseudowords     = [0 1 0 0 0 0 0 0];
-        numbers         = [0 0 1 0 0 0 0 0];
-        normal_speech   = [0 0 0 1 0 0 0 0];
-        scramble_speech = [0 0 0 0 1 0 0 0];
-        odds            = [0 0 0 0 0 1 0 0];
-        motor           = [0 0 0 0 0 0 1 0];
-        resting         = [0 0 0 0 0 0 0 1];
-        EOI             = [eye(7)];
-        EOI2            = [eye(5)];
-        
-        phonology       = normal_speech - scramble_speech;
-        lexicality      = words - pseudowords;
+        sounds      =   [1 0 0];
+        speech_scr  =   [0 1 0];
+        words_pw    =   [0 0 1];
+
+%         sounds      =   [1 0 0 0];
+%         speech_scr  =   [0 1 0 0];
+%         lists       =   [0 0 1 0];
+%         words_pw    =   [0 0 0 1];
         
         values = {...
-            words - resting, pseudowords - resting, numbers - resting, normal_speech - resting, scramble_speech - resting, ...
-            odds - resting, motor - resting,...
-            lexicality, -lexicality, (words + normal_speech + numbers) - 3*pseudowords,...
-            phonology, -phonology, words + pseudowords, 2*numbers - (words + pseudowords), ...
-            normal_speech - words, words + pseudowords + numbers + normal_speech, ...
-            words + pseudowords + numbers + normal_speech + scramble_speech, words - normal_speech, words - scramble_speech, pseudowords - scramble_speech, (words+pseudowords) - 2*scramble_speech, ...
-            (words + normal_speech) - 2*scramble_speech, (normal_speech + pseudowords) - 2*scramble_speech, ...
-            (normal_speech + pseudowords + words) - 3*scramble_speech, (normal_speech + pseudowords + words + numbers) - 4*scramble_speech,...
-            numbers - words, words - numbers,...
-            EOI, EOI2, ...
+            sounds, speech_scr, words_pw, ...
+            (sounds + speech_scr)/2, (sounds - speech_scr)/2, ...
+%             sounds.*words_pw, -sounds.*words_pw, ...
             };
         
         names = {...
-            'words', 'pseudowords', 'numbers', 'normal_speech', 'scramble_speech',...
-            'odds', 'motor',...
-            'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
-            'phonology', '-phonology', 'words + pseudowords', 'numbers - (words + pseudowords)', ...
-            'normal_speech - words', 'words + pseudowords + numbers + normal_speech', ...
-            'all', 'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
-            '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
-            '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
-            'numbers - words', 'words - numbers', ...
-            'EOI', 'EOI2', ...
+            'sounds', 'speech_scr', 'words_pw', ...
+            'speech', 'scrambled speech', ...
+%             'words', 'pw', ...
             };
+
+%         values = {...
+%             sounds, lists, speech_scr, words_pw, ...
+%             (sounds + speech_scr)/2, (sounds - speech_scr)/2, ...
+%             (lists + words_pw)/2, (lists - words_pw)/2,
+%             };
+%         
+%         names = {...
+%             'sounds', 'lists', 'speech_scr', 'words_pw', ...
+%             'speech', 'scrambled speech', ...
+%             'words', 'pw' ...
+%             };
         
-        for j=1:length(values)-1
+        for j=1:length(values)
             matlabbatch{i}.spm.stats.con.consess{j}.tcon.name = names{j};
             matlabbatch{i}.spm.stats.con.consess{j}.tcon.weights = values{j};
             matlabbatch{i}.spm.stats.con.consess{j}.tcon.sessrep = 'none';
         end
-        j=length(values);
-        matlabbatch{i}.spm.stats.con.consess{j}.fcon.name = names{j};
-        matlabbatch{i}.spm.stats.con.consess{j}.fcon.weights = values{j};
+        j = j+1;
+        matlabbatch{i}.spm.stats.con.consess{j}.fcon.name = 'Effects of interest';
+        matlabbatch{i}.spm.stats.con.consess{j}.fcon.weights = eye(3);
+%         matlabbatch{i}.spm.stats.con.consess{j}.fcon.weights = eye(4);
         matlabbatch{i}.spm.stats.con.consess{j}.fcon.sessrep = 'none';
-        
         matlabbatch{i}.spm.stats.con.delete = 1;
         i=i+1;
     end
 end
-
 % spm_jobman('run', matlabbatch)
 
 cd '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts'

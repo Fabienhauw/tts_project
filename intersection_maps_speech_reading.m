@@ -14,6 +14,7 @@ p_values_text   = {'510-2' '10-2' '510-3' '10-3' '510-4' '10-4'};
 p_values_field  = {'05' '01' '005' '001' '0005' '0001'};
 per_vox = 10; % percentage of voxels you want to keep
 use_best_vox = 0; % decide if you want to keep only X% best voxels or just use a general threshold;
+aud_con = 11;
 
 %% subjects selection
 Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
@@ -49,7 +50,7 @@ percent_intersection = '';
 
 for i_subj = 1 : length(S_effect)
     speech_spmfiles_select{i_subj}  = fullfile(D, S_effect(i_subj).name, 'Aud/loc/stats_s5_without_resting/SPM.mat');
-    speech_nifti{i_subj}            = fullfile(D, S_effect(i_subj).name, 'Aud/loc/stats_s5_without_resting/spmT_0011.nii'); % con 16 = all speech > rest ; con 11 = phonology
+    speech_nifti{i_subj}            = fullfile(D, S_effect(i_subj).name, sprintf('Aud/loc/stats_s5_without_resting/spmT_00%d.nii', aud_con)); % con 16 = all speech > rest ; con 11 = phonology
     read_spmfiles_select{i_subj}    = fullfile(D, S_effect(i_subj).name, 'Vis/loc/stats_s5_without_resting/SPM.mat');
     read_nifti{i_subj}              = fullfile(D, S_effect(i_subj).name, 'Vis/loc/stats_s5_without_resting/spmT_0012.nii'); % con 12
     mask_nifti{i_subj}              = fullfile(D, S_effect(i_subj).name, 'Aud/loc/stats_s5_without_resting/mask.nii');
@@ -248,3 +249,8 @@ elseif ~use_best_vox
     end
 end
 
+res_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/overlap_comp';
+if ~isdir(res_dir)
+    mkdir(res_dir)
+end
+save(fullfile(res_dir, sprintf('result_comparison_overlap_aud_con%d_reading.mat',aud_con)),'percent_intersection','h','p','t', 'df');
