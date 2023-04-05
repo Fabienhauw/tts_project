@@ -5,7 +5,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 
-res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa__without_resting_ttest_s8';
+res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa_without_resting_ttest_s8';
 % res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/MVPA/Aud/loc/syn_vs_con_rh_s5';
 
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -50,6 +50,9 @@ vector_hand = [
     ]; %0 = right, 1 = left;
 
 S_effect = [S_syn ; S_con];
+subname = {S_effect.name};
+
+totsub=length(subname);
 
 for j = 1 : size(S,1)
     if ~isempty(find(~cellfun(@isempty,(regexp({S_effect.name},S(j).name)))))
@@ -64,11 +67,41 @@ vector_cov2 = vector_hand(mask_cov==1);
 
 con_dir = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/',S_effect(1).name, radius);
 cd(con_dir)
-results = dir('results*');
+results = dir('results_Scr*NormalSpeech');
 for tmp_comp = 1 : length(results)
     str_path = strsplit(results(tmp_comp).name, '_');
     all_comp_inv{tmp_comp} = strjoin({str_path{1}, str_path{4}, str_path{3}, str_path{2}}, '_');
     all_comp{tmp_comp} = results(tmp_comp).name;
+end
+ncon = 1;
+all_comp_names = all_comp;
+cont = 1; %[1 : length(all_comp)];
+
+% get image files names
+P={};
+for con=1:ncon
+    for s=1:totsub
+        sub=subname{s};
+%         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+%         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s6res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s8res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+    end
+end
+
+j=0;
+for i=1:length(P)
+    if ~exist(P{i})
+        j=j+1;
+%         filestosmooth{j}=strrep(P{i},'s6res','res');
+        filestosmooth{j}=strrep(P{i},'s8res','res');
+    end
+end
+
+if j>0
+    for u=1:j
+%         spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s6res_'),[6 6 6],0); 
+        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s8res_'),[8 8 8],0); 
+    end
 end
 
 clear matlabbatch

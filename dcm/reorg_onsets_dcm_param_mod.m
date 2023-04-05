@@ -59,27 +59,13 @@ for k = a : b
         end
     end
     
-%     for mp = 1:length(new_onsets3(:,1))
-%         if ~isempty(find(new_onsets3(mp,1) == new_onsets4(:,1)))
-%             new_onsets3(mp,3)=1;
-%             new_onsets3(mp,4)=-1;
-%         else
-%             new_onsets3(mp,3)=-1;
-%             new_onsets3(mp,4)=1;
-%         end
-%     end
-    
     new_onsets  = sortrows(new_onsets);
   
     names2              = 'sounds';
-%     names2              = {'sounds'; 'lists'};
     onsets2{1}          = new_onsets(:,1);
-%     onsets2{2}          = new_onsets3(:,1);
     durations2{1}       = new_onsets(:,2);
-%     durations2{2}       = new_onsets3(:,2);
     parametric_modul{1} = new_onsets(:,3); % 1 = speech, -1 = scr;
     parametric_modul{2} = new_onsets(:,5); % 1 = words, -1 = pw;
-%     parametric_modul{2} = new_onsets3(:,3);
 
     names=names2;
     onsets=onsets2;

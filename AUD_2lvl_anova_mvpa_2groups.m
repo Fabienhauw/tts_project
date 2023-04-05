@@ -78,7 +78,7 @@ cd(con_dir)
 % comp = dir('results*');
 % comp = 'results_PW_vs_Words';
 % comp = 'results_ScrSpeech_vs_NormalSpeech';
-comp = 'results_Words_vs_Numbers';
+comp = 'results_Words_vs_NormalSpeech';
 
 res_dir_base = fullfile(res_dir_base, comp);
 
@@ -89,7 +89,6 @@ all_comp = [comp];
 % all_comp_names = {all_comp.name};
 all_comp_names = {all_comp};
 cont = 1; %[1 : length(all_comp)];
-% PPI-interaction
 %-----------------------------------------------------------------
 
 ncon = length(cont);
@@ -105,9 +104,9 @@ P={};
 for con=1:ncon
     for s=1:totsub
         sub=subname{s};
-        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+%         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
 %         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s6res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
-%         P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s8res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
+        P{(con-1)*totsub+s} =	sprintf(['/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images/%s/Aud/loc/mvpa_without_resting_%dmm/%s/s8res_accuracy_minus_chance.nii'],sub, radius, all_comp_names{con});
     end
 end
 
@@ -115,15 +114,15 @@ j=0;
 for i=1:length(P)
     if ~exist(P{i})
         j=j+1;
-        filestosmooth{j}=strrep(P{i},'s6res','res');
-%         filestosmooth{j}=strrep(P{i},'s8res','res');
+%         filestosmooth{j}=strrep(P{i},'s6res','res');
+        filestosmooth{j}=strrep(P{i},'s8res','res');
     end
 end
 
 if j>0
     for u=1:j
-        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s6res_'),[6 6 6],0); 
-%         spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s8res_'),[8 8 8],0); 
+%         spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s6res_'),[6 6 6],0); 
+        spm_smooth(filestosmooth{u},strrep(filestosmooth{u},'res_','s8res_'),[8 8 8],0); 
     end
 end
 

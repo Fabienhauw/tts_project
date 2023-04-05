@@ -54,43 +54,21 @@ for row=1:nbreg
 end
 
 %%
-variabl_conn = find(B==1);
-num_variabl_conn = length(variabl_conn);
-count=1;
-con_count=1;
-for value=1:2
-    aa=A;
-    aa(variabl_conn(con_count))=value-1;
-    if con_count<num_variabl_conn
-        con_count = con_count + 1;
-        for value=1:2
-            aa(variabl_conn(con_count))=value-1;
-            if con_count<num_variabl_conn
-                con_count = con_count + 1;
-                for value=1:2
-                    aa(variabl_conn(con_count))=value-1;
-                    if con_count<num_variabl_conn
-                        con_count = con_count + 1;
-                        for value=1:2
-                            aa(variabl_conn(con_count))=value-1;
-                            a{count}=aa;
-                            count=count+1;
-                        end
-                        con_count = con_count -1;
-                    end
-                end
-                con_count = con_count -1;
-            end
-        end
-        con_count = con_count -1;
-    end
+n = size(B,1); m = size(B,2);
+
+constraints_model = reshape(B', 1, n*m);
+s = 2^sum(constraints_model);
+result = repmat(constraints_model,s,1);
+result(:,logical(constraints_model)) = dec2bin(0:s-1)-'0';
+for struct_model = 1 : size(result,1)
+    a{1,struct_model} = reshape(result(struct_model,:), n, m)';
 end
 
-nb_struc_mod=length(a);
+for tmp_a = 1 : length(a)
+    a{tmp_a} = a{tmp_a} + A;
+end
 
-% now you have to delete models with no connexions from the stg or no
-% connexions to the vwfa:
-for aa=1:nb_struc_mod
+for aa=1:length(a)
     if (a{1,aa}(smg,lstgm)==0 & a{1,aa}(mfg,lstgm)==0)  | (a{1,aa}(vwfa,smg)==0 & a{1,aa}(vwfa,mfg)==0)
         a{1,aa}=[];
     end
@@ -135,77 +113,14 @@ for row=1:nbreg
 end
 
 %%
-variabl_conn = find(B==1);
-num_variabl_conn = length(variabl_conn);
+n = size(B,1); m = size(B,2);
 for struct_model=1:length(a)
-    count=1;
-    con_count=1;
-    aa=A;
-    for value=1:2
-        if a{1,struct_model}(variabl_conn(con_count))==0 & value==1
-            aa(variabl_conn(con_count))=0;
-        elseif a{1,struct_model}(variabl_conn(con_count))==0 & value==2 %before adding modulatory input on this
-            % connexion, you have to be sure that this connexion exists in your structural model;
-            % If the struc connexion does not exist, the only modulation
-            % value for this connexion is 0, so no need for a
-            % "second tour" and a lot a new identical models except for this connexion
-            break
-        else
-            aa(variabl_conn(con_count))=value-1;
-        end
-        if con_count<num_variabl_conn
-            con_count = con_count + 1;
-            for value=1:2
-                if a{1,struct_model}(variabl_conn(con_count))==0 & value==1
-                    aa(variabl_conn(con_count))=0;
-                elseif a{1,struct_model}(variabl_conn(con_count))==0 & value==2 %before adding modulatory input on this
-                    % connexion, you have to be sure that this connexion exists in your structural model;
-                    % If the struc connexion does not exist, the only modulation
-                    % value for this connexion is 0, so no need for a
-                    % "second tour" and a lot a new identical models except for this connexion
-                    break
-                else
-                    aa(variabl_conn(con_count))=value-1;
-                end
-                if con_count<num_variabl_conn
-                    con_count = con_count + 1;
-                    for value=1:2
-                        if a{1,struct_model}(variabl_conn(con_count))==0 & value==1
-                            aa(variabl_conn(con_count))=0;
-                        elseif a{1,struct_model}(variabl_conn(con_count))==0 & value==2 %before adding modulatory input on this
-                            % connexion, you have to be sure that this connexion exists in your structural model;
-                            % If the struc connexion does not exist, the only modulation
-                            % value for this connexion is 0, so no need for a
-                            % "second tour" and a lot a new identical models except for this connexion
-                            break
-                        else
-                            aa(variabl_conn(con_count))=value-1;
-                        end
-                        if con_count<num_variabl_conn
-                            con_count = con_count + 1;
-                            for value=1:2
-                                if a{1,struct_model}(variabl_conn(con_count))==0 & value==1
-                                    aa(variabl_conn(con_count))=0;
-                                elseif a{1,struct_model}(variabl_conn(con_count))==0 & value==2 %before adding modulatory input on this
-                                    % connexion, you have to be sure that this connexion exists in your structural model;
-                                    % If the struc connexion does not exist, the only modulation
-                                    % value for this connexion is 0, so no need for a
-                                    % "second tour" and a lot a new identical models except for this connexion
-                                    break
-                                else
-                                    aa(variabl_conn(con_count))=value-1;
-                                end
-                                a{1+count,struct_model}=aa;
-                                count=count+1;
-                            end
-                            con_count = con_count -1;
-                        end
-                    end
-                    con_count = con_count -1;
-                end
-            end
-            con_count = con_count -1;
-        end
+    constraints_model = (a{1,struct_model} == 1) & (B == 1); constraints_model = reshape(constraints_model', 1, n*m);
+    s = 2^sum(constraints_model);
+    result = repmat(constraints_model,s,1);
+    result(:,logical(constraints_model)) = dec2bin(0:s-1)-'0';
+    for modul_model = 1 : size(result,1)
+        a{modul_model + 1,struct_model} = reshape(result(modul_model,:), n, m)';
     end
 end
 

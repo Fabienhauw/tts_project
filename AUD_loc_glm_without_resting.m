@@ -24,7 +24,7 @@ elseif isequal(erase,'no')
     redo = 0;
 end
 
-for k = 23:24
+for k = a : b
     if isdir (fullfile(D, S(k).name,'Aud'))
         %% modele specification:
         if exist ('i', 'var')==0

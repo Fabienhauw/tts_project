@@ -4,7 +4,8 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 
-res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/syn_vs_con_rh_s5_without_resting';
+res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/A   ud/loc/syn_vs_con_rh_s5_without_resting';
+% res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/syn_vs_con_rh_s5_without_resting_with_pcs';
 % res_dir_base = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/syn_vs_con_s5';
 
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -41,6 +42,10 @@ vector_age = [
     29.865753; 26.57534247; 24.67945205; 29.72328767; 58.97534247; ...
     ];
 
+vector_pcs = [
+    0;0;1;1;1;1;1;1;0;0;1;1;0;1;1;0;1;1;0;0;0;1;1;0;0;0;0;0;0;1;0;0;0;1; ...
+    ];
+
 vector_hand = [
     0; 0; 0; 0; 1; 0; 1; 0; 0; 0; 1; 0; 0; 1; 0; 1; 0; 0; 0; 0; 0; 0;... % end of synesthetes
     zeros(21,1); 1; 1; 1; 1; 1; ... % end of controls
@@ -56,7 +61,8 @@ for j = 1 : size(S,1)
     end
 end
 
-vector_cov1 = vector_age(mask_cov==1);
+% vector_cov1 = vector_age(mask_cov==1);
+vector_cov1 = vector_pcs;
 vector_cov2 = vector_hand(mask_cov==1);
 
 clear matlabbatch
@@ -75,7 +81,7 @@ clear matlabbatch
 i=1;
 
 cd(fullfile(D, S(1).name,'Aud/loc/stats_s5_without_resting'))
-all_contrast = dir(sprintf('con*.nii'));
+all_contrast = dir(sprintf('s8con*.nii'));
 all_contrast = all_contrast(~cellfun(@isempty,(regexp({all_contrast.name}, '^con_\d+\.nii'))));
 
 names = {...
@@ -84,11 +90,11 @@ names = {...
             'lexicality', '-lexicality','(words + normal_speech + numbers) - pseudowords',...
             'phonology', '-phonology', 'words + pseudowords', 'numbers - (words + pseudowords)', ...
             'normal_speech - words', 'words + pseudowords + numbers + normal_speech', ...
-            'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
+            'all', 'words - normal_speech', 'words - scramble_speech', 'pseudowords - scramble_speech', '(words+pseudowords) -  scramble_speech', ...
             '(words + normal_speech) -  scramble_speech', '(normal_speech + pseudowords) -  scramble_speech', '(normal_speech + pseudowords + words) -  scramble_speech',...
             '(normal_speech + pseudowords + words + numbers) - scramble_speech',...
             'numbers - words', 'words - numbers', ...
-            'EOI', ...
+            'EOI', 'EOI2', ...
             };
 
 for c = 1:length(all_contrast)
@@ -131,10 +137,10 @@ for c = 1:length(all_contrast)
     matlabbatch{i}.spm.stats.factorial_design.des.t2.ancova = 0;
         
 %     matlabbatch{i}.spm.stats.factorial_design.cov(1).c = vector_cov1;
-%     matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'age';
+%     matlabbatch{i}.spm.stats.factorial_design.cov(1).cname = 'pcs';
 %     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCFI = 1;
 %     matlabbatch{i}.spm.stats.factorial_design.cov(1).iCC = 1;
-%     
+    
 %     matlabbatch{i}.spm.stats.factorial_design.cov(2).c = vector_cov2;
 %     matlabbatch{i}.spm.stats.factorial_design.cov(2).cname = 'handedness';
 %     matlabbatch{i}.spm.stats.factorial_design.cov(2).iCFI = 1;
@@ -186,6 +192,6 @@ for c = 1:length(all_contrast)
     i = i+1;
 end
 
-spm_jobman('interactive', matlabbatch)
+spm_jobman('run', matlabbatch)
 
 cd(res_dir)

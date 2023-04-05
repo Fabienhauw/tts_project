@@ -1,7 +1,4 @@
-% This batch script is to create a DCM model for flc for the CR
-% better use this script than the "reduced one", because this simulates all
-% models (longer) with all possible modulations, but in the end only takes into
-% account the ones with "new reduced" modulation...
+% This batch script is to create a DCM model for every participant
 
 clear;clc;
 addpath('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm');
@@ -61,7 +58,7 @@ subj={subjs};
 nsubjects   = length(subj);
 
 if nroi == 4
-    reg         = {'lstgm', 'smg', 'mfg', 'vwfa'};
+    reg         = {'lstgm', 'smg', 'sts', 'vwfa'};
     ROIs_coord = [-45 -24 8; -48 -44 23; -50 6 53; -45 -51 -10];
 elseif nroi == 3
     reg         = {'lpstg', 'smg', 'vwfa'};
@@ -73,7 +70,7 @@ nregions    = length(reg);
 if nroi == 3
     lstgm=1; smg=2; vwfa=3;
 elseif nroi == 4
-    lstgm=1; smg=2; mfg=3; vwfa=4;
+    lstgm=1; smg=2; sts=3; vwfa=4;
 end
 % this code is to check how much of the variance in your VOI is explained by the timeseries :
 % load('VOI_****_adapted_1.mat')
@@ -118,7 +115,7 @@ for k = 1 : numel(S)
     if nroi == 3
         reg         = {'lpstg', 'smg', 'vwfa'};
     elseif nroi == 4
-        reg         = {'lstgm', 'smg', 'mfg', 'vwfa'};
+        reg         = {'lstgm', 'smg', 'sts', 'vwfa'};
     end
     
     nregions    = length(reg);
@@ -126,7 +123,7 @@ for k = 1 : numel(S)
     if nroi == 3
         lstgm=1; smg=2; vwfa=3;
     elseif nroi == 4
-        lstgm=1; smg=2; mfg=3; vwfa=4;
+        lstgm=1; smg=2; sts=3; vwfa=4;
     end
     
     if nroi == 3
@@ -139,7 +136,7 @@ for k = 1 : numel(S)
         f = {
         fullfile(path_to_stats,'VOI_lSTGm_-45_-24_8_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
         fullfile(path_to_stats,'VOI_SMG_-48_-44_23_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
-        fullfile(path_to_stats,'VOI_MFG_-50_6_53_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
+        fullfile(path_to_stats,'VOI_lSTS_-65_-41_6_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
         fullfile(path_to_stats,'VOI_VWFA_-45_-51_-10_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
         };
     end

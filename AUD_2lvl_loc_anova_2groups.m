@@ -1,12 +1,18 @@
 clear;
 clc;
 
+% for any question, look at the function spm_run_factorial_design
+
 spm('defaults','FMRI')
 global defaults
 global UFp; UFp = 0.001;
 % categ='controls';
-tts_group.path_to_subject;
+D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
+S = dir(D);
+mask = ismember({S.name}, {'.', '..'});
+S(mask) = [];
 
+do_cov = 1;
 
 Syn = S(~cellfun(@isempty,(regexp({S.name},'Sujet')))); 
 Con = S(~cellfun(@isempty,(regexp({S.name},'Control'))));
@@ -34,7 +40,13 @@ nsub(2) = length(S_con_app); % controls
 ngroups = 2;
 
 S_effect = [S_droit ; S_con_app];
-res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_%s_to_%s_s8', S_effect(1).name, S_effect(end).name);
+
+if do_cov
+    res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_with_pcs');
+else
+    res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_%s_to_%s_s8', S_effect(1).name, S_effect(end).name);
+end
+
 % res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_without_resting_test');
 
 
@@ -53,6 +65,9 @@ vector_hand = [
     zeros(21,1); 1; 1; 1; 1; 1; ... % end of controls
     ]; %0 = right, 1 = left;
 
+vector_pcs = [
+    0;0;1;1;1;1;1;1;0;0;1;1;0;1;1;0;1;1;0;0;0;1;1;0;0;0;0;0;0;1;0;0;0;1; ...
+    ];
 
 for j = 1 : size(S,1)
     if ~isempty(find(~cellfun(@isempty,(regexp({S_effect.name},S(j).name)))))
@@ -62,7 +77,8 @@ for j = 1 : size(S,1)
     end
 end
 
-vector_cov1 = vector_age(mask_cov==1);
+% vector_cov1 = vector_age(mask_cov==1); name_cov1 = 'age';
+vector_cov1 = vector_pcs; name_cov1 = 'pcs';
 vector_cov2 = vector_hand(mask_cov==1);
 subname = {S_effect.name};
 
@@ -79,6 +95,9 @@ nscan = ncon*totsub;
 if ~isdir(res_dir_base)
     mkdir(res_dir_base)
 end
+
+vector_cov1 = repmat(vector_cov1, 1, ncon);
+vector_cov1 = reshape(vector_cov1, size(vector_cov1,1)*size(vector_cov1, 2), 1);
 
 cd(res_dir_base)
 
@@ -124,6 +143,11 @@ for c=1:ncon
     end
 end
 
+if do_cov == 1
+    k=k+1;
+    cname{k} = 'age';
+end
+
 for group=1:ngroups
     for c=1:nsub(group)
         k=k+1;
@@ -153,22 +177,98 @@ for group=1:ngroups
     g=g+nsub(group);
 end
 
-SPM.xX = struct(...
+% SPM.xX = struct(...
+%     'X',[kron(eye(ncon),os) subjectpart] ,... % change this
+%     'iH',1:ncon,'iC',zeros(1,0),...
+%     'iB',ncon+[1:totsub],...
+%     'iG',zeros(1,0),...
+%     'name',{cname},'I',[ones(nscan,1) kron([1:ncon]',os) kron(oc,[1:totsub]') ones(nscan,1)],...
+%     'sF',{{'repl'  'cond'  'subj'  ''}});
+
+
+rname_cov1 = name_cov1;
+rvector_cov1 = vector_cov1;
+
+%-Centre (mean correction) options for covariates & globals            (CC)
+% (options 9-12 are for centering of global when using AnCova GloNorm) (GC)
+%--------------------------------------------------------------------------
+sCC = {'around overall mean';...                            %-1
+    'around sF1 means';...                                  %-2
+    'around sF2 means';...                                  %-3
+    'around sF3 means';...                                  %-4
+    'around sF4 means';...                                  %-5
+    'around sF2 (within sF4) means';...                     %-6
+    'around sF3 (within sF4) means';...                     %-7
+    '<no centering>';...                                    %-8
+    'around user specified value';...                       %-9
+    '(as implied by AnCova)';...                            %-10
+    'GM';...                                                %-11
+    '(redundant: not doing AnCova)'}';                      %-12
+
+%-DesMtx argument components for covariate by factor interaction options
+% (Used for CFI's Covariate Centering (CC), GMscale & Global normalisation)
+%--------------------------------------------------------------------------
+CFIforms = {'[]',   'C',    '{}';...                        %-1
+    'I(:,1)',       'FxC',  '{sF{1}}';...                   %-2
+    'I(:,2)',       'FxC',  '{sF{2}}';...                   %-3
+    'I(:,3)',       'FxC',  '{sF{3}}';...                   %-4
+    'I(:,4)',       'FxC',  '{sF{4}}';...                   %-5
+    'I(:,[4,2])',   'FxC',  '{sF{4},sF{2}}';...             %-6
+    'I(:,[4,3])',   'FxC',  '{sF{4},sF{3}}' };              %-7
+
+CCforms = {'ones(nscan,1)',CFIforms{2:end,1},''}';
+vector_cov1 = rvector_cov1 - spm_meanby(rvector_cov1,eval(CCforms{1}));
+
+name_cov1     = {name_cov1};
+iCC = 1;
+iCFI = 1;
+
+str = {sprintf('%s',rname_cov1)};
+if size(rvector_cov1,2)>1, str = {sprintf('%s (block of %d covariates)',...
+        str{:},size(rvector_cov1,2))}; end
+if iCC < 8, str=[str;{['used centered ',sCC{iCC}]}]; end
+if iCFI> 1, str=[str;{['fitted as interaction ',sCFI{iCFI}]}]; end
+
+typ = 1;
+if do_cov == 1
+    SPM.xC = struct(...
+        'rc', rvector_cov1,         'rcname', rname_cov1, ...
+        'c', vector_cov1,           'cname', {name_cov1}, ...
+        'iCC', 1,         'iCFI', 1, ...
+        'type', typ, ...
+        'cols', ncon*size(os,2)+1,... %[1:size(vector_cov1,2)] + size([H,C],2) + size([B,G],2)*min(typ-1,1), ...
+        'descrip', {{'age'; 'used centered around overall mean'}});
+else
+    SPM.xC = [];
+end
+
+if do_cov == 1
+    SPM.xX = struct(...
+        'X',[kron(eye(ncon),os) vector_cov1 subjectpart] ,... % change this
+        'iH',1:ncon, ...
+        'iC', ncon+1, ...
+        'iB',ncon+1+[1:totsub],...
+        'iG',zeros(1,0),...
+        'name',{cname},'I',[ones(nscan,1) kron([1:ncon]',os) kron(oc,[1:totsub]') ones(nscan,1)],...
+        'sF',{{'repl'  'cond'  'subj'  ''}});
+    
+else
+    SPM.xX = struct(...
         'X',[kron(eye(ncon),os) subjectpart] ,... % change this
         'iH',1:ncon,'iC',zeros(1,0),...
         'iB',ncon+[1:totsub],...
         'iG',zeros(1,0),...
         'name',{cname},'I',[ones(nscan,1) kron([1:ncon]',os) kron(oc,[1:totsub]') ones(nscan,1)],...
         'sF',{{'repl'  'cond'  'subj'  ''}});
+    
+end
 
-    SPM.xC = [];
-
-    SPM.xGX = struct(...
-        'iGXcalc',1,    'sGXcalc','omit',                               'rg',[],...
-        'iGMsca',9,     'sGMsca','<no grand Mean scaling>',...
-        'GM',0,         'gSF',ones(nscan,1),...
-        'iGC',  12,     'sGC',  '(redundant: not doing AnCova)',        'gc',[],...
-        'iGloNorm',9,   'sGloNorm','<no global normalisation>');
+SPM.xGX = struct(...
+    'iGXcalc',1,    'sGXcalc','omit',                               'rg',[],...
+    'iGMsca',9,     'sGMsca','<no grand Mean scaling>',...
+    'GM',0,         'gSF',ones(nscan,1),...
+    'iGC',  12,     'sGC',  '(redundant: not doing AnCova)',        'gc',[],...
+    'iGloNorm',9,   'sGloNorm','<no global normalisation>');
 donotuseVI = 1;
 if (donotuseVI)
     SPM.xVi = struct(...
@@ -221,10 +321,8 @@ exp_mask = fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/
 exp_mask = sprintf('%s_%s_aud_loc_mask_thr_s5.nii',exp_mask, S_effect(end).name);
 SPM.xM	= struct(	'T',-Inf,'TH',ones(nscan,1)*-Inf,...
     'I',1,'VM',spm_vol([exp_mask]),'xs',Mdes);
-% SPM.xM	= struct(	'T',-Inf,'TH',ones(nscan,1)*-Inf,...
-%     'I',1,'VM',[],'xs',Mdes);
 
-Pdes    = {{sprintf('%d condition, +0 covariate, +0 block, +0 nuisance',ncon); sprintf('%d total, having %d degrees of freedom',ncon,ncon); sprintf('leaving %d degrees of freedom from %d images',nscan-ncon,nscan)}};
+Pdes    = {{sprintf('%d condition, +1  covariate, +0 block, +0 nuisance',ncon); sprintf('%d total, having %d degrees of freedom',ncon,ncon); sprintf('leaving %d degrees of freedom from %d images',nscan-ncon,nscan)}};
 
 SPM.xsDes = struct(...
     'Design',               {'1-way ANOVA (within-between-subjects)'},...
@@ -235,13 +333,18 @@ SPM.xsDes = struct(...
 
 SPM.SPMid       = 'SPM12: spm_spm (v7738)';
 
+% spm_run_factorial_design(SPM)
+% spm_design_within_subject(fblock,cov)
+
 save SPM SPM
 
 
+%%
 % Estimate parameters
 %===========================================================================
 SPM = spm_spm(SPM);
 
+%%
 %%%%%% Second, define the contrasts and estimate them
 
 words           = [1 0 0 0 0];
@@ -327,9 +430,25 @@ for u=1:numcomp
     names{4*numcomp+u}      = ['C-S ' Xnames{u}];
 end
 
-for n=1:size(values,2)
-    values{n}=[values{n} zeros(size(values{n},1),totsub)];
+if do_cov == 1 
+    for n=1:size(values,2)
+        values{n}=[values{n} zeros(size(values{n},1), size(name_cov1,1)) zeros(size(values{n},1),totsub)];
+    end
+    % one contrast for each cov
+    n = n + 1;
+    values{n}=[zeros(size(Xvalues{1})) zeros(size(Xvalues{1})) 1 zeros(1,totsub)];
+    names{n} = rname_cov1;
+    
+    n = n + 1;
+    values{n}=[zeros(size(Xvalues{1})) zeros(size(Xvalues{1})) -1 zeros(1,totsub)];
+    names{n} = ['-' rname_cov1];
+    
+else
+    for n=1:size(values,2)
+        values{n}=[values{n} zeros(size(values{n},1),totsub)];
+    end
 end
+
 
 for n = 1 : numcomp-1
     types{n} = 'T';
@@ -344,6 +463,11 @@ for n = numcomp
     types{2*numcomp+n} = 'F';
     types{3*numcomp+n} = 'F';
     types{4*numcomp+n} = 'F';
+end
+
+if do_cov == 1
+    types{5*numcomp+1} = 'T';
+    types{5*numcomp+2} = 'T';
 end
 
 %%

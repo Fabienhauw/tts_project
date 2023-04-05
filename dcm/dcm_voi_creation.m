@@ -56,7 +56,7 @@ vector_hand = [
     ]; %0 = right, 1 = left;
 
 S_effect = [S_syn ; S_con];
-S_effect = S_effect(18);
+% S_effect = S_effect(18);
 
 for j = 1 : size(S,1)
     if ~isempty(find(~cellfun(@isempty,(regexp({S_effect.name},S(j).name)))))
@@ -104,7 +104,41 @@ for tmp_con = 1 : length(all_con)
 end
 
 %%
+% spm_jobman('run', matlabbatch)
 
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+
+par.run = 0;
+par.sge = 1;
+par.sge_queu = 'normal,bigmem';
+par.pct = 1;
+par.walltime = '00:30:00';
+par.jobname  = 'dcm_voi';
+%%%%%%%% this line below to comment to avoid re estimating
+%%%%%%%% models
+
+job_ending_rountines(matlabbatch, [], par);
+
+%% for the STS resulting from the mvpa analysis:
+i=1;
+clear matlabbatch
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        %% batch for VOI, resulting from all subj, norm>scr speech
+        matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to extract time series.
+        matlabbatch{i}.spm.util.voi.adjust = F_con;
+        matlabbatch{i}.spm.util.voi.session = 1;
+        matlabbatch{i}.spm.util.voi.name = sprintf('lSTS_-65_-41_6_%dmm_sph_DCM_ROI_adapted_to_aud_con%d_adj_eoi5', roi_sph_rad, select_con);
+        matlabbatch{i}.spm.util.voi.roi{1}.sphere.centre = [-65 -41 6];
+        matlabbatch{i}.spm.util.voi.roi{1}.sphere.radius = roi_sph_rad;
+        matlabbatch{i}.spm.util.voi.roi{1}.sphere.move.fixed = 1;
+        matlabbatch{i}.spm.util.voi.expression = 'i1';
+        i=i+1;
+    end
+end
+
+%%
 % spm_jobman('run', matlabbatch)
 
 cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')

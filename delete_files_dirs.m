@@ -11,7 +11,7 @@ a = 1; b = 48;
 
 
 for k = a:b
-    which_dir = fullfile(D, S(k).name, 'Aud/loc/mvpa_without_resting');
+    which_dir = fullfile(D, S(k).name, 'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
     cd(which_dir)
     files = dir('SPM.mat');
     filenames = fullfile(which_dir, {files.name});
@@ -22,9 +22,9 @@ end
 
 % for dir
 for k = a:b
-    which_dir = fullfile(D, S(k).name,'Aud/loc/');
+    which_dir = fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
     cd(which_dir)
-    files = dir('mvpa_*resting'); % never enter the exact name, or it will also erase repo '.' and '..', so the repo above...
+    files = dir('all_3_rois*_4mm'); % never enter the exact name, or it will also erase repo '.' and '..', so the repo above...
     files = files([files.isdir]);
     filenames = fullfile(which_dir, {files.name});
     for tmp = 1 : length(filenames)
