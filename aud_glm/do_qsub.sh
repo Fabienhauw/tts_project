@@ -1,2 +1,0 @@
-export jobid=`sbatch -p normal,bigmem -N 1 --cpus-per-task=1 --job-name=aud_glm   -t 0-00:30:00 --mem=4000  -m block:block   -o /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/aud_glm/log-%A_%a  -e /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/aud_glm/err-%A_%a  --array=1-459  /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/aud_glm/do_job_array.sh |awk '{print $4}'` 
-echo submitted job $jobid

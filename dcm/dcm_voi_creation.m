@@ -7,7 +7,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 all_con = [16];
-roi_sph_rad = 4;
+roi_sph_rad = 6;
 F_con = 29;
 
 

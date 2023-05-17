@@ -13,6 +13,9 @@ S = dir(D);
 mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 
+model_kind = 2; % 3 kinds of models: or 1 = all speech cond vs baseline, or 2 = sentences vs
+% scrambled, or 3 = all speech cond vs scrambled.
+
 a = 1; b = 48;
 erase = input('Do you want to erase previous auditive models? [yes/no] ', 's');
 
@@ -29,7 +32,15 @@ for k = a : b
         if exist ('i', 'var')==0
             i=1;
         end
-        which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
+        
+        if model_kind == 1 % speech cond vs baseline 1 1 1 1 0
+            which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul_speech_baseline');
+        elseif model_kind == 2 % sentences vs scrambled 0 0 0 1 -1
+            which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul_sent_scramble');
+        elseif  model_kind == 3 % all speech cond vs scrambled 1 1 1 1 -1
+            which_dir=fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
+        end
+        
         if ~isdir(which_dir)
             mkdir(which_dir)
         end
@@ -76,13 +87,28 @@ for k = a : b
         
         matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
         cd(fullfile(D,S(k).name,'Aud/loc/cpt_data'))
-        multi_name = dir('onsets_dcm_param*.mat');
+        if model_kind == 1 % speech cond vs baseline 1 1 1 1 0
+            multi_name = dir('onsets_dcm_*speech_baseline.mat');
+        elseif model_kind == 2 % sentences vs scrambled 0 0 0 1 -1
+            multi_name = dir('onsets_dcm_*sent_scramble.mat');
+        elseif  model_kind == 3 % all speech cond vs scrambled 1 1 1 1 -1
+            multi_name = dir('onsets_dcm_*modul.mat');
+        end 
         load(multi_name.name)
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.name = names;
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.onset = onsets{1};
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.duration = durations{1};
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.tmod = 0;
-        matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'speech_scrambled';
+        if model_kind == 1
+            matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'speech_baseline';
+            con_name = 'speech_base';
+        elseif model_kind == 2
+            matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'sent_scrambled';
+            con_name = 'sent_scr';
+        elseif  model_kind == 3
+            matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'speech_scrambled';
+            con_name = 'speech_scr';
+        end
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).param = parametric_modul{1};
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).poly = 1;
         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).name = 'words_pw';
@@ -118,17 +144,15 @@ for k = a : b
         matlabbatch{i}.spm.stats.con.spmmat = {filename};
         
         sounds      =   [1 0 0];
-        speech_scr  =   [0 1 0];
+        con_name    =   [0 1 0];
         words_pw    =   [0 0 1];
         
         values = {...
-            sounds, speech_scr, words_pw, ...
-            (sounds + speech_scr)/2, (sounds - speech_scr)/2, ...
+            sounds, con_name, words_pw;
             };
         
         names = {...
-            'sounds', 'speech_scr', 'words_pw', ...
-            'speech', 'scrambled speech', ...
+            'sounds', sprintf('%s',con_name), 'words_pw';
             };
 
         for j=1:length(values)
@@ -144,7 +168,7 @@ for k = a : b
         i=i+1;
     end
 end
-% spm_jobman('run', matlabbatch)
+spm_jobman('run', matlabbatch)
 
 cd '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts'
 
@@ -157,4 +181,4 @@ par.jobname  = 'aud_glm';
 %%%%%%%% this line below to comment to avoid re estimating
 %%%%%%%% models
 
-job_ending_rountines(matlabbatch, [], par);
+% job_ending_rountines(matlabbatch, [], par);

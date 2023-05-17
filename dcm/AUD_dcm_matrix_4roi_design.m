@@ -1,32 +1,32 @@
 % to create all matrices possible for your DCM model;
 nbreg=4;
-lstgm=1; smg=2; mfg=3; vwfa=4;
+lstgm=1; smg=2; sts=3; vwfa=4;
 
 % basic matrices
 A=eye(nbreg);
-A(smg,mfg) = 1;
-A(mfg,smg) = 1;
+A(smg,sts) = 1;
+A(sts,smg) = 1;
 A(vwfa,lstgm) = 0;
 A(vwfa,lstgm) = 0;
 A(lstgm,vwfa) = 0; % no communication between the input and output rois;
 A(lstgm,smg)  = 0;
-A(lstgm,mfg)  = 0; % the input has no feedback;
+A(lstgm,sts)  = 0; % the input has no feedback;
 A(smg,vwfa)  = 0;
-A(mfg,vwfa)  = 0; % the output does not give feedback;
+A(sts,vwfa)  = 0; % the output does not give feedback;
 
 B=zeros(nbreg);
 fix_conn_matrix = {
-    smg,mfg;
-    mfg,smg;
+    smg,sts;
+    sts,smg;
     vwfa,lstgm;
     lstgm,vwfa;
     lstgm,smg;
-    lstgm,mfg;
+    lstgm,sts;
     smg,vwfa;
-    mfg,vwfa;
+    sts,vwfa;
     lstgm,lstgm;
     smg,smg;
-    mfg,mfg;
+    sts,sts;
     vwfa,vwfa;
     };
 
@@ -69,28 +69,28 @@ for tmp_a = 1 : length(a)
 end
 
 for aa=1:length(a)
-    if (a{1,aa}(smg,lstgm)==0 & a{1,aa}(mfg,lstgm)==0)  | (a{1,aa}(vwfa,smg)==0 & a{1,aa}(vwfa,mfg)==0)
+    if (a{1,aa}(smg,lstgm)==0 & a{1,aa}(sts,lstgm)==0)  | (a{1,aa}(vwfa,smg)==0 & a{1,aa}(vwfa,sts)==0)
         a{1,aa}=[];
     end
 end
 a=a(~cellfun('isempty',a));
 
 %% matrices for modulation connectivity
-lstgm=1; smg=2; mfg=3; vwfa=4;
+lstgm=1; smg=2; sts=3; vwfa=4;
 A=zeros(nbreg);
 
 B=zeros(nbreg);
 fix_conn_matrix = {
     lstgm,lstgm;
     smg,smg;
-    mfg,mfg;
+    sts,sts;
     vwfa,vwfa;
     vwfa,lstgm;
     lstgm,vwfa;
     lstgm,smg;
-    lstgm,mfg;
+    lstgm,sts;
     smg,vwfa;
-    mfg,vwfa;
+    sts,vwfa;
     };
 
 nb_fix_conn=size(fix_conn_matrix,1);

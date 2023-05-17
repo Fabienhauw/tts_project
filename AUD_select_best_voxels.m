@@ -201,7 +201,7 @@ for zz=1:length(test_con)
         fprintf( 'FIND BEST VOXELS %d/%d\n\n', qq + (size(all_xyzmm,1) * (zz - 1)), size(all_xyzmm,1) * length(test_con)) ;
         h = waitbar( 0, 'Finding best voxels...' ) ;
         
-        for i_subj = 1:totsub  %%%% loop across subjects
+        for i_subj = 18:18%totsub  %%%% loop across subjects
             clear tvol
             clear searchvol
             

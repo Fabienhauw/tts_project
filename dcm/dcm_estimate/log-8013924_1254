@@ -1,0 +1,73 @@
+started on hmb001
+mer. mai 17 16:52:08 CEST 2023
+
+                                                                              < M A T L A B (R) >
+                                                                    Copyright 1984-2020 The MathWorks, Inc.
+                                                                R2020b Update 2 (9.9.0.1524771) 64-bit (glnxa64)
+                                                                                November 3, 2020
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_xwypt] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_mmegz] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Function iscolumn has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1254_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function ismatrix has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1254_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isrow has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1254_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function narginchk has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1254_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isequaln has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1254_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_kyvai] 
+[> In path (line 34)
+In mfonc_j1254_dcm_estimate (line 1)
+In run (line 91)] 
+Initialising batch system... done.
+
+
+------------------------------------------------------------------------
+17-May-2023 16:55:31 - Running job #1
+------------------------------------------------------------------------
+17-May-2023 16:55:31 - Running 'DCM estimation'
+Loading DCMs...Done
+[Warning: Removing "/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/external/fieldtrip/compat/matlablt2010b" from your path.
+See http://www.fieldtriptoolbox.org/faq/should_i_add_fieldtrip_with_all_subdirectories_to_my_matlab_path/] 
+EM:(+): 1     F: 0.000e+00 dF predicted: 8.011e+01  actual: -5.818e+01 (4.84 sec)
+EM:(+): 2     F: -5.818e+01 dF predicted: 4.923e+01  actual: 3.961e+01 (3.86 sec)
+EM:(+): 3     F: -1.857e+01 dF predicted: 5.600e+01  actual: 1.077e+01 (3.50 sec)
+EM:(+): 4     F: -7.803e+00 dF predicted: 6.901e+01  actual: 5.666e+01 (3.52 sec)
+EM:(+): 5     F: 4.886e+01 dF predicted: 5.752e+01  actual: 1.112e+01 (3.61 sec)
+EM:(+): 6     F: 5.998e+01 dF predicted: 4.995e+01  actual: 1.845e+01 (3.69 sec)
+EM:(+): 7     F: 7.843e+01 dF predicted: 5.153e+01  actual: 4.469e+01 (3.61 sec)
+EM:(+): 8     F: 1.231e+02 dF predicted: 6.423e+01  actual: 2.685e+01 (3.56 sec)
+EM:(+): 9     F: 1.500e+02 dF predicted: 4.497e+01  actual: 2.489e+01 (3.61 sec)
+EM:(+): 10     F: 1.749e+02 dF predicted: 1.417e+01  actual: 1.032e-01 (3.48 sec)
+EM:(+): 11     F: 1.750e+02 dF predicted: 4.454e+00  actual: 2.817e+00 (4.05 sec)
+EM:(+): 12     F: 1.778e+02 dF predicted: 7.140e-01  actual: 3.759e-01 (3.60 sec)
+EM:(+): 13     F: 1.782e+02 dF predicted: 1.148e-01  actual: 3.578e-02 (3.56 sec)
+EM:(+): 14     F: 1.782e+02 dF predicted: 4.854e-02  actual: 5.355e-03 (3.49 sec)
+EM:(+): 15     F: 1.782e+02 dF predicted: 3.110e-02  actual: 5.565e-04 (4.02 sec)
+EM:(+): 16     F: 1.782e+02 dF predicted: 2.163e-02  actual: -4.853e-03 (3.44 sec)
+EM:(-): 17     F: 1.782e+02 dF predicted: 1.143e-03  convergence
+17-May-2023 16:57:18 - Done    'DCM estimation'
+17-May-2023 16:57:18 - Done
+
+Elapsed time: 5 min 0 H

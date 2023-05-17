@@ -1,0 +1,74 @@
+started on lmb028
+mer. mai 17 16:56:36 CEST 2023
+
+                                                                              < M A T L A B (R) >
+                                                                    Copyright 1984-2020 The MathWorks, Inc.
+                                                                R2020b Update 2 (9.9.0.1524771) 64-bit (glnxa64)
+                                                                                November 3, 2020
+
+[Warning: Unable to load Toolbox Path Cache /network/lustre/iss02/home/fabien.hauw/.matlab/R2020b/toolbox_cache-9.9.0-1327848252-glnxa64.xml. The cache file is not in the correct
+format. It will be regenerated upon quitting MATLAB.] 
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_xwypt] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_mmegz] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Function iscolumn has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1395_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function ismatrix has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1395_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isrow has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1395_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function narginchk has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1395_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isequaln has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1395_dcm_estimate (line 1)
+In run (line 91)] 
+Initialising batch system... done.
+
+
+------------------------------------------------------------------------
+17-May-2023 16:59:09 - Running job #1
+------------------------------------------------------------------------
+17-May-2023 16:59:09 - Running 'DCM estimation'
+Loading DCMs...Done
+[Warning: Removing "/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/external/fieldtrip/compat/matlablt2010b" from your path.
+See http://www.fieldtriptoolbox.org/faq/should_i_add_fieldtrip_with_all_subdirectories_to_my_matlab_path/] 
+EM:(+): 1     F: 0.000e+00 dF predicted: 1.449e+02  actual: -1.473e+01 (3.37 sec)
+EM:(+): 2     F: -1.473e+01 dF predicted: 2.063e+02  actual: 1.410e+02 (2.93 sec)
+EM:(+): 3     F: 1.263e+02 dF predicted: 2.019e+02  actual: 1.320e+02 (2.49 sec)
+EM:(+): 4     F: 2.583e+02 dF predicted: 1.166e+02  actual: 2.591e+01 (2.56 sec)
+EM:(+): 5     F: 2.842e+02 dF predicted: 8.255e+01  actual: 6.235e+01 (2.54 sec)
+EM:(+): 6     F: 3.466e+02 dF predicted: 6.215e+01  actual: 1.240e+01 (2.62 sec)
+EM:(+): 7     F: 3.590e+02 dF predicted: 5.377e+01  actual: 3.774e+01 (2.76 sec)
+EM:(+): 8     F: 3.967e+02 dF predicted: 3.842e+01  actual: -2.940e+00 (2.60 sec)
+EM:(-): 9     F: 3.967e+02 dF predicted: 7.849e+00  actual: 8.718e-01 (2.57 sec)
+EM:(+): 10     F: 3.976e+02 dF predicted: 1.660e+00  actual: 1.510e+00 (2.57 sec)
+EM:(+): 11     F: 3.991e+02 dF predicted: 2.170e+00  actual: 1.408e+00 (2.59 sec)
+EM:(+): 12     F: 4.005e+02 dF predicted: 3.057e+00  actual: -1.878e-01 (2.87 sec)
+EM:(-): 13     F: 4.005e+02 dF predicted: 4.368e-01  actual: 4.227e-01 (2.67 sec)
+EM:(+): 14     F: 4.009e+02 dF predicted: 6.947e-01  actual: 6.825e-01 (2.60 sec)
+EM:(+): 15     F: 4.016e+02 dF predicted: 1.098e+00  actual: -7.685e-01 (2.56 sec)
+EM:(-): 16     F: 4.016e+02 dF predicted: 1.510e-01  actual: -1.715e-02 (2.98 sec)
+EM:(-): 17     F: 4.016e+02 dF predicted: 2.049e-02  actual: 2.002e-02 (2.48 sec)
+EM:(+): 18     F: 4.016e+02 dF predicted: 3.373e-02  actual: -8.850e-03 (2.56 sec)
+EM:(-): 19     F: 4.016e+02 dF predicted: 4.568e-03  actual: 5.024e-04 (2.54 sec)
+EM:(+): 20     F: 4.016e+02 dF predicted: 7.529e-03  convergence
+17-May-2023 17:00:15 - Done    'DCM estimation'
+17-May-2023 17:00:15 - Done
+
+Elapsed time: 3 min 0 H

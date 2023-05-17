@@ -9,11 +9,11 @@ mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 a = 1; b = 48;
 
-
+% delete files
 for k = a:b
-    which_dir = fullfile(D, S(k).name, 'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
+    which_dir = fullfile(D, S(k).name, 'Aud/loc/cpt_data');
     cd(which_dir)
-    files = dir('SPM.mat');
+    files = dir('*speech_scramble.mat');
     filenames = fullfile(which_dir, {files.name});
     try
         delete( filenames{:} );
@@ -22,14 +22,16 @@ end
 
 % for dir
 for k = a:b
-    which_dir = fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul');
-    cd(which_dir)
-    files = dir('all_3_rois*_4mm'); % never enter the exact name, or it will also erase repo '.' and '..', so the repo above...
-    files = files([files.isdir]);
-    filenames = fullfile(which_dir, {files.name});
-    for tmp = 1 : length(filenames)
-        try
-            rmdir(filenames{tmp}, 's')
+    which_dir = fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul/lex_cond/all_4_rois_models_4mm');
+    try
+        cd(which_dir)
+        files = dir('stru*9'); % never enter the exact name, or it will also erase repo '.' and '..', so the repo above...
+        files = files([files.isdir]);
+        filenames = fullfile(which_dir, {files.name});
+        for tmp = 1 : length(filenames)
+            try
+                rmdir(filenames{tmp}, 's')
+            end
         end
     end
 end

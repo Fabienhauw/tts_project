@@ -1,0 +1,72 @@
+started on hmb001
+mer. mai 17 17:14:11 CEST 2023
+
+                                                                              < M A T L A B (R) >
+                                                                    Copyright 1984-2020 The MathWorks, Inc.
+                                                                R2020b Update 2 (9.9.0.1524771) 64-bit (glnxa64)
+                                                                                November 3, 2020
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_xwypt] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_mmegz] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Function iscolumn has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1964_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function ismatrix has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1964_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isrow has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1964_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function narginchk has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1964_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isequaln has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1964_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_kyvai] 
+[> In path (line 34)
+In mfonc_j1964_dcm_estimate (line 1)
+In run (line 91)] 
+Initialising batch system... done.
+
+
+------------------------------------------------------------------------
+17-May-2023 17:15:34 - Running job #1
+------------------------------------------------------------------------
+17-May-2023 17:15:35 - Running 'DCM estimation'
+Loading DCMs...Done
+[Warning: Removing "/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/external/fieldtrip/compat/matlablt2010b" from your path.
+See http://www.fieldtriptoolbox.org/faq/should_i_add_fieldtrip_with_all_subdirectories_to_my_matlab_path/] 
+EM:(+): 1     F: 0.000e+00 dF predicted: 3.382e+02  actual: 1.447e+02 (4.19 sec)
+EM:(+): 2     F: 1.447e+02 dF predicted: 3.099e+02  actual: 1.735e+02 (3.46 sec)
+EM:(+): 3     F: 3.182e+02 dF predicted: 1.873e+02  actual: 9.014e+01 (3.01 sec)
+EM:(+): 4     F: 4.083e+02 dF predicted: 4.614e+01  actual: 3.621e+01 (2.99 sec)
+EM:(+): 5     F: 4.445e+02 dF predicted: 3.476e+01  actual: 2.808e+01 (2.98 sec)
+EM:(+): 6     F: 4.726e+02 dF predicted: 2.979e+01  actual: 2.230e+01 (3.10 sec)
+EM:(+): 7     F: 4.949e+02 dF predicted: 2.338e+01  actual: 1.190e+01 (3.26 sec)
+EM:(+): 8     F: 5.068e+02 dF predicted: 1.968e+01  actual: 1.687e+01 (3.12 sec)
+EM:(+): 9     F: 5.237e+02 dF predicted: 1.603e+01  actual: 8.171e+00 (3.06 sec)
+EM:(+): 10     F: 5.319e+02 dF predicted: 9.798e+00  actual: 7.524e+00 (3.09 sec)
+EM:(+): 11     F: 5.394e+02 dF predicted: 3.329e+00  actual: 2.400e+00 (3.01 sec)
+EM:(+): 12     F: 5.418e+02 dF predicted: 4.458e-01  actual: 3.787e-01 (3.48 sec)
+EM:(+): 13     F: 5.422e+02 dF predicted: 1.370e-02  actual: 6.725e-02 (3.18 sec)
+EM:(+): 14     F: 5.422e+02 dF predicted: 7.629e-05  actual: 2.710e-02 (3.00 sec)
+EM:(+): 15     F: 5.423e+02 dF predicted: 2.929e-06  actual: 1.059e-02 (3.07 sec)
+EM:(+): 16     F: 5.423e+02 dF predicted: 3.019e-07  convergence
+17-May-2023 17:17:01 - Done    'DCM estimation'
+17-May-2023 17:17:01 - Done
+
+Elapsed time: 2 min 0 H

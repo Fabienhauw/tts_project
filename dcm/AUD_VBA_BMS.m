@@ -7,6 +7,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nroi = 4;
+lexic = 1;
 
 i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -49,49 +50,23 @@ for k=1:numel(S)
     path_to_all_stats   = [path_to_all_stats; tmp_path];
 end
 
-%% make the sum of each weighted parameter by the model probability in each subject
-for k = 1:numel(S)/2 %parfor 1:numel(S)
+%% here we estimate posterior probability at the group level for each model based on probability for each individuals models comparison
+clear L1 L2
+
+for k = 1:numel(S)/2
     path_to_stats = path_to_all_stats{k};
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+    end
     if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
     end
     cd(res_path)
     BMS = load('BMS.mat'); BMS = BMS.BMS;
-    subj = load('model_space.mat'); subj = subj.subj;
-    
-    models(:) = {subj.sess.model(:).fname};
-    for dcm_i = 1:length(models)
-        tmp_DCM     = load(models{dcm_i});
-        tmp_DCM     = tmp_DCM.DCM;
-        connex      = tmp_DCM.Ep.A;
-        modul       = tmp_DCM.Ep.B;
-        wconnex     = tmp_post_prob(dcm_i)*connex;
-        wmodul      = tmp_post_prob(dcm_i)*modul;
-        mean_conn{k}    = [mean_conn{k}+wconnex];
-        mean_modul{k}   = [mean_modul{k}+wmodul];
-    end
-    L1(:,k) = BMS.DCM.ffx.family.like(:);
-end
-
-for k = numel(S)/2+1:numel(S)
-
-end
-
-%%
-clear L1
-
-for k = 1:numel(S)/2 %parfor 1:numel(S)
-    path_to_stats = path_to_all_stats{k};
-    if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
-    elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
-    end
-    cd(res_path)
-    BMS = load('BMS.mat');
-    BMS = BMS.BMS;
     L1(:,k) = BMS.DCM.ffx.F(:);
 end
 
@@ -99,10 +74,15 @@ end
 
 for k = numel(S)/2+1:numel(S) %parfor 1:numel(S)
     path_to_stats = path_to_all_stats{k};
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+    end
     if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
     end
     cd(res_path)
     BMS = load('BMS.mat');
@@ -111,18 +91,27 @@ for k = numel(S)/2+1:numel(S) %parfor 1:numel(S)
 end
 [posterior2,out2] = VBA_groupBMC(L2) ;
 
-%% Bayesian model average for structural connectivity
+
+%--------------------------------------------------------------------------
+
+
+% Bayesian model average for structural connectivity
 % for group 1
-post_prob = posterior1.r';
+post_prob = posterior1.r'; %% quoi utiliser ? posterior.r ou .a???? Revoir avec Jean
 mean_conn1(1:numel(S)/2) = {zeros(nroi,nroi)};
 mean_modul1(1:numel(S)/2) = {zeros(nroi,nroi)};
-clear conn_distrib1 modul_distrib1 conn_distrib2 modul_distrib2
+clear conn_distrib1 modul1_distrib1 modul2_distrib1 conn_distrib2 modul1_distrib2 modul2_distrib2
 for k = 1:numel(S)/2
     path_to_stats = path_to_all_stats{k};
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+    end
     if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
     end
     cd(res_path);
     tmp_post_prob = post_prob(k,:);
@@ -166,10 +155,15 @@ mean_conn2(1:numel(S)/2) = {zeros(nroi,nroi)};
 mean_modul2(1:numel(S)/2) = {zeros(nroi,nroi)};
 for k = numel(S)/2+1:numel(S)
     path_to_stats = path_to_all_stats{k};
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+    end
     if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
     end
     cd(res_path);
     tmp_post_prob = post_prob(k-numel(S)/2,:);
@@ -208,7 +202,7 @@ for x = 1:size(connex,1)
 end
 
 
-%% Plot for connections
+% Plot for connections
 
 % [cb] = cbrewer('qual', 'Set1', 16, 'pchip'); reg = {'STGm', 'SMG', 'MTG', 'VWFA'};
 count = 0;
@@ -232,7 +226,7 @@ p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res =
 [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values_res);
 
 
-%% Plot for modulations 1
+% Plot for modulations 1
 
 clear p_values
 count = 0;
@@ -255,7 +249,7 @@ end
 p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res == 0); p_values_res(mask) = [];
 [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values_res);
 
-%% Plot for modulations 2
+% Plot for modulations 2
 
 clear p_values
 count = 0;
@@ -279,15 +273,25 @@ p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res =
 [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values_res);
 
 
+
+
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+
 %% New estimation if estimation of all models probability is made with all subjects as one group
 clear L
 
 for k = 1:numel(S) %parfor 1:numel(S)
     path_to_stats = path_to_all_stats{k};
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+    end
     if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
     end
     cd(res_path)
     BMS = load('BMS.mat');
@@ -297,7 +301,8 @@ end
 
 [posterior,out] = VBA_groupBMC(L) ;
 
-%% Bayesian model average for structural connectivity
+%--------------------------------------------------------------------------
+% Bayesian model average for structural connectivity
 % for group 1
 post_prob = posterior.r';
 mean_conn(1:numel(S)) = {zeros(nroi,nroi)};
@@ -305,11 +310,17 @@ mean_modul(1:numel(S)) = {zeros(nroi,nroi)};
 clear conn_distrib modul_distrib
 for k = 1:numel(S)
     path_to_stats = path_to_all_stats{k};
-    if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
-    elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
     end
+    if nroi == 3
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
+    elseif nroi == 4
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
+    end
+    
     cd(res_path);
     tmp_post_prob = post_prob(k,:);
     subj = load('model_space.mat'); subj = subj.subj;
@@ -336,7 +347,8 @@ for x = 1:size(connex,1)
     end
 end
 
-%% Plot for connections
+%--------------------------------------------------------------------------
+% Plot for connections
 
 % [cb] = cbrewer('qual', 'Set1', 16, 'pchip'); reg = {'STGm', 'SMG', 'MTG', 'VWFA'};
 count = 0;
@@ -359,7 +371,8 @@ end
 p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res == 0); p_values_res(mask) = [];
 [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values_res);
 
-%% Plot for modulations 1
+
+% Plot for modulations 1
 
 clear p_values
 count = 0;
@@ -382,12 +395,12 @@ end
 p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res == 0); p_values_res(mask) = [];
 [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values_res);
 
-%% Plot for modulations 2
+% Plot for modulations 2
 
 clear p_values
 count = 0;
 for x = 1:size(modul(:,:,2),2)
-    for y =1:size(modul(:,:,2),2)
+    for y = 1 : size(modul(:,:,2),2)
         if any(modul2_distrib{x,y})~=0
             count = count + 1;
 %             f(count) = figure;
@@ -407,7 +420,10 @@ p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res =
 
 
 
-%% last try using posterior probability at subject's scale, not population's scale
+%% make the sum of each weighted parameter by the model probability in each subject
+% here we take the BMS and model space that was estimated across all models
+% for each subject, and extracting weighted parameters based on that.
+
 clear L
 mean_conn(1:numel(S)) = {zeros(nroi,nroi)};
 mean_modul(1:numel(S)) = {zeros(nroi,nroi)};
@@ -415,10 +431,15 @@ clear conn_distrib modul_distrib
 
 for k = 1:numel(S) %parfor 1:numel(S)
     path_to_stats = path_to_all_stats{k};
+    if lexic
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+    else
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+    end
     if nroi == 3
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path,'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats,'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path,'all_4_rois_models_4mm');
     end
     cd(res_path)
     BMS = load('BMS.mat');

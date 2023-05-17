@@ -38,7 +38,8 @@ ngroups = 2;
 
 S_effect = [S_droit ; S_con_app];
 % res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_PPI_%s_to_%s_speech_baseline_adj_eoi5_s8', S_effect(1).name, S_effect(end).name);
-res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_PPI_%s_to_%s_norm_scr_adj_eoi5_s8', S_effect(1).name, S_effect(end).name);
+res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_PPI_with_rs_rois_%s_to_%s_speech_baseline_adj_eoi5_s8', S_effect(1).name, S_effect(end).name);
+% res_dir_base = sprintf('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/ANOVA_s5_PPI_%s_to_%s_norm_scr_adj_eoi5_s8', S_effect(1).name, S_effect(end).name);
 
 vector_age = [
     25.1013699; 70.8219178; 23.6821918; 24.3342466; 21.109589; 31.7260274; 18.8438356; ...
@@ -72,13 +73,15 @@ totsub=length(subname);
 
 %-----------------------------------------------------------------
 cd(fullfile('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/PPI/',S(1).name));
-comp = dir('*norm_scr_eoi5');
-% comp = dir('*speech_baseline_eoi5');
+% comp = dir('*norm_scr_eoi5');
+comp = dir('*speech_baseline_eoi5');
+% comp = dir('*speech_baseline'); % here without eoi5, we get the previous results on figure and text, with a slightly different cluster on right STG...
 mask = ~cellfun(@isempty,(regexp({comp.name},'best_vox')));
 comp(mask) = '';
 all_comp = [comp];
 all_comp_names = {all_comp.name};
 cont = [1 : length(all_comp)];
+
 % PPI-interaction
 %-----------------------------------------------------------------
 

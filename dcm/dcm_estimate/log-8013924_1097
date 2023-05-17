@@ -1,0 +1,152 @@
+started on hmb002
+mer. mai 17 16:47:08 CEST 2023
+
+                                                                              < M A T L A B (R) >
+                                                                    Copyright 1984-2020 The MathWorks, Inc.
+                                                                R2020b Update 2 (9.9.0.1524771) 64-bit (glnxa64)
+                                                                                November 3, 2020
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_xwypt] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_mmegz] 
+[> In path (line 34)
+In startup (line 9)] 
+[Warning: Function iscolumn has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1097_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function ismatrix has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1097_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isrow has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1097_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function narginchk has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1097_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Function isequaln has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[> In path (line 34)
+In mfonc_j1097_dcm_estimate (line 1)
+In run (line 91)] 
+[Warning: Name is nonexistent or not a directory: /tmp/Editor_kyvai] 
+[> In path (line 34)
+In mfonc_j1097_dcm_estimate (line 1)
+In run (line 91)] 
+Initialising batch system... done.
+
+
+------------------------------------------------------------------------
+17-May-2023 16:49:49 - Running job #1
+------------------------------------------------------------------------
+17-May-2023 16:49:49 - Running 'DCM estimation'
+Loading DCMs...Done
+[Warning: Removing "/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/external/fieldtrip/compat/matlablt2010b" from your path.
+See http://www.fieldtriptoolbox.org/faq/should_i_add_fieldtrip_with_all_subdirectories_to_my_matlab_path/] 
+EM:(+): 1     F: 0.000e+00 dF predicted: 7.474e+01  actual: -5.828e+01 (3.91 sec)
+EM:(+): 2     F: -5.828e+01 dF predicted: 4.311e+01  actual: 3.799e+01 (3.06 sec)
+EM:(+): 3     F: -2.028e+01 dF predicted: 4.226e+01  actual: -7.962e-01 (2.69 sec)
+EM:(-): 4     F: -2.028e+01 dF predicted: 9.575e+00  actual: -1.262e+00 (2.73 sec)
+EM:(-): 5     F: -2.028e+01 dF predicted: 1.971e+00  actual: -7.235e-02 (2.71 sec)
+EM:(-): 6     F: -2.028e+01 dF predicted: 3.112e-01  actual: 8.138e-02 (2.76 sec)
+EM:(+): 7     F: -2.020e+01 dF predicted: 4.579e-01  actual: 4.403e-01 (2.82 sec)
+EM:(+): 8     F: -1.976e+01 dF predicted: 6.488e-01  actual: -4.863e-02 (2.84 sec)
+EM:(-): 9     F: -1.976e+01 dF predicted: 9.189e-02  actual: 7.729e-03 (2.69 sec)
+EM:(+): 10     F: -1.975e+01 dF predicted: 1.469e-01  actual: 1.468e-01 (2.74 sec)
+EM:(+): 11     F: -1.960e+01 dF predicted: 2.312e-01  actual: 1.020e-02 (2.69 sec)
+EM:(+): 12     F: -1.959e+01 dF predicted: 3.573e-01  actual: 3.453e-01 (2.88 sec)
+EM:(+): 13     F: -1.925e+01 dF predicted: 5.425e-01  actual: 1.595e-02 (2.69 sec)
+EM:(+): 14     F: -1.923e+01 dF predicted: 8.240e-01  actual: 7.976e-01 (3.03 sec)
+EM:(+): 15     F: -1.844e+01 dF predicted: 1.274e+00  actual: 3.171e-03 (2.83 sec)
+EM:(+): 16     F: -1.843e+01 dF predicted: 2.038e+00  actual: 2.008e+00 (2.63 sec)
+EM:(+): 17     F: -1.642e+01 dF predicted: 3.262e+00  actual: -1.923e-01 (2.72 sec)
+EM:(-): 18     F: -1.642e+01 dF predicted: 4.534e-01  actual: 2.730e-01 (2.64 sec)
+EM:(+): 19     F: -1.615e+01 dF predicted: 7.429e-01  actual: 2.587e-01 (3.37 sec)
+EM:(+): 20     F: -1.589e+01 dF predicted: 1.215e+00  actual: 8.184e-01 (2.71 sec)
+EM:(+): 21     F: -1.507e+01 dF predicted: 1.974e+00  actual: 4.792e-01 (2.67 sec)
+EM:(+): 22     F: -1.459e+01 dF predicted: 3.194e+00  actual: 2.542e+00 (2.74 sec)
+EM:(+): 23     F: -1.205e+01 dF predicted: 5.056e+00  actual: 2.178e-01 (2.76 sec)
+EM:(+): 24     F: -1.183e+01 dF predicted: 7.968e+00  actual: 7.769e+00 (2.67 sec)
+EM:(+): 25     F: -4.065e+00 dF predicted: 1.167e+01  actual: -3.479e+00 (2.71 sec)
+EM:(-): 26     F: -4.065e+00 dF predicted: 1.776e+00  actual: -1.323e-01 (2.66 sec)
+EM:(-): 27     F: -4.065e+00 dF predicted: 2.478e-01  actual: 2.437e-01 (2.78 sec)
+EM:(+): 28     F: -3.822e+00 dF predicted: 4.025e-01  actual: -6.562e-02 (2.77 sec)
+EM:(-): 29     F: -3.822e+00 dF predicted: 5.486e-02  actual: 2.750e-02 (2.91 sec)
+EM:(+): 30     F: -3.794e+00 dF predicted: 9.017e-02  actual: 3.250e-02 (2.65 sec)
+EM:(+): 31     F: -3.762e+00 dF predicted: 1.480e-01  actual: 8.012e-02 (3.23 sec)
+EM:(+): 32     F: -3.681e+00 dF predicted: 2.425e-01  actual: 7.431e-02 (2.70 sec)
+EM:(+): 33     F: -3.607e+00 dF predicted: 3.966e-01  actual: 2.415e-01 (2.83 sec)
+EM:(+): 34     F: -3.366e+00 dF predicted: 6.470e-01  actual: 1.384e-01 (2.67 sec)
+EM:(+): 35     F: -3.227e+00 dF predicted: 1.055e+00  actual: 7.632e-01 (2.75 sec)
+EM:(+): 36     F: -2.464e+00 dF predicted: 1.710e+00  actual: 9.091e-02 (2.68 sec)
+EM:(+): 37     F: -2.373e+00 dF predicted: 2.765e+00  actual: 2.539e+00 (2.65 sec)
+EM:(+): 38     F: 1.658e-01 dF predicted: 4.346e+00  actual: -1.081e+00 (2.70 sec)
+EM:(-): 39     F: 1.658e-01 dF predicted: 6.115e-01  actual: 1.972e-01 (2.66 sec)
+EM:(+): 40     F: 3.630e-01 dF predicted: 9.984e-01  actual: 5.402e-01 (2.77 sec)
+EM:(+): 41     F: 9.032e-01 dF predicted: 1.620e+00  actual: 4.065e-01 (2.64 sec)
+EM:(+): 42     F: 1.310e+00 dF predicted: 2.610e+00  actual: 1.619e+00 (2.64 sec)
+EM:(+): 43     F: 2.929e+00 dF predicted: 4.116e+00  actual: 4.705e-01 (2.65 sec)
+EM:(+): 44     F: 3.399e+00 dF predicted: 6.385e+00  actual: 4.913e+00 (2.69 sec)
+EM:(+): 45     F: 8.312e+00 dF predicted: 9.230e+00  actual: -1.749e+00 (2.74 sec)
+EM:(-): 46     F: 8.312e+00 dF predicted: 1.390e+00  actual: 1.363e+00 (2.64 sec)
+EM:(+): 47     F: 9.675e+00 dF predicted: 2.189e+00  actual: -2.739e-01 (3.02 sec)
+EM:(-): 48     F: 9.675e+00 dF predicted: 3.037e-01  actual: 3.006e-01 (2.62 sec)
+EM:(+): 49     F: 9.976e+00 dF predicted: 4.960e-01  actual: 7.249e-02 (2.63 sec)
+EM:(+): 50     F: 1.005e+01 dF predicted: 8.088e-01  actual: 5.101e-01 (2.66 sec)
+EM:(+): 51     F: 1.056e+01 dF predicted: 1.308e+00  actual: -5.051e-03 (2.64 sec)
+EM:(-): 52     F: 1.056e+01 dF predicted: 1.794e-01  actual: 1.780e-01 (2.64 sec)
+EM:(+): 53     F: 1.074e+01 dF predicted: 2.944e-01  actual: 2.123e-01 (2.63 sec)
+EM:(+): 54     F: 1.095e+01 dF predicted: 4.818e-01  actual: -5.964e-02 (2.62 sec)
+EM:(-): 55     F: 1.095e+01 dF predicted: 6.552e-02  actual: 6.505e-02 (2.62 sec)
+EM:(+): 56     F: 1.101e+01 dF predicted: 1.078e-01  actual: 2.137e-02 (2.63 sec)
+EM:(+): 57     F: 1.103e+01 dF predicted: 1.774e-01  actual: 9.694e-02 (2.63 sec)
+EM:(+): 58     F: 1.113e+01 dF predicted: 2.912e-01  actual: 2.858e-02 (3.65 sec)
+EM:(+): 59     F: 1.116e+01 dF predicted: 4.773e-01  actual: 3.211e-01 (3.52 sec)
+EM:(+): 60     F: 1.148e+01 dF predicted: 7.776e-01  actual: -5.608e-02 (2.67 sec)
+EM:(-): 61     F: 1.148e+01 dF predicted: 1.061e-01  actual: 1.053e-01 (2.65 sec)
+EM:(+): 62     F: 1.159e+01 dF predicted: 1.744e-01  actual: 8.009e-02 (3.33 sec)
+EM:(+): 63     F: 1.167e+01 dF predicted: 2.863e-01  actual: 5.746e-02 (2.72 sec)
+EM:(+): 64     F: 1.172e+01 dF predicted: 4.691e-01  actual: 2.493e-01 (4.33 sec)
+EM:(+): 65     F: 1.197e+01 dF predicted: 7.647e-01  actual: 7.773e-02 (2.64 sec)
+EM:(+): 66     F: 1.205e+01 dF predicted: 1.240e+00  actual: 8.106e-01 (2.65 sec)
+EM:(+): 67     F: 1.286e+01 dF predicted: 1.980e+00  actual: -1.528e-01 (2.59 sec)
+EM:(-): 68     F: 1.286e+01 dF predicted: 2.737e-01  actual: 2.715e-01 (2.58 sec)
+EM:(+): 69     F: 1.313e+01 dF predicted: 4.476e-01  actual: 2.330e-01 (2.66 sec)
+EM:(+): 70     F: 1.337e+01 dF predicted: 7.294e-01  actual: 6.486e-02 (2.59 sec)
+EM:(+): 71     F: 1.343e+01 dF predicted: 1.183e+00  actual: 7.611e-01 (2.57 sec)
+EM:(+): 72     F: 1.419e+01 dF predicted: 1.888e+00  actual: -1.698e-01 (2.60 sec)
+EM:(-): 73     F: 1.419e+01 dF predicted: 2.608e-01  actual: 2.587e-01 (2.58 sec)
+EM:(+): 74     F: 1.445e+01 dF predicted: 4.265e-01  actual: 2.289e-01 (2.58 sec)
+EM:(+): 75     F: 1.468e+01 dF predicted: 6.948e-01  actual: 2.892e-02 (2.58 sec)
+EM:(+): 76     F: 1.471e+01 dF predicted: 1.126e+00  actual: 7.642e-01 (2.58 sec)
+EM:(+): 77     F: 1.547e+01 dF predicted: 1.796e+00  actual: -2.912e-01 (2.59 sec)
+EM:(-): 78     F: 1.547e+01 dF predicted: 2.481e-01  actual: 2.461e-01 (2.58 sec)
+EM:(+): 79     F: 1.572e+01 dF predicted: 4.057e-01  actual: 1.180e-01 (2.58 sec)
+EM:(+): 80     F: 1.584e+01 dF predicted: 6.613e-01  actual: 2.202e-01 (2.67 sec)
+EM:(+): 81     F: 1.606e+01 dF predicted: 1.070e+00  actual: 2.940e-01 (2.67 sec)
+EM:(+): 82     F: 1.635e+01 dF predicted: 1.712e+00  actual: 5.901e-01 (2.64 sec)
+EM:(+): 83     F: 1.694e+01 dF predicted: 2.682e+00  actual: 6.511e-01 (2.68 sec)
+EM:(+): 84     F: 1.759e+01 dF predicted: 4.078e+00  actual: 1.505e+00 (2.67 sec)
+EM:(+): 85     F: 1.910e+01 dF predicted: 5.868e+00  actual: 1.050e+00 (2.61 sec)
+EM:(+): 86     F: 2.015e+01 dF predicted: 7.873e+00  actual: 3.665e+00 (2.64 sec)
+EM:(+): 87     F: 2.381e+01 dF predicted: 9.361e+00  actual: 4.806e-01 (2.66 sec)
+EM:(+): 88     F: 2.429e+01 dF predicted: 1.041e+01  actual: 9.137e+00 (2.85 sec)
+EM:(+): 89     F: 3.343e+01 dF predicted: 1.046e+01  actual: -3.756e+00 (2.67 sec)
+EM:(-): 90     F: 3.343e+01 dF predicted: 1.940e+00  actual: -5.510e-01 (2.81 sec)
+EM:(-): 91     F: 3.343e+01 dF predicted: 3.992e-01  actual: 3.312e-01 (2.65 sec)
+EM:(+): 92     F: 3.376e+01 dF predicted: 4.218e-01  actual: -2.514e-01 (2.79 sec)
+EM:(-): 93     F: 3.376e+01 dF predicted: 6.140e-02  actual: -1.770e-02 (2.63 sec)
+EM:(-): 94     F: 3.376e+01 dF predicted: 8.425e-03  actual: 8.149e-03 (2.69 sec)
+EM:(+): 95     F: 3.377e+01 dF predicted: 1.376e-02  actual: -1.787e-03 (2.69 sec)
+EM:(-): 96     F: 3.377e+01 dF predicted: 1.868e-03  convergence
+17-May-2023 16:55:48 - Done    'DCM estimation'
+17-May-2023 16:55:48 - Done
+
+Elapsed time: 8 min 0 H

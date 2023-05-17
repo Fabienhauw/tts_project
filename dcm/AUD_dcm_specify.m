@@ -8,9 +8,17 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nroi = 3;
+nroi = 4;
+lexic = 1;
+model_kind = 2;
+if model_kind == 1
+    dcm_folder = 'dcm_model_param_modul_speech_baseline';
+elseif model_kind == 2
+    dcm_folder = 'dcm_model_param_modul_sent_scramble';
+elseif model_kind == 3
+    dcm_folder = 'dcm_model_param_modul';
+end
 
-i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
 cd (D);
 S = dir(D);
@@ -50,8 +58,6 @@ for k=1:numel(S)
 end
 
 %% model parameters
-nconditions = 3;
-
 sounds = 1; speech = 2; words = 3;
 
 subj={subjs};
@@ -59,10 +65,10 @@ nsubjects   = length(subj);
 
 if nroi == 4
     reg         = {'lstgm', 'smg', 'sts', 'vwfa'};
-    ROIs_coord = [-45 -24 8; -48 -44 23; -50 6 53; -45 -51 -10];
+    ROIs_coord = [-45 -24 8; -48 -44 23; -65 -41 6; -45 -51 -10];
 elseif nroi == 3
-    reg         = {'lpstg', 'smg', 'vwfa'};
-    ROIs_coord = [-70 -28 3;-48 -44 23; -45 -51 -10];
+    reg         = {'lstgm', 'smg', 'vwfa'};
+    ROIs_coord = [-45 -24 8;-48 -44 23; -45 -51 -10];
 end
 
 nregions    = length(reg);
@@ -80,6 +86,19 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory containing the data %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if nroi == 3
+    AUD_dcm_matrix_3roi_design;
+elseif nroi == 4
+    if lexic
+        AUD_dcm_matrix_4roi_design_lexic
+    elseif ~lexic
+        AUD_dcm_matrix_4roi_design;
+    end
+end
+
+temp_a=a;
+clear a
 
 for k = 1 : numel(S)
     matlabbatch=[];
@@ -109,7 +128,7 @@ for k = 1 : numel(S)
     
     clear DCM
     
-    SPM = load(fullfile(path_to_stats,'dcm_model_param_modul/SPM.mat'));
+    SPM = load(fullfile(path_to_stats,dcm_folder,'SPM.mat'));
     SPM = SPM.SPM;
     
     if nroi == 3
@@ -147,10 +166,16 @@ for k = 1 : numel(S)
        xY(r) = XY.xY;
     end
     
+    if lexic
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
+    else
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
+    end
+    
     if nroi == 3
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/all_3_rois_models_4mm');
+        res_path = fullfile(res_path, 'all_3_rois_models_4mm');
     elseif nroi == 4
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/all_4_rois_models_4mm');
+        res_path = fullfile(res_path, 'all_4_rois_models_4mm');
     end
     
     if ~isdir(res_path)
@@ -160,21 +185,17 @@ for k = 1 : numel(S)
     cd(res_path);
     
     clear a
-    if nroi == 3
-        AUD_dcm_matrix_3roi_design;
-    elseif nroi == 4
-        AUD_dcm_matrix_4roi_design;
-    end
-    
-    temp_a=a;
-    clear a
     
     %% common parameters for all models;
     
     if nroi == 3
         include = [1 1 0];
     elseif nroi == 4
-        include = [1 1 1];
+        if lexic
+            include = [1 1 1];
+        elseif ~lexic
+            include = [1 1 0];
+        end
     end
     
     % C-matrix = driving / input matrice (lines for roi, columns for conditions)
@@ -200,21 +221,21 @@ for k = 1 : numel(S)
     name_count=0;
     length(find(~cellfun(@isempty,temp_a(2:end,:))));
     for i=1:size(temp_a,2)
-        a=temp_a{1,i};
+        a=temp_a{1,i}(:,:,1);
         modul_models = length(find(~cellfun('isempty',temp_a(1:end,i)))==1);
-        for j=2:modul_models % skip the first line which corresponds to the fixed connections;
+        for j=1:modul_models
             if i>1
-                name_count = length(find(~cellfun(@isempty,temp_a(2:end,1:i-1)))) + length(find(~cellfun(@isempty,temp_a(2:j,i))));
+                name_count = length(find(~cellfun(@isempty,temp_a(1:end,1:i-1)))) + length(find(~cellfun(@isempty,temp_a(1:j,i))));
             else
-                name_count = length(find(~cellfun(@isempty,temp_a(2:j,i))));
+                name_count = length(find(~cellfun(@isempty,temp_a(1:j,i))));
             end
             
-            b(:,:,speech)=temp_a{j,i};
-            if nroi == 4
-                b(:,:,words)=temp_a{j,i};
+            b(:,:,speech)=temp_a{j,i}(:,:,2);
+            if nroi == 4 & lexic
+                b(:,:,words)=temp_a{j,i}(:,:,3);
             end
             
-            mod_name = sprintf('struct_%d_num_%d_tot_%d',i,j-1,name_count);
+            mod_name = sprintf('struct_%d_num_%d_tot_%d',i,j,name_count);
             s.a=a;
             s.b=b;
             s.name=mod_name;

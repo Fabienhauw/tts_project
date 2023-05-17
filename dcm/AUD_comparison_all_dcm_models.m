@@ -3,6 +3,20 @@ addpath('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm'
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/matvol'))
 addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')) 
 
+nroi = 4;
+lexic = 1;
+fam_comp = 1;
+redo_comp = 0;
+
+model_kind = 1;
+if model_kind == 1
+    dcm_folder = 'dcm_model_param_modul_speech_baseline';
+elseif model_kind == 2
+    dcm_folder = 'dcm_model_param_modul_sent_scramble';
+elseif model_kind == 3
+    dcm_folder = 'dcm_model_param_modul';
+end
+
 i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
 cd (D);
@@ -32,8 +46,13 @@ S = [S_droit ; S_con_app];
 
 counter = 0;
 clear a
-AUD_dcm_matrix_3roi_design;
-% AUD_dcm_matrix_4roi_design;
+if nroi == 3
+    AUD_dcm_matrix_3roi_design;
+elseif nroi == 4 & ~lexic
+    AUD_dcm_matrix_4roi_design;
+elseif nroi == 4 & lexic
+    AUD_dcm_matrix_4roi_design_lexic;
+end
 temp_a=a;
 clear a
 
@@ -50,15 +69,30 @@ for k=1:numel(S)
 end
 
 
-for k = 1:numel(S)
-    res_path=fullfile(path_to_all_stats{k}, 'dcm_model_param_modul/all_3_rois_models_4mm');
-%     res_path=fullfile(path_to_all_stats{k}, 'dcm_model_param_modul/all_4_rois_models_4mm');
+for k = 1 : numel(S)
+    fprintf('%s \n', S(k).name)
+    if lexic
+        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'lex_cond');
+    else
+        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'no_lex_cond');
+    end
+    if nroi == 3
+        res_path=fullfile(res_path, 'all_3_rois_models_4mm');
+    elseif nroi == 4
+        res_path=fullfile(res_path, 'all_4_rois_models_4mm');
+    end
 
     cd(res_path);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%         MODEL COMPARISON           %%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    if redo_comp
+        try
+            delete('BMS.mat');
+        catch
+        end
+    end
     all_DCM = dir('DCM*');
     path_to_dcm = {};
     for dcm=1:length(all_DCM)
@@ -68,6 +102,8 @@ for k = 1:numel(S)
     
     %to compare all DCM models;
     clear matlabbatch
+    fprintf('All models comparison \n')
+
     matlabbatch{1}.spm.dcm.bms.inference.dir = {res_path};
     matlabbatch{1}.spm.dcm.bms.inference.sess_dcm{1}.dcmmat = path_to_dcm;
     matlabbatch{1}.spm.dcm.bms.inference.model_sp = {''};
@@ -77,10 +113,12 @@ for k = 1:numel(S)
     matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
     matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
     
-    spm_jobman('run', matlabbatch)
+%     spm_jobman('run', matlabbatch)
     clear matlabbatch
     
-    if size(temp_a,2)>1
+    
+    fprintf('All families comparison \n')
+    if size(temp_a,2)>1 & fam_comp
         % fam comparison
         family.names={};
         names_fam = '';
@@ -106,6 +144,14 @@ for k = 1:numel(S)
             mkdir(fullfile(res_path,'fam_comparison'))
         end
         
+        cd(fullfile(res_path,'fam_comparison'))
+        if redo_comp
+            try
+                delete('BMS.mat');
+            catch
+            end
+        end
+        
         matlabbatch{1}.spm.dcm.bms.inference.dir = {fullfile(res_path,'fam_comparison')};
         matlabbatch{1}.spm.dcm.bms.inference.sess_dcm{1}.dcmmat = path_to_dcm;
         matlabbatch{1}.spm.dcm.bms.inference.model_sp = {''};
@@ -115,7 +161,7 @@ for k = 1:numel(S)
         matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
         matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
         
-        spm_jobman('run', matlabbatch)
+%         spm_jobman('run', matlabbatch)
         clear matlabbatch
         
         % then identify the winning family:
@@ -129,6 +175,7 @@ for k = 1:numel(S)
         end
         
         %identify the DCM within the winning family:
+        cd(res_path)
         DCM_winning_fam = dir(sprintf('*%s*.mat',win_fam));
         path_to_dcm_win_fam = {};
         for dcm=1:length(DCM_winning_fam)
@@ -137,6 +184,13 @@ for k = 1:numel(S)
         end
         
         %new DCM comparison:
+        fprintf('All models among best family comparison \n')
+        cd(res_path_fam)
+        if redo_comp
+            try
+                delete('BMS.mat');
+            end
+        end
         matlabbatch{1}.spm.dcm.bms.inference.dir = {res_path_fam};
         matlabbatch{1}.spm.dcm.bms.inference.sess_dcm{1}.dcmmat = path_to_dcm_win_fam;
         matlabbatch{1}.spm.dcm.bms.inference.model_sp = {''};
@@ -146,36 +200,79 @@ for k = 1:numel(S)
         matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
         matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
         
-        spm_jobman('run', matlabbatch)
+%         spm_jobman('run', matlabbatch)
         clear matlabbatch
     end
     
-%     %% to compare systematically all models within the best group model (ie
-%     % struct 9)
-%     
-%     path_to_dcm_fam_9 = {};
-%     %identify the DCM within the 9th family:
-%     DCM_fam_9 = dir(sprintf('*struct_9*.mat'));
-%     for dcm=1:length(DCM_fam_9)
-%         new_dcm             = fullfile(res_path,DCM_fam_9(dcm).name);
-%         path_to_dcm_fam_9   = [path_to_dcm_fam_9;new_dcm];
-%     end
-%     
-%     res_path_fam_9 = fullfile(res_path, 'struc_9');
-%     if ~isdir(res_path_fam_9)
-%         mkdir(res_path_fam_9)
-%     end
-% 
-%     %new DCM comparison:
-%     matlabbatch{1}.spm.dcm.bms.inference.dir = {res_path_fam_9};
-%     matlabbatch{1}.spm.dcm.bms.inference.sess_dcm{1}.dcmmat = path_to_dcm_fam_9;
-%     matlabbatch{1}.spm.dcm.bms.inference.model_sp = {''};
-%     matlabbatch{1}.spm.dcm.bms.inference.load_f = {''};
-%     matlabbatch{1}.spm.dcm.bms.inference.method = 'FFX';
-%     matlabbatch{1}.spm.dcm.bms.inference.family_level.family_file = {''};
-%     matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
-%     matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
-%     
-%     spm_jobman('run', matlabbatch)
-%     clear matlabbatch
+    %% to compare systematically all models within the best group model (ie
+    % struct 9)
+    
+    path_to_dcm_fam_9 = {};
+    cd(res_path)
+    %identify the DCM within the 9th family:
+    DCM_fam_9 = dir(sprintf('*struct_9*.mat'));
+    for dcm=1:length(DCM_fam_9)
+        new_dcm             = fullfile(res_path,DCM_fam_9(dcm).name);
+        path_to_dcm_fam_9   = [path_to_dcm_fam_9;new_dcm];
+    end
+    
+    res_path_fam_9 = fullfile(res_path, 'struct_9');
+    if ~isdir(res_path_fam_9)
+        mkdir(res_path_fam_9)
+    end
+
+    %new DCM comparison:
+    matlabbatch{1}.spm.dcm.bms.inference.dir = {res_path_fam_9};
+    matlabbatch{1}.spm.dcm.bms.inference.sess_dcm{1}.dcmmat = path_to_dcm_fam_9;
+    matlabbatch{1}.spm.dcm.bms.inference.model_sp = {''};
+    matlabbatch{1}.spm.dcm.bms.inference.load_f = {''};
+    matlabbatch{1}.spm.dcm.bms.inference.method = 'FFX';
+    matlabbatch{1}.spm.dcm.bms.inference.family_level.family_file = {''};
+    matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
+    matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
+    
+    spm_jobman('run', matlabbatch)
+    clear matlabbatch
+end
+
+%% to make a .mat with all info for each subject about the 3 previous comparisons
+
+all_results(numel(S)).name                  = [];
+all_results(numel(S)).bestmodel             = [];
+all_results(numel(S)).bestfam               = [];
+all_results(numel(S)).bestmodel_inbestfam   = [];
+
+for k = 1 : numel(S)
+    fprintf('%s \n', S(k).name)
+    all_results(k).name = S(k).name;
+    if lexic
+        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'lex_cond');
+    else
+        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'no_lex_cond');
+    end
+    if nroi == 3
+        res_path=fullfile(res_path, 'all_3_rois_models_4mm');
+    elseif nroi == 4
+        res_path=fullfile(res_path, 'all_4_rois_models_4mm');
+    end
+    
+    cd(res_path);
+    BMS = load('BMS.mat'); models = load('model_space.mat');
+    BMS = BMS.BMS;
+    [val, idx] = max(BMS.DCM.ffx.F);
+    path_bestmodel = strsplit(models.subj.sess.model(idx).fname, '/'); name_bestmodel = path_bestmodel{end};
+    all_results(k).bestmodel = name_bestmodel;
+    
+    BMS = load(fullfile(res_path,'fam_comparison/BMS.mat'));
+    BMS = BMS.BMS;
+    [val, idx] = max(BMS.DCM.ffx.family.post);
+    win_fam         = sprintf('struct_%d',idx);
+    all_results(k).bestfam = win_fam;
+    
+    BMS = load(fullfile(res_path, win_fam, 'BMS.mat')); models = load(fullfile(res_path, win_fam, 'model_space.mat'));
+    BMS = BMS.BMS;
+    [val, idx] = max(BMS.DCM.ffx.F);
+    path_bestmodel = strsplit(models.subj.sess.model(idx).fname, '/'); name_bestmodel = path_bestmodel{end};
+    all_results(k).bestmodel_inbestfam = name_bestmodel;
+
 end
