@@ -10,7 +10,8 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 
 nroi = 4;
 lexic = 1;
-model_kind = 2;
+sphere_radius = 6;
+model_kind = 3;
 if model_kind == 1
     dcm_folder = 'dcm_model_param_modul_speech_baseline';
 elseif model_kind == 2
@@ -147,16 +148,16 @@ for k = 1 : numel(S)
     
     if nroi == 3
         f = {
-        fullfile(path_to_stats,'VOI_lSTGm_-45_-24_8_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
-        fullfile(path_to_stats,'VOI_SMG_-48_-44_23_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
-        fullfile(path_to_stats,'VOI_VWFA_-45_-51_-10_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
+        fullfile(path_to_stats,sprintf('VOI_lSTGm_-45_-24_8_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_SMG_-48_-44_23_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_VWFA_-45_-51_-10_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
         };
     elseif nroi == 4
         f = {
-        fullfile(path_to_stats,'VOI_lSTGm_-45_-24_8_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
-        fullfile(path_to_stats,'VOI_SMG_-48_-44_23_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
-        fullfile(path_to_stats,'VOI_lSTS_-65_-41_6_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
-        fullfile(path_to_stats,'VOI_VWFA_-45_-51_-10_4mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat');
+        fullfile(path_to_stats,sprintf('VOI_lSTGm_-45_-24_8_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_SMG_-48_-44_23_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_lSTS_-65_-41_6_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_VWFA_-45_-51_-10_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
         };
     end
     
@@ -173,9 +174,9 @@ for k = 1 : numel(S)
     end
     
     if nroi == 3
-        res_path = fullfile(res_path, 'all_3_rois_models_4mm');
+        res_path = fullfile(res_path, sprintf('all_3_rois_models_%dmm', sphere_radius));
     elseif nroi == 4
-        res_path = fullfile(res_path, 'all_4_rois_models_4mm');
+        res_path = fullfile(res_path, sprintf('all_4_rois_models_%dmm', sphere_radius));
     end
     
     if ~isdir(res_path)

@@ -1,2 +1,0 @@
-export jobid=`sbatch -p normal,bigmem -N 1 --cpus-per-task=1 --job-name=dcm_estimate   -t 0-00:30:00 --mem=4000  -m block:block   -o /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm/dcm_estimate/log-%A_%a  -e /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm/dcm_estimate/err-%A_%a  --array=1-8704  /network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm/dcm_estimate/do_job_array.sh |awk '{print $4}'` 
-echo submitted job $jobid

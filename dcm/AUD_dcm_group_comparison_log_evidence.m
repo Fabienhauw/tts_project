@@ -235,6 +235,7 @@ if p > 0.5
             for param = 1:numel(S)
                 conn_distrib{x,y}(param) = connex{1,param}(x,y);
                 modul1_distrib{x,y}(param) = modul{1,param}(x,y,2);
+                modul2_distrib{x,y}(param) = modul{1,param}(x,y,3);
             end
             
             if any(conn_distrib{x,y})~=0
@@ -243,10 +244,16 @@ if p > 0.5
                 mconn_distrib1{x,y} = mean(conn_distrib{x,y}(1:17));
                 mconn_distrib2{x,y} = mean(conn_distrib{x,y}(18:end));
                 p_values_conn(x,y)=p;
+                
                 [hypoth, p, t, df] = ttest2(modul1_distrib{x,y}(1:17), modul1_distrib{x,y}(18:end));
                 mmodul1_distrib1{x,y} = mean(modul1_distrib{x,y}(1:17));
                 mmodul1_distrib2{x,y} = mean(modul1_distrib{x,y}(18:end));
-                p_values_mod(x,y)=p;
+                p_values_mod1(x,y)=p;
+                
+                [hypoth, p, t, df] = ttest2(modul2_distrib{x,y}(1:17), modul2_distrib{x,y}(18:end));
+                mmodul2_distrib1{x,y} = mean(modul2_distrib{x,y}(1:17));
+                mmodul2_distrib2{x,y} = mean(modul2_distrib{x,y}(18:end));
+                p_values_mod2(x,y)=p;
             end
         end
     end
@@ -285,3 +292,9 @@ Fe = out.F(end);
 Fd = out1.F(end) + out2.F(end) ;
 
 p = 1/(1+exp(Fd-Fe)); % p> 0.5, it is most likely that both groups have the same best family;
+
+if p >0.5
+    [val, idx] = max(out.Ef); % here it is the fam 9, num 55;
+    winning_model_split = strsplit(all_models{idx}, '/');
+    winning_model_across_all = winning_model_split{end};
+end

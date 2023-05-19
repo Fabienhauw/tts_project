@@ -9,17 +9,21 @@ mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 a = 1; b = 48;
 
+return
+%%
 % delete files
 for k = a:b
-    which_dir = fullfile(D, S(k).name, 'Aud/loc/cpt_data');
+    which_dir = fullfile(D, S(k).name, 'Aud/loc/stats_s5_without_resting');
     cd(which_dir)
-    files = dir('*speech_scramble.mat');
+    files = dir('VOI_lSTS_ROI_from_MVPA_6mm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5*');
     filenames = fullfile(which_dir, {files.name});
     try
         delete( filenames{:} );
     end
 end
 
+return
+%%
 % for dir
 for k = a:b
     which_dir = fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting/dcm_model_param_modul/lex_cond/all_4_rois_models_4mm');

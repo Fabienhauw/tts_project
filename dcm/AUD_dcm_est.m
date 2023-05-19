@@ -9,7 +9,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 nroi = 4;
 lexic = 1;
 redo =0;
-model_kind = 2;
+model_kind = 1;
 if model_kind == 1
     dcm_folder = 'dcm_model_param_modul_speech_baseline';
 elseif model_kind == 2
@@ -17,6 +17,7 @@ elseif model_kind == 2
 elseif model_kind == 3
     dcm_folder = 'dcm_model_param_modul';
 end
+sphere_radius = 6;
 
 i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -69,9 +70,9 @@ for k = 1 : numel(S)
     end
     
     if nroi == 3
-        res_path = fullfile(res_path, 'all_3_rois_models_4mm');
+        res_path = fullfile(res_path, sprintf('all_3_rois_models_%dmm', sphere_radius));
     elseif nroi == 4
-        res_path = fullfile(res_path, 'all_4_rois_models_4mm');
+        res_path = fullfile(res_path, sprintf('all_4_rois_models_%dmm', sphere_radius));
     end
     
     if ~isdir(res_path)

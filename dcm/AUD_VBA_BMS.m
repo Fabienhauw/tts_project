@@ -9,6 +9,15 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 nroi = 4;
 lexic = 1;
 
+model_kind = 1;
+if model_kind == 1
+    dcm_folder = 'dcm_model_param_modul_speech_baseline';
+elseif model_kind == 2
+    dcm_folder = 'dcm_model_param_modul_sent_scramble';
+elseif model_kind == 3
+    dcm_folder = 'dcm_model_param_modul';
+end
+
 i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
 cd (D);
@@ -56,9 +65,9 @@ clear L1 L2
 for k = 1:numel(S)/2
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
@@ -75,9 +84,9 @@ end
 for k = numel(S)/2+1:numel(S) %parfor 1:numel(S)
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
@@ -104,9 +113,9 @@ clear conn_distrib1 modul1_distrib1 modul2_distrib1 conn_distrib2 modul1_distrib
 for k = 1:numel(S)/2
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
@@ -156,9 +165,9 @@ mean_modul2(1:numel(S)/2) = {zeros(nroi,nroi)};
 for k = numel(S)/2+1:numel(S)
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
@@ -278,15 +287,16 @@ p_values_res = reshape(p_values, 1, numel(p_values)); mask = find(p_values_res =
 %--------------------------------------------------------------------------
 %--------------------------------------------------------------------------
 
-%% New estimation if estimation of all models probability is made with all subjects as one group
+%% New estimation if estimation of all models probability is made with all subjects as one group; 
+% This one is supposed to be the best adapted.
 clear L
 
 for k = 1:numel(S) %parfor 1:numel(S)
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
@@ -311,9 +321,9 @@ clear conn_distrib modul_distrib
 for k = 1:numel(S)
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
@@ -432,9 +442,9 @@ clear conn_distrib modul_distrib
 for k = 1:numel(S) %parfor 1:numel(S)
     path_to_stats = path_to_all_stats{k};
     if lexic
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
     else
-        res_path = fullfile(path_to_stats, 'dcm_model_param_modul/no_lex_cond');
+        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
     end
     if nroi == 3
         res_path = fullfile(res_path,'all_3_rois_models_4mm');
