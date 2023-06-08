@@ -7,7 +7,7 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12/m
 
 wd = pwd;
 all_con = [16];
-roi_sph_rad = 6;
+roi_sph_rad = 4;
 F_con = 29;
 
 
@@ -40,21 +40,6 @@ S_con(mask_gauch_con) = [];
 S_syn = S;
 S_syn(mask_gauch) = [];
 
-vector_age = [
-    25.1013699; 70.8219178; 23.6821918; 24.3342466; 21.109589; 31.7260274; 18.8438356; ...
-    36.3424658; 49.7753425; 27.2767123; 26.3616438; 40.8876712; 22.8246575; 43.1013699; 44.309589; ...
-    51.2246575; 40.7561644; 18.5835616; 39.939726; 58.9534247; 43.1753425; 39.9260274; ... % end of synesthetes
-    35.8219178; 23.2054795; 21.9726027; 31.7945205; 30.7589041; 70.3808219; 26.3589041; ... %start of controls
-    22.660274; 42.0027397; 45.5589041; 19.6027397; 55.9041096; 19.4958904; 38.3643836; ...
-    49.9178082; 46.0739726; 51.8630137; 25.1945205; 23.0547945; 41.4383562; 41.5972603; ...
-    29.865753; 26.57534247; 24.67945205; 29.72328767; 58.97534247; ...
-    ];
-
-vector_hand = [
-    0; 0; 0; 0; 1; 0; 1; 0; 0; 0; 1; 0; 0; 1; 0; 1; 0; 0; 0; 0; 0; 0;... % end of synesthetes
-    zeros(21,1); 1; 1; 1; 1; 1; ... % end of controls
-    ]; %0 = right, 1 = left;
-
 S_effect = [S_syn ; S_con];
 % S_effect = S_effect(18);
 
@@ -66,19 +51,21 @@ for j = 1 : size(S,1)
     end
 end
 
-vector_cov1 = vector_age(mask_cov==1);
-vector_cov2 = vector_hand(mask_cov==1);
+% coord from TTS network (speech > baseline, syn > con) except: common_vwfa
+% from con sent>scrambled in syn + con and smg common from speech >
+% baseline for syn + con
+% ROIs_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG',  'lpSTG',   'laSTG',  'rpSTG',   'raSTG',   'lSTGm',    'AngG',    'SMG_common'};
+% ROIs_coord = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53; -70 -28 3; -60 12 -7; 50 -24 16; 65 4 0; -45 -24 8; -30 -71 33; -48 -41 16]; 
 
-% coord from TTS network (speech > baseline, syn > con)
-ROIs_names = {'SMG',    'VWFA',      'lIPS',     'lprecent',   'MFG',  'lpSTG',   'laSTG',  'rpSTG',   'raSTG',   'lSTGm'};
-ROIs_coord = [-48 -44 23; -45 -51 -10; -40 -41 46; -50 -16 50; -50 6 53; -70 -28 3; -60 12 -7; 50 -24 16; 65 4 0; -45 -24 8]; 
+ROIs_names = { 'VWFA_common', 'lSTG_common'};
+ROIs_coord = [-42 -38 -20; -58 -11 0];
 
 i=1;
 for tmp_con = 1 : length(all_con)
     select_con = all_con(tmp_con);
     for k = 1 : numel(S_effect)
         for tmp_ROI = 1 : numel(ROIs_names)
-            %% batch for VOI, resulting from all subj, norm>scr speech
+            %% batch for VOI, resulting from all subj, speech>baseline
             matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to extract time series.
             matlabbatch{i}.spm.util.voi.adjust = F_con;
             matlabbatch{i}.spm.util.voi.session = 1;
@@ -119,7 +106,7 @@ par.jobname  = 'dcm_voi';
 
 job_ending_rountines(matlabbatch, [], par);
 
-%% for the STS resulting from the mvpa analysis:
+%% for the STS resulting from the mvpa analysis, spherical ROI:
 i=1;
 clear matlabbatch
 for tmp_con = 1 : length(all_con)
@@ -166,7 +153,43 @@ for tmp_con = 1 : length(all_con)
         matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to extract time series.
         matlabbatch{i}.spm.util.voi.adjust = F_con;
         matlabbatch{i}.spm.util.voi.session = 1;
-        matlabbatch{i}.spm.util.voi.name = sprintf('lSTS_ROI_from_MVPA_sph_DCM_ROI_adapted_to_aud_con%d_adj_eoi5', roi_sph_rad, select_con);
+        matlabbatch{i}.spm.util.voi.name = sprintf('lSTS_ROI_from_MVPA_sph_DCM_ROI_adapted_to_aud_con%d_adj_eoi5', select_con);
+        matlabbatch{i}.spm.util.voi.roi{1}.mask.image = {'/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa_without_resting_ttest_s8/results_PW_vs_Words/all_participants_pw_vs_words_left_cluster_10-3_510-2_mvpa.nii'};
+        matlabbatch{i}.spm.util.voi.roi{1}.mask.threshold = 0.5;        
+        matlabbatch{i}.spm.util.voi.roi{2}.mask.image = {fullfile(D, S_effect(k).name,'Aud/loc/stats_s5_without_resting/mask.nii')};
+        matlabbatch{i}.spm.util.voi.roi{2}.mask.threshold = 0.5;
+        matlabbatch{i}.spm.util.voi.expression = 'i1 & i2';
+        i=i+1;
+    end
+end
+
+%%
+% spm_jobman('run', matlabbatch)
+
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+
+par.run = 0;
+par.sge = 1;
+par.sge_queu = 'normal,bigmem';
+par.pct = 1;
+par.walltime = '00:30:00';
+par.jobname  = 'dcm_voi';
+%%%%%%%% this line below to comment to avoid re estimating
+%%%%%%%% models
+
+job_ending_rountines(matlabbatch, [], par);
+
+%% for the left angular gyrus from univariate comparison words > PW:
+i=1;
+clear matlabbatch
+for tmp_con = 1 : length(all_con)
+    select_con = all_con(tmp_con);
+    for k = 1 : numel(S_effect)
+        %% batch for VOI, resulting from all subj, norm>scr speech
+        matlabbatch{i}.spm.util.voi.spmmat = {fullfile(D, S_effect(k).name, 'Aud/loc/stats_s5_without_resting/SPM.mat')}; % use this .mat to extract time series.
+        matlabbatch{i}.spm.util.voi.adjust = F_con;
+        matlabbatch{i}.spm.util.voi.session = 1;
+        matlabbatch{i}.spm.util.voi.name = sprintf('lAG_ROI_DCM_ROI_adapted_to_aud_con%d_adj_eoi5', select_con);
         matlabbatch{i}.spm.util.voi.roi{1}.mask.image = {'/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/mvpa_without_resting_ttest_s8/results_PW_vs_Words/all_participants_pw_vs_words_left_cluster_10-3_510-2_mvpa.nii'};
         matlabbatch{i}.spm.util.voi.roi{1}.mask.threshold = 0.5;        
         matlabbatch{i}.spm.util.voi.roi{2}.mask.image = {fullfile(D, S_effect(k).name,'Aud/loc/stats_s5_without_resting/mask.nii')};
@@ -193,14 +216,22 @@ par.jobname  = 'dcm_voi';
 job_ending_rountines(matlabbatch, [], par);
 
 
-
+return
 %--------------------------------------------------------------------------
 %--------------------------------------------------------------------------
 
 %% visual rois
-% coord from TTS network (speech > baseline, syn > con)
-ROIs_names = {'SMG',      'VWFA',     'lIPS',     'MFG',    'lpSTG',    'lSTGm'};
-ROIs_coord = [-48 -44 23; -50 -54 -14; -32 -48 40; -40 6 30; -62 -31 3;  -45 -24 8]; 
+% coord from TTS network (speech > baseline, syn > con), 
+% VFWA from w > htf in syn + con
+% SMG is from w > fh in syn + con
+% occip is from all_stim in syn + con;
+
+% ROIs_names = {'common_SMG', 'common_VWFA',  'common_occip',  'lIPS',     'MFG',    'lpSTG',   'lSTGm'};
+% ROIs_coord = [-52 -44 20;   -50 -54 -14;    -28 -84 -12;    -32 -48 40; -40 6 30; -62 -31 3;  -45 -24 8]; 
+
+ROIs_names = {'common_SMG', 'common_VWFA',  'common_occip'};
+ROIs_coord = [-52 -44 20;   -50 -54 -14;    -28 -84 -12]; 
+
 F_con = 21;
 select_con = 12;
 clear matlabbatch

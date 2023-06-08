@@ -6,9 +6,6 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nroi = 4;
-lexic = 1;
-ang_gyr = 1;
 redo =0;
 model_kind = 3;
 if model_kind == 1
@@ -18,7 +15,7 @@ elseif model_kind == 2
 elseif model_kind == 3
     dcm_folder = 'dcm_model_param_modul';
 end
-sphere_radius = 6;
+sphere_radius = 4;
 
 i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
@@ -50,32 +47,25 @@ S = [S_droit ; S_con_app];
 subjs={};
 nb_subj=numel(S);
 path_to_scan = {};
-path_to_all_stats = {};
+path_to_all_stats_aud = {};
+path_to_all_stats_vis = {};
 counter = 0;
 
-for k=1:numel(S)
+for k = 1 : numel(S)
     subjs               = [subjs;S(k).name];
     path_to_subj        = fullfile(D, S(k).name);
     path_to_scan        = [path_to_scan;path_to_subj];
-    tmp_path            = fullfile(path_to_subj, 'Aud/loc/stats_s5_without_resting');
-    path_to_all_stats   = [path_to_all_stats; tmp_path];
-    if lexic & ~ang_gyr
-        tmp_final_path = fullfile(tmp_path, dcm_folder, 'lex_cond');
-    elseif lexic & ang_gyr
-        tmp_final_path = fullfile(tmp_path, dcm_folder, 'ang_gyr');
-    elseif ~lexic & ~ang_gyr
-        tmp_final_path = fullfile(tmp_path, dcm_folder, 'no_lex_cond');
-    end
-    if nroi == 3
-        tmp_final_path = fullfile(tmp_final_path,sprintf('all_3_rois_models_%dmm', sphere_radius));
-    elseif nroi == 4
-        tmp_final_path = fullfile(tmp_final_path,sprintf('all_4_rois_models_%dmm', sphere_radius));
-    end
-    final_path          = [final_path ;tmp_final_path];
+    tmp_path_aud            = fullfile(path_to_subj, 'Aud/loc/stats_s5_without_resting');
+    tmp_path_vis            = fullfile(path_to_subj, 'Vis/loc/stats_s5_without_resting');
+    path_to_all_stats_aud   = [path_to_all_stats_aud; tmp_path_aud];
+    path_to_all_stats_vis   = [path_to_all_stats_vis; tmp_path_vis];
 end
 
+%%
 for k = 1 : numel(S)
-    res_path = final_path{k};
+    fprintf('%s\n',S(k).name)
+    path_to_stats = path_to_all_stats_aud{k};
+    res_path = fullfile(path_to_stats, dcm_folder, sprintf('all_3_rois_models_%dmm', sphere_radius));
     
     if ~isdir(res_path)
         mkdir(res_path)
@@ -84,7 +74,7 @@ for k = 1 : numel(S)
 
 %     all_DCM_1 = dir('DCM_struct_2*'); all_DCM_2 = dir('DCM_struct_3*');
 %     all_DCM = [all_DCM_1;all_DCM_2];
-        all_DCM = dir('DCM_*');
+    all_DCM = dir('DCM_*');
     path_to_dcm = {};
     all_DCM_non_estimated = {};
     for dcm=1:length(all_DCM)
@@ -132,8 +122,69 @@ for k = 1 : numel(S)
     
 end
 
+
+%% visual part
+for k = 4%1 : numel(S)
+    fprintf('%s\n',S(k).name)
+    path_to_stats = path_to_all_stats_vis{k};
+    res_path = fullfile(path_to_stats, dcm_folder, sprintf('all_3_rois_models_%dmm', sphere_radius));
+    
+    if ~isdir(res_path)
+        mkdir(res_path)
+    end
+    cd(res_path)
+
+%     all_DCM_1 = dir('DCM_struct_2*'); all_DCM_2 = dir('DCM_struct_3*');
+%     all_DCM = [all_DCM_1;all_DCM_2];
+    all_DCM = dir('DCM_*');
+    path_to_dcm = {};
+    all_DCM_non_estimated = {};
+    for dcm=1:length(all_DCM)
+        new_dcm      = fullfile(res_path,all_DCM(dcm).name);
+        path_to_dcm  = [path_to_dcm;new_dcm];
+    end
+    
+    for dcm=1:length(all_DCM)
+        try
+            tmp_dcm = load(all_DCM(dcm).name);
+        catch
+            disp(['still impossible to load: ' fullfile(res_path,all_DCM(dcm).name) ', try to estimate it manually...'])
+        end
+        
+        if ~isfield(tmp_dcm, 'F')
+            all_DCM_non_estimated = [all_DCM_non_estimated;fullfile(res_path,all_DCM(dcm).name)];
+%             disp(['non estimated: ' fullfile(res_path,all_DCM(dcm).name)])
+        end
+    end
+    
+    clear a
+    clear b
+    
+    %%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%         MODEL ESTIMATION           %%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %DCM Estimation
+    if redo
+        for dcm_mod = 1:length(path_to_dcm)
+            counter = counter + 1;
+            matlabbatch{counter}.spm.dcm.estimate.dcms.subj.dcmmat = path_to_dcm(dcm_mod);
+            matlabbatch{counter}.spm.dcm.estimate.output.separate = struct([]);
+        end
+    elseif ~redo
+        for dcm_mod = 1:length(all_DCM_non_estimated)
+            counter = counter + 1;
+            matlabbatch{counter}.spm.dcm.estimate.dcms.subj.dcmmat = all_DCM_non_estimated(dcm_mod);
+            matlabbatch{counter}.spm.dcm.estimate.output.separate = struct([]);
+        end
+    end
+    %%%%%%%% this line below to comment to avoid re estimating
+    %%%%%%%% models
+    
+end
 %%
-cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts')
+cd('/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm')
 
 par.run = 0;
 par.sge = 1;

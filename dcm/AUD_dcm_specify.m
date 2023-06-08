@@ -9,7 +9,8 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/spm12')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nroi = 4;
-lexic = 1;
+lexic = 0;
+ang_gyr = 1;
 sphere_radius = 6;
 model_kind = 3;
 if model_kind == 1
@@ -56,6 +57,19 @@ for k=1:numel(S)
     path_to_scan        = [path_to_scan;path_to_subj];
     tmp_path            = fullfile(path_to_subj, 'Aud/loc/stats_s5_without_resting');
     path_to_all_stats   = [path_to_all_stats; tmp_path];
+    if lexic & ~ang_gyr
+        tmp_final_path = fullfile(tmp_path, dcm_folder, 'lex_cond');
+    elseif lexic & ang_gyr
+        tmp_final_path = fullfile(tmp_path, dcm_folder, 'ang_gyr');
+    elseif ~lexic & ~ang_gyr
+        tmp_final_path = fullfile(tmp_path, dcm_folder, 'no_lex_cond');
+    end
+    if nroi == 3
+        tmp_final_path = fullfile(tmp_final_path,sprintf('all_3_rois_models_%dmm', sphere_radius));
+    elseif nroi == 4
+        tmp_final_path = fullfile(tmp_final_path,sprintf('all_4_rois_models_%dmm', sphere_radius));
+    end
+    final_path          = [final_path ;tmp_final_path];
 end
 
 %% model parameters
@@ -152,7 +166,14 @@ for k = 1 : numel(S)
         fullfile(path_to_stats,sprintf('VOI_SMG_-48_-44_23_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
         fullfile(path_to_stats,sprintf('VOI_VWFA_-45_-51_-10_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
         };
-    elseif nroi == 4
+    elseif nroi == 4 & ang_gyr
+        f = {
+        fullfile(path_to_stats,sprintf('VOI_lSTGm_-45_-24_8_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_SMG_-48_-44_23_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_AngG_-30_-71_33_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        fullfile(path_to_stats,sprintf('VOI_VWFA_-45_-51_-10_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
+        };
+    elseif nroi == 4 & ~ang_gyr
         f = {
         fullfile(path_to_stats,sprintf('VOI_lSTGm_-45_-24_8_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
         fullfile(path_to_stats,sprintf('VOI_SMG_-48_-44_23_%dmm_sph_DCM_ROI_adapted_to_aud_con16_adj_eoi5_1.mat', sphere_radius));
@@ -167,17 +188,7 @@ for k = 1 : numel(S)
        xY(r) = XY.xY;
     end
     
-    if lexic
-        res_path = fullfile(path_to_stats, dcm_folder, 'lex_cond');
-    else
-        res_path = fullfile(path_to_stats, dcm_folder, 'no_lex_cond');
-    end
-    
-    if nroi == 3
-        res_path = fullfile(res_path, sprintf('all_3_rois_models_%dmm', sphere_radius));
-    elseif nroi == 4
-        res_path = fullfile(res_path, sprintf('all_4_rois_models_%dmm', sphere_radius));
-    end
+    res_path = final_path{k};
     
     if ~isdir(res_path)
         mkdir(res_path)

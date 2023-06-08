@@ -14,19 +14,12 @@ mask = ismember({S.name}, {'.', '..','meinfo.mat'});
 S(mask) = [];
 
 model_kind = 3;
-if model_kind == 1
-    dcm_folder = 'dcm_model_with_ga_param_modul_speech_baseline';
-%     dcm_folder = 'dcm_model_param_modul_speech_baseline';
-elseif model_kind == 2
-    dcm_folder = 'dcm_model_with_ga_param_modul_sent_scramble';
-%     dcm_folder = 'dcm_model_param_modul_sent_scramble';
-elseif model_kind == 3
-    dcm_folder = 'dcm_model_with_ga_param_modul';
-%     dcm_folder = 'dcm_model_param_modul';
-end
+con_name = 'words_non_words';
+dcm_folder = 'dcm_model_param_modul';
+
 
 a = 1; b = 48;
-erase = input('Do you want to erase previous auditive models? [yes/no] ', 's');
+erase = input('Do you want to erase previous visual models? [yes/no] ', 's');
 
 redo = 1;
 if isequal(erase,'yes')
@@ -36,13 +29,13 @@ elseif isequal(erase,'no')
 end
 
 for k = a : b
-    if isdir (fullfile(D, S(k).name,'Aud'))
+    if isdir (fullfile(D, S(k).name,'Vis'))
         %% modele specification:
         if exist ('i', 'var')==0
             i=1;
         end
         
-        which_dir = fullfile(D, S(k).name,'Aud/loc/stats_s5_without_resting', dcm_folder);
+        which_dir = fullfile(D, S(k).name,'Vis/loc/stats_s5_without_resting', dcm_folder);
         
         if ~isdir(which_dir)
             mkdir(which_dir)
@@ -58,7 +51,7 @@ for k = a : b
             delete( filenames{:} );
         end
         
-        filename = fullfile(D,S(k).name,'Aud/loc/param');
+        filename = fullfile(D,S(k).name,'Vis/loc/param');
         cd (filename);
         json=dir('*.json');
         json=json.name;
@@ -78,9 +71,9 @@ for k = a : b
 %         
 %         clear scans;
 %         scans={};
-%         cd(fullfile(D, S(k).name,'Aud/loc/swf'))
+%         cd(fullfile(D, S(k).name,'Vis/loc/swf'))
 %         vol_name = dir('s5wts_OC.nii');
-%         vol_name=fullfile(D, S(k).name,'Aud/loc/swf', vol_name(1).name);
+%         vol_name=fullfile(D, S(k).name,'Vis/loc/swf', vol_name(1).name);
 %         nb_vol = size(spm_vol(vol_name),1);
 %         
 %         for v=1:nb_vol
@@ -89,38 +82,20 @@ for k = a : b
 %         end
 %         
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.scans = scans;
-%         cd(fullfile(D,S(k).name,'Aud/loc/cpt_data'))
-%         if model_kind == 1 % speech cond vs baseline 1 1 1 1 0
-%             multi_name = dir('onsets_dcm_*speech_baseline.mat');
-%         elseif model_kind == 2 % sentences vs scrambled 0 0 0 1 -1
-%             multi_name = dir('onsets_dcm_*sent_scramble.mat');
-%         elseif  model_kind == 3 % all speech cond vs scrambled 1 1 1 1 -1
-%             multi_name = dir('onsets_dcm_*modul.mat');
-%         end 
+%         cd(fullfile(D,S(k).name,'Vis/loc/cpt_data'))
+%         multi_name = dir('onsets_dcm_*words_non_words.mat'); 
 %         load(multi_name.name)
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.name = names;
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.onset = onsets{1};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.duration = durations{1};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.tmod = 0;
-%         if model_kind == 1
-%             matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'speech_baseline';
-%             con_name = 'speech_base';
-%         elseif model_kind == 2
-%             matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'sent_scrambled';
-%             con_name = 'sent_scr';
-%         elseif  model_kind == 3
-%             matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'speech_scrambled';
-%             con_name = 'speech_scr';
-%         end
+%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).name = 'words_non_words';
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).param = parametric_modul{1};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(1).poly = 1;
-%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).name = 'words_pw';
-%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).param = parametric_modul{2};
-%         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.pmod(2).poly = 1;
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.cond.orth = 0; % orthogonalization, try with 1 or 0...
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.multi = {''};
 %         matlabbatch{i}.spm.stats.fmri_spec.sess.regress = struct('name', {}, 'val', {});
-%         multi_reg=fullfile(D,S(k).name,'Aud/loc/param');
+%         multi_reg=fullfile(D,S(k).name,'Vis/loc/param');
 %         cd (multi_reg);
 %         mr = 'multiple_regressors.txt';
 %         multi_reg=fullfile(multi_reg,mr);
@@ -146,16 +121,15 @@ for k = a : b
 % %         
         matlabbatch{i}.spm.stats.con.spmmat = {filename};
         
-        sounds      =   [1 0 0];
-        con_name    =   [0 1 0];
-        words_pw    =   [0 0 1];
+        stim            =   [1 0];
+        words_non_words =   [0 1];
         
         values = {...
-            sounds, con_name, words_pw;
+            stim, words_non_words;
             };
         
         names = {...
-            'sounds', sprintf('%s',con_name), 'words_pw';
+            'stim', sprintf('%s',con_name);
             };
 
         for j=1:length(values)
@@ -165,7 +139,7 @@ for k = a : b
         end
         j = j+1;
         matlabbatch{i}.spm.stats.con.consess{j}.fcon.name = 'Effects of interest';
-        matlabbatch{i}.spm.stats.con.consess{j}.fcon.weights = eye(3);
+        matlabbatch{i}.spm.stats.con.consess{j}.fcon.weights = eye(2);
         matlabbatch{i}.spm.stats.con.consess{j}.fcon.sessrep = 'none';
         matlabbatch{i}.spm.stats.con.delete = 1;
         i=i+1;
@@ -173,7 +147,7 @@ for k = a : b
 end
 % spm_jobman('run', matlabbatch)
 
-cd '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts'
+cd '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/scripts/dcm'
 
 par.run = 0;
 par.sge = 1;

@@ -7,8 +7,8 @@ nroi = 4;
 lexic = 1;
 fam_comp = 1;
 redo_comp = 0;
-
-model_kind = 1;
+ang_gyr = 1;
+model_kind = 3;
 if model_kind == 1
     dcm_folder = 'dcm_model_param_modul_speech_baseline';
 elseif model_kind == 2
@@ -17,6 +17,7 @@ elseif model_kind == 3
     dcm_folder = 'dcm_model_param_modul';
 end
 
+sphere_radius = 4;
 i=0;
 D = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/final_images';
 cd (D);
@@ -66,21 +67,25 @@ for k=1:numel(S)
     path_to_scan        = [path_to_scan;path_to_subj];
     tmp_path            = fullfile(path_to_subj, 'Aud/loc/stats_s5_without_resting');
     path_to_all_stats   = [path_to_all_stats; tmp_path];
+    if lexic & ~ang_gyr
+        tmp_final_path = fullfile(tmp_path, dcm_folder, 'lex_cond');
+    elseif lexic & ang_gyr
+        tmp_final_path = fullfile(tmp_path, dcm_folder, 'ang_gyr');
+    elseif ~lexic & ~ang_gyr
+        tmp_final_path = fullfile(tmp_path, dcm_folder, 'no_lex_cond');
+    end
+    if nroi == 3
+        tmp_final_path = fullfile(tmp_final_path,sprintf('all_3_rois_models_%dmm', sphere_radius));
+    elseif nroi == 4
+        tmp_final_path = fullfile(tmp_final_path,sprintf('all_4_rois_models_%dmm', sphere_radius));
+    end
+    final_path          = [final_path ;tmp_final_path];
 end
 
 
 for k = 1 : numel(S)
     fprintf('%s \n', S(k).name)
-    if lexic
-        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'lex_cond');
-    else
-        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'no_lex_cond');
-    end
-    if nroi == 3
-        res_path=fullfile(res_path, 'all_3_rois_models_4mm');
-    elseif nroi == 4
-        res_path=fullfile(res_path, 'all_4_rois_models_4mm');
-    end
+    res_path = final_path{k};
 
     cd(res_path);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,7 +118,9 @@ for k = 1 : numel(S)
     matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
     matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
     
-%     spm_jobman('run', matlabbatch)
+    if ~exist(fullfile(res_path, 'BMS.mat')) | redo_comp
+        spm_jobman('run', matlabbatch)
+    end
     clear matlabbatch
     
     
@@ -161,7 +168,9 @@ for k = 1 : numel(S)
         matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
         matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
         
-%         spm_jobman('run', matlabbatch)
+        if ~exist(fullfile(res_path, 'fam_comparison/BMS.mat')) | redo_comp
+            spm_jobman('run', matlabbatch)
+        end
         clear matlabbatch
         
         % then identify the winning family:
@@ -200,8 +209,11 @@ for k = 1 : numel(S)
         matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
         matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
         
-%         spm_jobman('run', matlabbatch)
+        if ~exist(fullfile(res_path_fam, 'BMS.mat')) | redo_comp
+            spm_jobman('run', matlabbatch)
+        end
         clear matlabbatch
+
     end
     
     %% to compare systematically all models within the best group model (ie
@@ -230,8 +242,9 @@ for k = 1 : numel(S)
     matlabbatch{1}.spm.dcm.bms.inference.family_level.family_file = {''};
     matlabbatch{1}.spm.dcm.bms.inference.bma.bma_no = 0;
     matlabbatch{1}.spm.dcm.bms.inference.verify_id = 1;
-    
-    spm_jobman('run', matlabbatch)
+    if ~exist(fullfile(res_path_fam_9, 'BMS.mat')) | redo_comp
+        spm_jobman('run', matlabbatch)
+    end
     clear matlabbatch
 end
 
@@ -245,16 +258,8 @@ all_results(numel(S)).bestmodel_inbestfam   = [];
 for k = 1 : numel(S)
     fprintf('%s \n', S(k).name)
     all_results(k).name = S(k).name;
-    if lexic
-        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'lex_cond');
-    else
-        res_path = fullfile(path_to_all_stats{k}, dcm_folder, 'no_lex_cond');
-    end
-    if nroi == 3
-        res_path=fullfile(res_path, 'all_3_rois_models_4mm');
-    elseif nroi == 4
-        res_path=fullfile(res_path, 'all_4_rois_models_4mm');
-    end
+    res_path = final_path{k};
+    
     
     cd(res_path);
     BMS = load('BMS.mat'); models = load('model_space.mat');

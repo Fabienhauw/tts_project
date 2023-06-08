@@ -13,7 +13,7 @@ S(mask) = [];
 
 % 3 kinds of models: or 1 = all speech cond vs baseline, or 2 = sentences vs
 % scrambled, or 3 = all speech cond vs scrambled.
-model_kind = 2; % 1, 2, 3 for previous description of model kinds.
+model_kind = 3; % 1, 2, 3 for previous description of model kinds.
 
 a = 1; b = 48;
 
@@ -75,7 +75,7 @@ for k = a : b
         elseif model_kind == 3 % all speech cond vs scrambled 1 1 1 1 -1
             if ~isempty(find(new_onsets(mp,1) == new_onsets2(:,1)))
                 new_onsets(mp,3)=1; % when sent or speech
-            elseif ~isempty(find(new_onsets(mp,1) == new_onsets2(:,3)))
+            else
                 new_onsets(mp,3)=-1; % when scrambled speech
             end
         end

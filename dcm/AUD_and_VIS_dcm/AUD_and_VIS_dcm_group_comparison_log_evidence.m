@@ -7,16 +7,16 @@ addpath(genpath('/network/lustre/iss02/home/fabien.hauw/Documents/MATLAB/VBA-too
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nroi = 4;
+nroi = 3;
 lexic = 1;
 ang_gyr = 1;
-
-model_kind = 1;
+stim_modality = 1; %1 = aud, 2 = vis;
+model_kind = 2;
 if model_kind == 1
     dcm_folder = 'dcm_model_param_modul_speech_baseline';
 elseif model_kind == 2
     dcm_folder = 'dcm_model_param_modul_sent_scramble';
-elseif model_kind == 3
+    elseif model_kind == 3
     dcm_folder = 'dcm_model_param_modul';
 end
 sphere_radius = 4;
@@ -51,28 +51,18 @@ S = [S_droit ; S_con_app];
 subjs={};
 nb_subj=numel(S);
 path_to_scan = {};
-path_to_all_stats = {};
+path_to_all_stats_aud = {};
+path_to_all_stats_vis = {};
 counter = 0;
 
 for k=1:numel(S)
     subjs               = [subjs;S(k).name];
     path_to_subj        = fullfile(D, S(k).name);
     path_to_scan        = [path_to_scan;path_to_subj];
-    tmp_path            = fullfile(path_to_subj, 'Aud/loc/stats_s5_without_resting');
-    path_to_all_stats   = [path_to_all_stats; tmp_path];
-    if lexic & ~ang_gyr
-        tmp_final_path = fullfile(tmp_path, dcm_folder, 'lex_cond');
-    elseif lexic & ang_gyr
-        tmp_final_path = fullfile(tmp_path, dcm_folder, 'ang_gyr');
-    elseif ~lexic & ~ang_gyr
-        tmp_final_path = fullfile(tmp_path, dcm_folder, 'no_lex_cond');
-    end
-    if nroi == 3
-        tmp_final_path = fullfile(tmp_final_path,sprintf('all_3_rois_models_%dmm', sphere_radius));
-    elseif nroi == 4
-        tmp_final_path = fullfile(tmp_final_path,sprintf('all_4_rois_models_%dmm', sphere_radius));
-    end
-    final_path          = [final_path ;tmp_final_path];
+    tmp_path_aud            = fullfile(path_to_subj, 'Aud/loc/stats_s5_without_resting');
+    tmp_path_vis            = fullfile(path_to_subj, 'Vis/loc/stats_s5_without_resting');
+    path_to_all_stats_aud   = [path_to_all_stats_aud; tmp_path_aud];
+    path_to_all_stats_vis   = [path_to_all_stats_vis; tmp_path_vis];
 end
 
 total_results.comp              = dcm_folder;
@@ -80,20 +70,22 @@ total_results.radius            = sphere_radius;
 
 %% First part is to made the matrix L1 for group 1 and L2 for group 2, that will includ the evidence for each family for each participant
 clear L1 L2 a
-
-if nroi == 3
-    AUD_dcm_matrix_3roi_design;
-elseif nroi == 4
-    AUD_dcm_matrix_4roi_design;
-end
+AUD_and_VIS_dcm_matrix_3roi_design
 
 temp_a=a;
 
 final_fam_evid = [];
 for k = 1:numel(S)
+    if stim_modality == 1
+        path_to_stats = path_to_all_stats_aud{k};
+        res_path = fullfile(path_to_stats, dcm_folder, sprintf('all_3_rois_models_%dmm', sphere_radius));
+    elseif stim_modality == 2
+        path_to_stats = path_to_all_stats_vis{k};
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul', sprintf('all_3_rois_models_%dmm', sphere_radius));
+    end
     disp(S(k).name)
-    res_path = final_path{k};
-
+    
+    
     cd(res_path)
     BMS = load('BMS.mat'); BMS = BMS.BMS;
     
@@ -154,9 +146,16 @@ if p > 0.5
     clear L
     [val, idx] = max(out.Ef);
     for k = 1:numel(S)
+        if stim_modality == 1
+            path_to_stats = path_to_all_stats_aud{k};
+            res_path = fullfile(path_to_stats, dcm_folder, sprintf('all_3_rois_models_%dmm', sphere_radius));
+        elseif stim_modality == 2
+            path_to_stats = path_to_all_stats_vis{k};
+            res_path = fullfile(path_to_stats, 'dcm_model_param_modul', sprintf('all_3_rois_models_%dmm', sphere_radius));
+        end
         disp(S(k).name)
-        res_path = final_path{k};
 
+        
         cd(res_path)
         %         idx = 9;
         win_fam         = sprintf('struct_%d',idx);
@@ -239,9 +238,15 @@ total_results.distrib_in_fam_best_g2            = winning_model2;
 %% Last part would be to test the mean parameters for this best model
 fprintf('Stats\n')
 for k = 1:numel(S)
+    if stim_modality == 1
+        path_to_stats = path_to_all_stats_aud{k};
+        res_path = fullfile(path_to_stats, dcm_folder, sprintf('all_3_rois_models_%dmm', sphere_radius));
+    elseif stim_modality == 2
+        path_to_stats = path_to_all_stats_vis{k};
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul', sprintf('all_3_rois_models_%dmm', sphere_radius));        
+    end
     disp(S(k).name)
-    res_path = final_path{k};
-
+    
     cd(res_path)
     best_model = winning_model;
     tmp_DCM     = load(best_model); tmp_DCM     = tmp_DCM.DCM;
@@ -255,7 +260,6 @@ for x = 1:size(connex{1,1},1)
         for param = 1:numel(S)
             conn_distrib{x,y}(param) = connex{1,param}(x,y);
             modul1_distrib{x,y}(param) = modul{1,param}(x,y,2);
-            modul2_distrib{x,y}(param) = modul{1,param}(x,y,3);
         end
         
         if any(conn_distrib{x,y})~=0
@@ -269,26 +273,26 @@ for x = 1:size(connex{1,1},1)
             mmodul1_distrib1{x,y} = mean(modul1_distrib{x,y}(1:17));
             mmodul1_distrib2{x,y} = mean(modul1_distrib{x,y}(18:end));
             p_values_mod1(x,y)=p;
-            
-            [hypoth, p, t, df] = ttest2(modul2_distrib{x,y}(1:17), modul2_distrib{x,y}(18:end));
-            mmodul2_distrib1{x,y} = mean(modul2_distrib{x,y}(1:17));
-            mmodul2_distrib2{x,y} = mean(modul2_distrib{x,y}(18:end));
-            p_values_mod2(x,y)=p;
         end
     end
 end
 
 total_results.stats_in_fam_best_model(1) = {p_values_conn};
 total_results.stats_in_fam_best_model(2) = {p_values_mod1};
-total_results.stats_in_fam_best_model(3) = {p_values_mod2};
 
 
 %% another option is to initially compare all models, not only the families.
 clear L L1 L2
 for k = 1:numel(S)
+    if stim_modality == 1
+        path_to_stats = path_to_all_stats_aud{k};
+        res_path = fullfile(path_to_stats, dcm_folder, sprintf('all_3_rois_models_%dmm', sphere_radius));
+    elseif stim_modality == 2
+        path_to_stats = path_to_all_stats_vis{k};
+        res_path = fullfile(path_to_stats, 'dcm_model_param_modul', sprintf('all_3_rois_models_%dmm', sphere_radius));        
+    end
     disp(S(k).name)
-    res_path = final_path{k};
-
+        
     cd(res_path)
     BMS = load('BMS.mat'); BMS = BMS.BMS;
     
@@ -330,12 +334,15 @@ total_results.all_models_g1             = winning_model_across_all1;
 total_results.all_models_g2             = winning_model_across_all2;
 
 %%
-res_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/dcm_distrib_comparison';
+res_dir = '/network/lustre/iss02/cohen/data/Fabien_official/SYNESTHEX/second_level/Aud/loc/Aud_and_Vis_dcm_distrib_comparison';
 if ~isdir(res_dir)
     mkdir(res_dir)
 end
-if ang_gyr
-    save(fullfile(res_dir, sprintf('%s_%dmm_with_ang_gyr.mat', dcm_folder, sphere_radius)), 'total_results');
-else
-    save(fullfile(res_dir, sprintf('%s_%dmm.mat', dcm_folder, sphere_radius)), 'total_results');
+if stim_modality == 1
+    mod = 'Aud';
+    save(fullfile(res_dir, sprintf('%s_%s_%dmm.mat', dcm_folder, mod, sphere_radius)), 'total_results');
+elseif stim_modality == 2
+    mod = 'Vis';
+    save(fullfile(res_dir, sprintf('dcm_model_param_modul_%s_%dmm.mat', mod, sphere_radius)), 'total_results');
 end
+
